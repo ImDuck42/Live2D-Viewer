@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live2D Viewer</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Live2D Viewer</h1>
+            <div class="model-selector">
+                <select id="model-select">
+                    <option value="" disabled selected>Default Models</option>
+                    <option value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json">Shizuku (Cubism 2.1)</option>
+                    <option value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json">Haru (Cubism 4)</option>
+                    <option value="https://raw.githubusercontent.com/Eikanya/Live2d-model/refs/heads/master/崩坏学园2/bronya/model.json">Bronya (Cubism 2.1)</option>
+                    <option value="https://cdn.jsdelivr.net/gh/Eikanya/Live2d-model/%E7%A2%A7%E8%93%9D%E8%88%AA%E7%BA%BF%20Azue%20Lane/Azue%20Lane(JP)/abeikelongbi_3/abeikelongbi_3.model3.json">Aiko (Cubism 4)</option>
+                </select>
+                <button id="load-button">Load</button>
+                <div class="file-input-container">
+                    <button id="upload-button">Upload Model</button>
+                    <input type="file" id="file-input" webkitdirectory multiple style="display: none;">
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="canvas-container">
+                <canvas id="live2d-canvas"></canvas>
+                <div class="loading-overlay" id="loading-overlay">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading model...</div>
+                </div>
+                <div id="no-model-message">
+                    <i class="fas fa-user-circle"></i>
+                    <p>Select a model to display</p>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <div class="control-item">
+                    <input type="checkbox" id="show-hit-areas" />
+                    <label for="show-hit-areas">Show Hit Areas</label>
+                </div>
+                
+                <div class="panel-section">
+                    <h3>Expressions</h3>
+                    <div id="expressions-container" class="expressions-container">
+                        <p class="no-content">No expressions available</p>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Motions</h3>
+                    <div id="motions-container" class="motions-container">
+                        <p class="no-content">No motions available</p>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>Hit Areas</h3>
+                    <div id="hit-areas-container" class="hit-areas-container">
+                        <p class="no-content">No hit areas available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Powered by <a href="https://github.com/guansss/pixi-live2d-display" target="_blank">pixi-live2d-display</a></p>
+            <p>Interact with the model: Click and drag to move, scroll to zoom</p>
+        </div>
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>
+    <script src="libs/live2d.min.js"></script>
+    <script src="libs/live2dcubismcore.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/extra.min.js"></script>
+    
+    <!-- Custom Script -->
+    <script src="js/script.js"></script>
+</body>
+</html>

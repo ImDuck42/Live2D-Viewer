@@ -1,0 +1,434 @@
+/*=============================================
+  IMPORTS & GLOBAL VARIABLES
+=============================================*/
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* --- Color Palette (Dark Mode) --- */
+    --bg-primary: #0f0f1a;            /* Main background */
+    --bg-secondary: #1a1a2e;          /* Card/Panel background */
+    --bg-element: #262639;            /* Interactive element background */
+    --bg-interactive: #3a3a50;        /* Lighter interactive elements (hover) */
+    --accent-primary: #8c5eff;        /* Main accent */
+    --accent-primary-rgb: 140, 94, 255; /* RGB version for rgba() */
+    --accent-secondary: #ff67d7;      /* Secondary accent */
+    --text-primary: #ffffff;          /* Main text */
+    --text-secondary: #b8b8d0;        /* Subdued text */
+    --border-color: #40405a;          /* Borders */
+    --error-color: #ff4757;           /* Error states */
+    --success-color: #2ecc71;         /* Success states */
+
+    /* --- Sizing & Effects --- */
+    --base-font-size: 16px;
+    --border-radius: 0.75rem;                             /* 12px */
+    --border-radius-small: 0.375rem;                      /* 6px */
+    --shadow: 0 0.375rem 0.9375rem rgba(0, 0, 0, 0.2);  /* 6px 15px */
+    --transition: all 0.3s ease;
+    --standard-padding: 1.5rem;                           /* Common padding */
+    --standard-gap: 1.5rem;                               /* Common gap */
+}
+
+/*=============================================
+  BASE RESET & BODY SETUP
+=============================================*/
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: var(--base-font-size);
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/*=============================================
+  LAYOUT CONTAINER
+=============================================*/
+.container {
+    width: 100%;
+    margin: 0 auto; /* Center content if max-width is added later */
+    padding: var(--standard-padding);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Takes up space between header and footer */
+    gap: var(--standard-gap);
+}
+
+/*=============================================
+  COMMON ELEMENT STYLES (Buttons, Selects)
+=============================================*/
+select, button {
+    padding: 0.6rem 1.2rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    background-color: var(--bg-element);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+select:focus, button:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.5); /* Focus ring using RGB variable */
+}
+
+button {
+    font-weight: 600;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+/*=============================================
+  HEADER COMPONENT
+=============================================*/
+.header {
+    background-color: var(--bg-secondary);
+    padding: var(--standard-padding);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    color: var(--accent-primary);
+}
+
+.model-selector {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.model-selector select {
+    min-width: 15rem;
+}
+
+/* Default button style in header (Load/Upload) */
+.model-selector button,
+#upload-button {
+    background-color: var(--accent-primary);
+    border: none;
+    color: var(--text-primary);
+}
+.model-selector button:hover,
+.file-input-container:hover #upload-button {
+    background-color: var(--accent-secondary);
+}
+
+.file-input-container {
+    position: relative;
+    display: inline-block;
+}
+
+input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+/*=============================================
+  MAIN CONTENT AREA
+=============================================*/
+.main-content {
+    display: flex;
+    flex-grow: 1; /* Takes available vertical space */
+    gap: var(--standard-gap);
+    flex-wrap: wrap; /* Allow control panel to wrap below canvas on smaller screens */
+    min-height: 0; /* Prevent flexbox overflow issues */
+}
+
+/*=============================================
+  CANVAS CONTAINER & STATES
+=============================================*/
+.canvas-container {
+    flex: 1; /* Grow to fill available space */
+    min-width: 0; /* Prevent flex item from overflowing container */
+    min-height: 25rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+#live2d-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    object-fit: contain; /* Scale model correctly */
+}
+
+/* Loading / Empty States */
+.loading-overlay,
+#no-model-message {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
+    z-index: 5;
+}
+
+.loading-overlay {
+    background-color: var(--bg-primary);
+    display: none; /* Controlled by JS */
+}
+
+.spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 5px solid var(--bg-element);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+#no-model-message {
+    color: var(--text-secondary);
+    background-color: var(--bg-secondary);
+    font-size: 1.5rem;
+}
+
+#no-model-message i {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    color: var(--accent-primary);
+}
+
+/*=============================================
+  CONTROL PANEL
+=============================================*/
+.control-panel {
+    width: 20%;
+    max-height: calc(40rem - 1px); /* Fuck you 1px | Only looks good on 1920x1080 on not fullscreen | Don't know why*/
+    flex-shrink: 0; /* Prevent shrinking when space is limited */
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: var(--standard-padding);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: var(--standard-gap);
+    overflow-y: auto; /* Enable scrolling if content exceeds height */
+}
+
+/* Custom Scrollbar for Control Panel */
+.control-panel::-webkit-scrollbar { width: 8px; }
+.control-panel::-webkit-scrollbar-track { background: var(--bg-element); border-radius: 10px; }
+.control-panel::-webkit-scrollbar-thumb { background-color: var(--accent-primary); border-radius: 10px; border: 2px solid var(--bg-element); }
+.control-panel::-webkit-scrollbar-thumb:hover { background-color: var(--accent-secondary); }
+
+.panel-section h3 {
+    margin-bottom: 1rem;
+    color: var(--accent-primary);
+    font-size: 1.3rem;
+    border-left: 0.25rem solid var(--accent-secondary);
+    border-radius: 5px 0 0 5px;
+    padding-left: 0.75rem;
+}
+
+.expressions-container,
+.motions-container,
+.hit-areas-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+/* Buttons within Control Panel */
+.expression-btn,
+.motion-btn,
+.hit-area-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-element);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.expression-btn:hover,
+.motion-btn:hover,
+.hit-area-btn:hover {
+    background-color: var(--bg-interactive);
+    color: var(--text-primary);
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+    box-shadow: none;
+}
+
+/* Active state for control buttons */
+.expression-btn.active,
+.motion-btn.active,
+.hit-area-btn.active {
+    background-color: var(--accent-primary);
+    color: var(--text-primary);
+    border-color: var(--accent-primary);
+    font-weight: 500;
+}
+
+.no-content {
+    color: var(--text-secondary);
+    font-style: italic;
+    width: 100%;
+    text-align: center;
+    padding: 1rem 0;
+    background-color: var(--bg-element);
+    border-radius: var(--border-radius-small);
+}
+
+/*=============================================
+  FOOTER COMPONENT
+=============================================*/
+.footer {
+    text-align: center;
+    padding: var(--standard-padding);
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.footer p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+.footer p:last-child {
+    margin-bottom: 0;
+}
+
+.footer a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.footer a:hover {
+    color: var(--accent-secondary);
+    text-decoration: underline;
+}
+
+/*=============================================
+  RESPONSIVE STYLES
+=============================================*/
+@media (max-width: 992px) { /* Tablet and below */
+    .main-content {
+        flex-direction: column; /* Stack canvas and controls */
+    }
+
+    .control-panel {
+        width: 100%; /* Control panel takes full width */
+    }
+
+    .canvas-container {
+        max-height: 30rem; /* Adjust canvas height */
+        max-width: 100%; /* Prevent overflow */
+    }
+}
+
+@media (max-width: 768px) { /* Mobile */
+    .container {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: stretch; /* Make items full width */
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .header h1 {
+        text-align: center;
+        margin-bottom: 0.5rem; /* Reduced margin */
+    }
+
+    .model-selector {
+        width: 100%;
+        flex-direction: column; /* Stack selector elements */
+        gap: 0.75rem;
+    }
+
+    /* Make controls full-width on mobile */
+    .model-selector select,
+    .model-selector button,
+    .file-input-container,
+    #upload-button {
+        width: 100%;
+    }
+
+    select {
+        min-width: auto; /* Remove min-width */
+    }
+
+    .control-panel {
+        padding: 1rem;
+    }
+
+    .canvas-container {
+        min-height: 18rem; /* Adjust minimum height */
+        max-height: 50vh; /* Use viewport height for flexibility */
+        max-width: 100%; /* Prevent overflow */
+    }
+
+     /* Adjust padding for smaller control panel sections */
+    .expression-btn,
+    .motion-btn,
+    .hit-area-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+}
