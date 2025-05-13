@@ -32,9 +32,9 @@ const loadingOverlay = document.getElementById('loading-overlay');
 const noModelMessage = document.getElementById('no-model-message');
 const modelSelect = document.getElementById('model-select');
 const loadButton = document.getElementById('load-button');
-const modelUrlInput = document.getElementById('model-url-input'); // New
-const loadUrlButton = document.getElementById('load-url-button'); // New
-const uploadButton = document.getElementById('upload-button'); // Optional
+const modelUrlInput = document.getElementById('model-url-input');
+const loadUrlButton = document.getElementById('load-url-button');
+const uploadButton = document.getElementById('upload-button'); // Optional, linked to fileInput
 const fileInput = document.getElementById('file-input');
 const showHitAreasCheckbox = document.getElementById('show-hit-areas'); // Optional
 const expressionsContainer = document.getElementById('expressions-container');
@@ -49,27 +49,20 @@ const hitAreasContainer = document.getElementById('hit-areas-container');
  * Initializes the PixiJS application and sets up event listeners.
  */
 function initApp() {
-    if (!canvas) {
-        console.error("Fatal Error: Canvas element 'live2d-canvas' not found.");
-        alert("Initialization failed: Canvas element missing.");
-        return;
-    }
-    if (!fileInput) {
-        console.error("Fatal Error: File input element 'file-input' not found.");
-        alert("Initialization failed: File input missing.");
-        return;
-    }
-    if (!loadingOverlay || !noModelMessage || !expressionsContainer || !motionsContainer || !hitAreasContainer) {
-         console.error("Fatal Error: One or more essential UI container elements are missing.");
-         alert("Initialization failed: Essential UI elements missing.");
-         return;
-    }
-    if (!modelUrlInput || !loadUrlButton) { // New checks
-        console.error("Fatal Error: URL input or load URL button elements are missing.");
-        alert("Initialization failed: URL loading UI elements missing.");
-        return;
-    }
+    const essentialElements = {
+        canvas, fileInput, loadingOverlay, noModelMessage,
+        expressionsContainer, motionsContainer, hitAreasContainer,
+        modelUrlInput, loadUrlButton
+    };
 
+    for (const elName in essentialElements) {
+        if (!essentialElements[elName]) {
+            const errorMessage = `Fatal Error: Essential UI element '${elName}' (or its mapped ID) not found.`;
+            console.error(errorMessage);
+            alert(`Initialization failed: ${errorMessage}`);
+            return;
+        }
+    }
 
     // Create PixiJS Application
     try {
@@ -88,10 +81,9 @@ function initApp() {
         return;
     }
 
-
     // Set up UI event listeners
     loadButton?.addEventListener('click', loadSelectedModel);
-    loadUrlButton?.addEventListener('click', loadFromUrlInput); // New
+    loadUrlButton.addEventListener('click', loadFromUrlInput);
     uploadButton?.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', handleFileUpload);
     showHitAreasCheckbox?.addEventListener('change', toggleHitAreaFrames);
@@ -125,9 +117,9 @@ function handleResize() {
  */
 async function loadSelectedModel() {
     if (!modelSelect) {
-         console.error("Model select dropdown ('model-select') not found.");
-         alert('Model selection dropdown is missing.');
-         return;
+        console.error("Model select dropdown ('model-select') not found.");
+        alert('Model selection dropdown is missing.');
+        return;
     }
     const modelUrl = modelSelect.value;
     if (modelUrl) {
@@ -141,14 +133,8 @@ async function loadSelectedModel() {
  * Loads the model from the URL input field.
  */
 async function loadFromUrlInput() {
-    if (!modelUrlInput) {
-        console.error("Model URL input field ('model-url-input') not found.");
-        alert('Model URL input field is missing.');
-        return;
-    }
     const modelUrl = modelUrlInput.value.trim();
     if (modelUrl) {
-        // Basic URL validation (can be improved)
         if (!modelUrl.startsWith('http://') && !modelUrl.startsWith('https://')) {
             alert('Please enter a valid HTTP or HTTPS URL.');
             modelUrlInput.focus();
@@ -161,15 +147,12 @@ async function loadFromUrlInput() {
     }
 }
 
-
 /**
  * Handles file input changes for loading models from local files/folders.
  */
 async function handleFileUpload(event) {
     const files = event.target.files;
-    if (!files || files.length === 0) {
-        return; // No files selected
-    }
+    if (!files || files.length === 0) return;
 
     console.log(`Processing ${files.length} file(s) from input.`);
 
@@ -179,117 +162,94 @@ async function handleFileUpload(event) {
     const isSingleJson = files.length === 1 && hasSettingsFile;
 
     if (files.length > 1 && !hasSettingsFile) {
-        console.warn("Warning: No *.model.json or *.model3.json file detected in the selection. Folder uploads might fail if the main settings file is missing or the library cannot automatically detect it.");
+        console.warn("Warning: No *.model.json or *.model3.json file detected. Folder uploads might fail if the main settings file is missing.");
     }
 
     try {
-        let modelSource = files; // Default to FileList for folder/zip handling
-
+        let modelSource = files;
         if (isSingleJson) {
             console.log("Loading single model JSON file via Object URL.");
             const fileUrl = URL.createObjectURL(files[0]);
             setTimeout(() => URL.revokeObjectURL(fileUrl), CONFIG.FILE_URL_REVOKE_TIMEOUT);
             modelSource = fileUrl;
         } else {
-            console.log("Attempting to load model from FileList (likely folder or zip).");
+            console.log("Attempting to load model from FileList (folder/zip).");
         }
-
         await loadModel(modelSource);
-
     } catch (error) {
         console.error('Error initiating model load from file input:', error);
         alert(`Failed to start loading model. Error: ${error.message}`);
         loadingOverlay.style.display = 'none';
         noModelMessage.style.display = currentModel ? 'none' : 'flex';
     } finally {
-        event.target.value = null;
+        event.target.value = null; // Reset file input
     }
 }
-
 
 /**
  * Loads a Live2D model from a given source (URL, FileList, File[]).
  * @param {string | FileList | File[]} source - The source to load the model from.
  */
 async function loadModel(source) {
-    if (!app || !app.stage) {
+    if (!app?.stage) {
         console.error("PIXI Application not ready for loading.");
         alert("Error: Application not initialized properly.");
         return;
     }
 
-    // --- Show loading state ---
     noModelMessage.style.display = 'none';
     loadingOverlay.style.display = 'flex';
-    clearUIElements(); // Clear old controls
+    clearUIElements();
 
-    // --- Cleanup previous model ---
     if (currentModel) {
         console.log("Destroying previous model...");
         app.stage.removeChild(currentModel);
-        currentModel.destroy({ children: true, texture: true, baseTexture: true }); // Full cleanup
+        currentModel.destroy({ children: true, texture: true, baseTexture: true });
         currentModel = null;
-        hitAreaFrames = null; // Ensure visualizer reference is cleared
+        hitAreaFrames = null;
     }
 
-    // --- Load new model ---
     try {
         console.log("Loading new model from:", typeof source === 'string' ? source : `${source.length} files`);
-
         const model = await PIXI.live2d.Live2DModel.from(source, {
             onError: (e) => {
-                 console.error("Error during Live2DModel.from operation:", e);
-                 alert(`Failed during model loading process: ${e.message || 'Unknown error'}. Please check console.`);
+                console.error("Error during Live2DModel.from operation:", e);
+                alert(`Failed during model loading process: ${e.message || 'Unknown error'}. Check console.`);
             },
         });
-
         console.log("Model loaded:", model.internalModel?.settings?.name || "Unnamed Model");
 
-        // --- Setup model ---
         currentModel = model;
         app.stage.addChild(model);
 
-        // Enable HitAreaFrames visualizer if available
         if (PIXI.live2d.HitAreaFrames) {
             hitAreaFrames = new PIXI.live2d.HitAreaFrames();
             currentModel.addChild(hitAreaFrames);
             hitAreaFrames.visible = showHitAreasCheckbox?.checked ?? false;
-            console.log("HitAreaFrames added to model.");
             if (showHitAreasCheckbox) showHitAreasCheckbox.disabled = false;
         } else {
             console.warn('HitAreaFrames feature is unavailable. Load pixi-live2d-display/extra for this.');
-            hitAreaFrames = null;
             if (showHitAreasCheckbox) showHitAreasCheckbox.disabled = true;
         }
 
-        // Wait briefly before fitting - ensures bounds are calculated
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100)); // Wait for bounds calculation
         fitModelToScreen();
-
-        // Populate UI controls
         setupModelControls();
-
-        // Set initial cursor style
         currentModel.cursor = 'grab';
-
-        console.log('Model setup complete.');
         noModelMessage.style.display = 'none';
+        console.log('Model setup complete.');
 
     } catch (error) {
         console.error('Error during model loading or setup:', error);
-        alert(`Failed to load model. Check console for details. Error: ${error.message || error}`);
-
+        alert(`Failed to load model. Check console. Error: ${error.message || error}`);
         if (currentModel && app.stage.children.includes(currentModel)) {
-             app.stage.removeChild(currentModel);
-             currentModel.destroy({ children: true, texture: true, baseTexture: true });
+            app.stage.removeChild(currentModel);
+            currentModel.destroy({ children: true, texture: true, baseTexture: true });
         }
         currentModel = null;
         hitAreaFrames = null;
-
-        const hasLive2DModel = app.stage.children.some(c => c instanceof PIXI.live2d.Live2DModel);
-        noModelMessage.style.display = hasLive2DModel ? 'none' : 'flex';
+        noModelMessage.style.display = 'flex';
         clearUIElements();
-
     } finally {
         loadingOverlay.style.display = 'none';
     }
@@ -303,19 +263,16 @@ async function loadModel(source) {
  * Scales and positions the model to fit within the canvas view.
  */
 function fitModelToScreen() {
-    if (!currentModel || !app?.renderer || !canvas.parentElement) {
-        return; // Not ready to fit
-    }
+    if (!currentModel || !app?.renderer || !canvas.parentElement) return;
 
     const parent = canvas.parentElement;
     const viewWidth = parent.clientWidth;
     const viewHeight = parent.clientHeight;
-
     const modelWidth = currentModel.width;
     const modelHeight = currentModel.height;
 
     if (!modelWidth || !modelHeight || modelWidth <= 0 || modelHeight <= 0) {
-        console.warn("Model dimensions are invalid or not ready, cannot fit to screen yet.");
+        // console.warn("Model dimensions invalid/not ready, cannot fit.");
         return;
     }
 
@@ -324,28 +281,27 @@ function fitModelToScreen() {
     const scale = Math.min(scaleX, scaleY);
 
     currentModel.scale.set(scale);
-    currentModel.anchor.set(0.5, 0.5); // Center anchor
-    currentModel.position.set(viewWidth / 2, viewHeight / 2); // Center model in view
-
-    console.log(`Model fitted. View: ${viewWidth}x${viewHeight}, Model Original: ${modelWidth.toFixed(0)}x${modelHeight.toFixed(0)}, Applied Scale: ${scale.toFixed(3)}`);
+    currentModel.anchor.set(0.5, 0.5);
+    currentModel.position.set(viewWidth / 2, viewHeight / 2);
+    // console.log(`Model fitted. View: ${viewWidth}x${viewHeight}, Scale: ${scale.toFixed(3)}`);
 }
 
 /**
  * Sets up all model-related UI controls (Motions, Expressions, Hit Areas).
  */
 function setupModelControls() {
-    setupModelMotions(); // Use the reverted layout function
-    setupModelExpressions(); // Keep using helper for consistency here
-    setupModelHitAreas(); // Keep using helper for consistency here
+    setupModelMotions();
+    setupModelExpressions();
+    setupModelHitAreas();
 }
 
 /**
- * Creates a standard button element for UI controls (Used for Expressions/HitAreas).
- * @param {string} text - Button text.
- * @param {string} title - Button tooltip.
- * @param {() => void} onClick - Click handler function.
- * @param {string} [className='control-btn'] - CSS class name.
- * @returns {HTMLDivElement} - The created button element.
+ * Creates a standard button element for UI controls.
+ * @param {string} text Button text.
+ * @param {string} title Button tooltip.
+ * @param {() => void} onClick Click handler.
+ * @param {string} [className='control-btn'] CSS class.
+ * @returns {HTMLDivElement} The button element.
  */
 function createControlButton(text, title, onClick, className = 'control-btn') {
     const button = document.createElement('div');
@@ -357,19 +313,35 @@ function createControlButton(text, title, onClick, className = 'control-btn') {
 }
 
 /**
+ * Sets or clears the "active" class on a button within a container.
+ * @param {HTMLElement} container The parent container of the buttons.
+ * @param {HTMLElement | null} activeButton The button to mark as active, or null to clear all.
+ */
+function setActiveButton(container, activeButton) {
+    if (!container) return;
+    container.querySelectorAll('.active').forEach(btn => btn.classList.remove('active'));
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+}
+
+
+/**
  * Adds a "no content" message to a container.
- * @param {HTMLElement} container - The container element.
- * @param {string} contentType - Type of content (e.g., "motions").
+ * @param {HTMLElement} container The container element.
+ * @param {string} contentType Type of content (e.g., "motions").
  */
 function setNoContentMessage(container, contentType) {
-    container.innerHTML = `<p class="no-content">No ${contentType} defined</p>`;
+    if (container) {
+        container.innerHTML = `<p class="no-content">No ${contentType} defined</p>`;
+    }
 }
 
 /**
- * Populates the motions UI container using the original layout structure.
+ * Populates the motions UI container.
  */
 function setupModelMotions() {
-    motionsContainer.innerHTML = ''; // Clear previous
+    motionsContainer.innerHTML = '';
     const motionManager = currentModel?.internalModel?.motionManager;
     const definitions = motionManager?.definitions;
 
@@ -378,44 +350,40 @@ function setupModelMotions() {
         return;
     }
 
-    // Get motion groups and sort alphabetically for consistent order
     const groupNames = Object.keys(definitions).sort();
+    let motionButtonsCreated = 0;
 
     groupNames.forEach(group => {
         const motions = definitions[group];
-        if (!motions || motions.length === 0) return; // Skip empty groups
+        if (!motions || motions.length === 0) return;
 
-        // Create buttons for each motion index (Original Style)
         motions.forEach((motionDef, index) => {
             const button = document.createElement('div');
-            button.className = 'motion-btn'; // Use original class name
+            button.className = 'motion-btn';
 
-            // Extract a user-friendly name
             const pathName = motionDef?.File?.split(/[/\\]/).pop()?.replace(/\.(motion3\.json|mtn)$/i, '');
             const explicitName = motionDef?.Name;
             const motionName = explicitName || pathName || `${group} ${index + 1}`;
 
             button.textContent = motionName;
-            button.title = `Play Motion: ${group} [${index}]`;
+            button.title = `Play Motion: ${group} [${index}] (${motionName})`;
             button.onclick = () => {
-                 try {
-                     console.log(`Playing motion: Group=${group}, Index=${index}, Name=${motionName}`);
-                     currentModel?.motion(group, index);
-                     // Highlight active button
-                     motionsContainer.querySelectorAll('.motion-btn.active').forEach(btn => btn.classList.remove('active'));
-                     button.classList.add('active');
-                 } catch (e) {
-                     console.error(`Error playing motion ${group}[${index}] (${motionName}):`, e);
-                     alert(`Could not play motion: ${motionName}. ${e.message}`);
-                 }
+                try {
+                    currentModel?.motion(group, index);
+                    setActiveButton(motionsContainer, button);
+                    console.log(`Playing motion: ${group}[${index}] - ${motionName}`);
+                } catch (e) {
+                    console.error(`Error playing motion ${group}[${index}] (${motionName}):`, e);
+                    alert(`Could not play motion: ${motionName}. ${e.message}`);
+                }
             };
-            // Append button directly to the main container (Original Style)
             motionsContainer.appendChild(button);
+            motionButtonsCreated++;
         });
     });
 
-    if (motionsContainer.childElementCount === 0) {
-        setNoContentMessage(motionsContainer, 'motions'); // Fallback if only empty groups existed
+    if (motionButtonsCreated === 0) {
+        setNoContentMessage(motionsContainer, 'motions');
     }
 }
 
@@ -423,12 +391,11 @@ function setupModelMotions() {
  * Populates the expressions UI container.
  */
 function setupModelExpressions() {
-    expressionsContainer.innerHTML = ''; // Clear previous
-    const expressionDefs = currentModel?.internalModel?.expressions ?? // V3 internal
-                           currentModel?.internalModel?.settings?.expressions ?? // V2/V3 settings
-                           []; // Default
-
+    expressionsContainer.innerHTML = '';
+    const expressionDefs = currentModel?.internalModel?.expressions ??
+        currentModel?.internalModel?.settings?.expressions ?? [];
     let expressionList = [];
+
     if (Array.isArray(expressionDefs)) {
         expressionList = expressionDefs;
     } else if (typeof expressionDefs === 'object' && expressionDefs !== null) {
@@ -442,21 +409,20 @@ function setupModelExpressions() {
 
     expressionList.forEach((expression, index) => {
         const expressionName = expression.name || expression.Name || `Expression ${index + 1}`;
-        const button = createControlButton( // Use helper for consistency
+        const button = createControlButton(
             expressionName,
             `Set Expression: ${expressionName}`,
             () => {
                 try {
-                    console.log(`Setting expression: ${expressionName}`);
                     currentModel?.expression(expressionName);
-                    expressionsContainer.querySelectorAll('.expression-btn.active').forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
+                    setActiveButton(expressionsContainer, button);
+                    console.log(`Setting expression: ${expressionName}`);
                 } catch (e) {
                     console.error(`Error setting expression ${expressionName}:`, e);
-                    alert(`Could not set expression: ${expressionName}. It might not be defined correctly. ${e.message}`);
+                    alert(`Could not set expression: ${expressionName}. ${e.message}`);
                 }
             },
-            'expression-btn' // Specific class
+            'expression-btn'
         );
         expressionsContainer.appendChild(button);
     });
@@ -466,7 +432,7 @@ function setupModelExpressions() {
  * Populates the hit areas UI container.
  */
 function setupModelHitAreas() {
-    hitAreasContainer.innerHTML = ''; // Clear previous
+    hitAreasContainer.innerHTML = '';
     const hitAreaDefs = currentModel?.internalModel?.settings?.hitAreas;
 
     if (!hitAreaDefs || hitAreaDefs.length === 0) {
@@ -474,40 +440,41 @@ function setupModelHitAreas() {
         return;
     }
 
-    let validHitAreasFound = false;
+    let validHitAreasFound = 0;
     hitAreaDefs.forEach(hitAreaDef => {
         const hitAreaName = hitAreaDef.name || hitAreaDef.Name;
-        if (!hitAreaName) {
-            console.warn("Found hit area definition without a name, skipping.");
-            return;
-        }
-        validHitAreasFound = true;
-        const button = createControlButton( // Use helper for consistency
+        if (!hitAreaName) return;
+
+        validHitAreasFound++;
+        const button = createControlButton(
             hitAreaName,
             `Simulate Tap on Hit Area: ${hitAreaName}`,
             () => simulateHitArea(hitAreaName),
-            'hit-area-btn' // Specific class
+            'hit-area-btn'
         );
         hitAreasContainer.appendChild(button);
     });
 
-    if (!validHitAreasFound) {
-         setNoContentMessage(hitAreasContainer, 'valid hit areas');
+    if (validHitAreasFound === 0) {
+        setNoContentMessage(hitAreasContainer, 'valid hit areas');
     }
 }
 
 /**
- * Clears UI elements related to the model (buttons, messages).
+ * Clears UI elements related to the model.
  */
 function clearUIElements() {
-    const containers = [expressionsContainer, motionsContainer, hitAreasContainer];
-    containers.forEach(container => {
+    [expressionsContainer, motionsContainer, hitAreasContainer].forEach(container => {
         if (container) {
-            setNoContentMessage(container, 'model');
+            // Individual setup functions will set specific "no content" messages if needed.
+            // Here, we just clear them or set a generic placeholder during full reset.
+            setNoContentMessage(container, 'model data');
         }
     });
-    document.querySelectorAll('.motion-btn.active, .expression-btn.active, .hit-area-btn.active')
-        .forEach(btn => btn.classList.remove('active'));
+    // Clear any lingering active states
+    setActiveButton(motionsContainer, null);
+    setActiveButton(expressionsContainer, null);
+    // Hit area buttons have temporary highlights, handled by their own logic
 }
 
 /**
@@ -516,13 +483,11 @@ function clearUIElements() {
 function toggleHitAreaFrames() {
     if (hitAreaFrames && currentModel) {
         hitAreaFrames.visible = showHitAreasCheckbox?.checked ?? false;
-        console.log(`HitAreaFrames visibility set to: ${hitAreaFrames.visible}`);
     } else if (showHitAreasCheckbox?.checked) {
         console.warn("Cannot show HitAreaFrames: Feature not loaded or no model present.");
         if (showHitAreasCheckbox) showHitAreasCheckbox.checked = false;
     }
 }
-
 
 //==============================================================================
 // MODEL INTERACTION (Dragging, Tapping, Zooming)
@@ -535,40 +500,33 @@ function setupModelInteractions() {
     if (!app?.stage) return;
 
     app.stage.interactive = true;
-    app.stage.hitArea = app.screen;
+    app.stage.hitArea = app.screen; // Make the whole stage interactive
 
     app.stage.on('pointerdown', handlePointerDown);
     app.stage.on('pointermove', handlePointerMove);
     app.stage.on('pointerup', handlePointerUp);
     app.stage.on('pointerupoutside', handlePointerUp);
-    app.stage.on('pointertap', handlePointerTap);
+    app.stage.on('pointertap', handlePointerTap); // Tap on the stage
 
     canvas.addEventListener('wheel', handleZoom, { passive: false });
 }
 
 /**
  * Handles pointer down event for initiating potential drag.
- * Reverted hit test logic.
  */
 function handlePointerDown(event) {
-    if (!currentModel || !event.data || !app?.renderer) return; // Add renderer check
+    if (!currentModel || !event.data || !app?.renderer) return;
+    wasDragging = false;
 
-    wasDragging = false; // Reset drag state
-
-    // Use Pixi's interaction manager to hit test against the stage
-    // This is generally more accurate for complex display objects like the model
     const hitObject = app.renderer.plugins.interaction.hitTest(event.data.global, app.stage);
-
-    // Check if the object hit was the current model
     if (hitObject === currentModel) {
         isDragging = true;
-        // Calculate offset relative to the model's parent (the stage)
         const pointerInStage = currentModel.parent.toLocal(event.data.global);
         dragStartOffset.x = pointerInStage.x - currentModel.x;
         dragStartOffset.y = pointerInStage.y - currentModel.y;
         currentModel.cursor = 'grabbing';
     } else {
-        isDragging = false; // Not dragging if pointerdown is not on the model
+        isDragging = false;
     }
 }
 
@@ -577,9 +535,7 @@ function handlePointerDown(event) {
  */
 function handlePointerMove(event) {
     if (!isDragging || !currentModel || !event.data) return;
-
-    wasDragging = true; // Indicate movement occurred
-
+    wasDragging = true;
     const pointerInStage = currentModel.parent.toLocal(event.data.global);
     currentModel.position.set(
         pointerInStage.x - dragStartOffset.x,
@@ -592,19 +548,16 @@ function handlePointerMove(event) {
  */
 function handlePointerUp() {
     if (isDragging) {
-        if (currentModel) {
-            currentModel.cursor = 'grab'; // Restore cursor
-        }
-        // Keep wasDragging state for handlePointerTap to check
+        if (currentModel) currentModel.cursor = 'grab';
     }
-    isDragging = false; // Always end dragging state on pointer up/upoutside
+    isDragging = false;
 }
 
 /**
  * Handles mouse wheel event for zooming the model.
  */
 function handleZoom(event) {
-    if (!currentModel || !app?.renderer) return; // Add renderer check
+    if (!currentModel || !app?.renderer) return;
     event.preventDefault();
 
     const delta = event.deltaY;
@@ -633,31 +586,26 @@ function handleZoom(event) {
  * Handles pointer tap event on the stage for hit testing the model.
  */
 function handlePointerTap(event) {
-    if (wasDragging || isDragging) { // Check if a drag just finished or is somehow still active
-        // console.log("Pointer tap ignored because a drag occurred.");
-        wasDragging = false; // Reset for the next interaction cycle
+    if (wasDragging || isDragging) { // Prevent tap after drag
+        wasDragging = false;
         return;
     }
-    if (!currentModel || !event.data) {
-        return;
-    }
+    if (!currentModel || !event.data) return;
 
-    currentModel.updateTransform();
-    const globalPos = event.data.global;
-    const localPos = currentModel.toLocal(globalPos);
-
+    currentModel.updateTransform(); // Ensure transforms are up-to-date
+    const localPos = currentModel.toLocal(event.data.global);
     const hitAreaNames = currentModel.hitTest(localPos.x, localPos.y);
 
     if (hitAreaNames.length > 0) {
-        console.log('Tap hit detected area(s):', hitAreaNames);
+        console.log('Tap hit detected area(s):', hitAreaNames.join(', '));
         highlightHitAreaButtons(hitAreaNames);
-        playMotionForHitArea(hitAreaNames[0]);
+        playMotionForHitArea(hitAreaNames[0]); // Play motion for the first detected area
     } else {
-        console.log("Tap occurred, but no defined hit area detected at:", localPos);
-        // playMotionForHitArea(null); // Optional: trigger background tap motion
+        // console.log("Tap occurred, but no defined hit area detected at:", localPos);
+        // Optionally, play a generic background tap motion if desired:
+        // playMotionForHitArea(null);
     }
-
-    wasDragging = false; // Reset after tap processing too
+    wasDragging = false; // Reset for next interaction
 }
 
 /**
@@ -671,12 +619,8 @@ function simulateHitArea(hitAreaName) {
     highlightHitAreaButtons([hitAreaName]);
     playMotionForHitArea(hitAreaName);
 
-    // Optionally highlight the frame visualizer briefly
-    if (hitAreaFrames?.highlight) { // Check if highlight method exists
-         hitAreaFrames.highlight(hitAreaName);
-    } else if (hitAreaFrames && hitAreaFrames.visible) {
-        // Basic visual feedback if highlight method is missing: temporarily make others less visible? Complex.
-        // Or just rely on the button highlight.
+    if (hitAreaFrames?.highlight) {
+        hitAreaFrames.highlight(hitAreaName);
     }
 }
 
@@ -686,25 +630,22 @@ function simulateHitArea(hitAreaName) {
  */
 function highlightHitAreaButtons(hitAreaNames) {
     if (!hitAreasContainer) return;
-
     hitAreasContainer.querySelectorAll('.hit-area-btn').forEach(button => {
         if (hitAreaNames.includes(button.textContent)) {
-            button.classList.add('active'); // Add highlight class
-            setTimeout(() => {
-                button.classList.remove('active'); // Remove after duration
-            }, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
+            button.classList.add('active');
+            setTimeout(() => button.classList.remove('active'), CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
         }
     });
 }
 
 /**
  * Attempts to find and play a motion related to a hit area tap.
- * @param {string | null} hitAreaName - The name of the hit area, or null for a potential background tap.
+ * @param {string | null} hitAreaName - The name of the hit area, or null for a background tap.
  */
 function playMotionForHitArea(hitAreaName) {
     const motionManager = currentModel?.internalModel?.motionManager;
     if (!motionManager?.definitions || Object.keys(motionManager.definitions).length === 0) {
-        console.warn("Cannot play hit motion: MotionManager or definitions not available.");
+        // console.warn("Cannot play hit motion: MotionManager or definitions not available.");
         return;
     }
 
@@ -712,13 +653,12 @@ function playMotionForHitArea(hitAreaName) {
     let motionPlayed = false;
 
     const potentialGroups = hitAreaName
-        ? [ `tap_${hitAreaName}`, hitAreaName ] // Priority: TapHead, Fallback: Head
-        : [ 'tap' ]; // Generic Tap for background/fallback
+        ? [`tap_${hitAreaName.toLowerCase()}`, hitAreaName.toLowerCase()] // Standardize to lower for matching
+        : ['tap'];
 
     let targetGroup = null;
     for (const potential of potentialGroups) {
-        const potentialLower = potential.toLowerCase();
-        const foundGroup = definedGroups.find(defined => defined.toLowerCase() === potentialLower);
+        const foundGroup = definedGroups.find(defined => defined.toLowerCase() === potential);
         if (foundGroup) {
             targetGroup = foundGroup;
             break;
@@ -728,35 +668,34 @@ function playMotionForHitArea(hitAreaName) {
     if (targetGroup) {
         try {
             console.log(`Playing motion for hit '${hitAreaName || 'Generic Tap'}': Group='${targetGroup}'`);
-            currentModel.motion(targetGroup); // Play random motion from the group
+            currentModel.motion(targetGroup);
             motionPlayed = true;
         } catch (e) {
-            console.warn(`Motion group '${targetGroup}' exists but failed to play for hit '${hitAreaName || 'Generic Tap'}':`, e);
+            console.warn(`Motion group '${targetGroup}' failed to play for hit '${hitAreaName || 'Generic Tap'}':`, e);
         }
     }
 
+    // Fallback to generic 'Tap' if a specific (non-'Tap') hit area was targeted but no motion played
     if (!motionPlayed && hitAreaName && targetGroup?.toLowerCase() !== 'tap') {
         const genericTapGroup = definedGroups.find(defined => defined.toLowerCase() === 'tap');
         if (genericTapGroup) {
-             try {
-                 console.log(`Playing generic 'Tap' motion as fallback for hit '${hitAreaName}': Group='${genericTapGroup}'`);
-                 currentModel.motion(genericTapGroup);
-                 motionPlayed = true;
-             } catch (e) {
-                 console.warn(`Generic 'Tap' motion failed to play as fallback:`, e);
-             }
+            try {
+                console.log(`Playing generic 'Tap' motion as fallback for hit '${hitAreaName}': Group='${genericTapGroup}'`);
+                currentModel.motion(genericTapGroup);
+                motionPlayed = true;
+            } catch (e) {
+                console.warn(`Generic 'Tap' motion fallback failed:`, e);
+            }
         }
     }
 
     if (!motionPlayed) {
-        console.log(`No suitable motion group found or played for hit: ${hitAreaName || '(No specific area)'}`);
+        // console.log(`No suitable motion group found or played for hit: ${hitAreaName || '(No specific area)'}`);
     }
 }
-
 
 //==============================================================================
 // STARTUP
 //==============================================================================
 
-// Initialize the application when the DOM is fully loaded
 window.addEventListener('DOMContentLoaded', initApp);
