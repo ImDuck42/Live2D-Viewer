@@ -32,6 +32,8 @@ const loadingOverlay = document.getElementById('loading-overlay');
 const noModelMessage = document.getElementById('no-model-message');
 const modelSelect = document.getElementById('model-select');
 const loadButton = document.getElementById('load-button');
+const modelUrlInput = document.getElementById('model-url-input'); // New
+const loadUrlButton = document.getElementById('load-url-button'); // New
 const uploadButton = document.getElementById('upload-button'); // Optional
 const fileInput = document.getElementById('file-input');
 const showHitAreasCheckbox = document.getElementById('show-hit-areas'); // Optional
@@ -62,6 +64,12 @@ function initApp() {
          alert("Initialization failed: Essential UI elements missing.");
          return;
     }
+    if (!modelUrlInput || !loadUrlButton) { // New checks
+        console.error("Fatal Error: URL input or load URL button elements are missing.");
+        alert("Initialization failed: URL loading UI elements missing.");
+        return;
+    }
+
 
     // Create PixiJS Application
     try {
@@ -83,6 +91,7 @@ function initApp() {
 
     // Set up UI event listeners
     loadButton?.addEventListener('click', loadSelectedModel);
+    loadUrlButton?.addEventListener('click', loadFromUrlInput); // New
     uploadButton?.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', handleFileUpload);
     showHitAreasCheckbox?.addEventListener('change', toggleHitAreaFrames);
@@ -127,6 +136,31 @@ async function loadSelectedModel() {
         alert('Please select a model from the dropdown first.');
     }
 }
+
+/**
+ * Loads the model from the URL input field.
+ */
+async function loadFromUrlInput() {
+    if (!modelUrlInput) {
+        console.error("Model URL input field ('model-url-input') not found.");
+        alert('Model URL input field is missing.');
+        return;
+    }
+    const modelUrl = modelUrlInput.value.trim();
+    if (modelUrl) {
+        // Basic URL validation (can be improved)
+        if (!modelUrl.startsWith('http://') && !modelUrl.startsWith('https://')) {
+            alert('Please enter a valid HTTP or HTTPS URL.');
+            modelUrlInput.focus();
+            return;
+        }
+        await loadModel(modelUrl);
+    } else {
+        alert('Please enter a model URL.');
+        modelUrlInput.focus();
+    }
+}
+
 
 /**
  * Handles file input changes for loading models from local files/folders.
@@ -678,8 +712,8 @@ function playMotionForHitArea(hitAreaName) {
     let motionPlayed = false;
 
     const potentialGroups = hitAreaName
-        ? [ `Tap${hitAreaName}`, hitAreaName ] // Priority: TapHead, Fallback: Head
-        : [ 'Tap' ]; // Generic Tap for background/fallback
+        ? [ `tap_${hitAreaName}`, hitAreaName ] // Priority: TapHead, Fallback: Head
+        : [ 'tap' ]; // Generic Tap for background/fallback
 
     let targetGroup = null;
     for (const potential of potentialGroups) {
@@ -709,7 +743,7 @@ function playMotionForHitArea(hitAreaName) {
                  currentModel.motion(genericTapGroup);
                  motionPlayed = true;
              } catch (e) {
-                 console.warn(`Generic 'Tap' motion group failed to play as fallback:`, e);
+                 console.warn(`Generic 'Tap' motion failed to play as fallback:`, e);
              }
         }
     }

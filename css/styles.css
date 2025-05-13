@@ -65,21 +65,33 @@ body {
 }
 
 /*=============================================
-  COMMON ELEMENT STYLES (Buttons, Selects)
+  COMMON ELEMENT STYLES (Buttons, Selects, Inputs)
 =============================================*/
-select, button {
+select, button, input[type="text"] {
     padding: 0.6rem 1.2rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-small);
     background-color: var(--bg-element);
     color: var(--text-primary);
-    cursor: pointer;
     font-family: inherit;
     font-size: 0.9rem;
     transition: var(--transition);
 }
 
-select:focus, button:focus {
+select, button {
+    cursor: pointer;
+}
+
+input[type="text"] {
+    min-width: 15rem; /* Default min-width for URL input */
+}
+
+input[type="text"]::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+select:focus, button:focus, input[type="text"]:focus {
     outline: none;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.5); /* Focus ring using RGB variable */
@@ -127,15 +139,17 @@ button:hover {
     min-width: 15rem;
 }
 
-/* Default button style in header (Load/Upload) */
+/* Default button style in header (Load/Upload/Load URL) */
 .model-selector button,
-#upload-button {
+#upload-button,
+#load-url-button { /* Ensure new button gets accent color */
     background-color: var(--accent-primary);
     border: none;
     color: var(--text-primary);
 }
 .model-selector button:hover,
-.file-input-container:hover #upload-button {
+.file-input-container:hover #upload-button,
+#load-url-button:hover {
     background-color: var(--accent-secondary);
 }
 
@@ -405,13 +419,15 @@ input[type="file"] {
     /* Make controls full-width on mobile */
     .model-selector select,
     .model-selector button,
+    .model-selector input[type="text"], /* Ensure URL input is full-width */
     .file-input-container,
     #upload-button {
         width: 100%;
     }
 
-    select {
-        min-width: auto; /* Remove min-width */
+    select,
+    input[type="text"] { /* Remove min-width for select and URL input */
+        min-width: auto;
     }
 
     .control-panel {
