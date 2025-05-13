@@ -1,85 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live2D Viewer</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
+        integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
+    <div class="app-container">
+        <header class="site-header">
             <h1>Live2D Viewer</h1>
-            <div class="model-selector">
-                <!-- New URL input and button -->
-                <input type="text" id="model-url-input" placeholder="Enter model (.json/.model3.json) URL...">
-                <button id="load-url-button">Load URL</button>
+            <div class="model-controls">
+                <div class="model-loader-group">
+                    <label for="model-url-input" class="sr-only">Model URL</label>
+                    <input type="text" id="model-url-input" placeholder="Enter model (.json/.model3.json) URL...">
+                    <button id="load-url-button" title="Load model from the entered URL">Load URL</button>
+                </div>
 
-                <!-- Existing dropdown and its load button -->
-                <select id="model-select">
-                    <option value="" disabled selected>Default Models</option>
-                    <option value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json">Shizuku (Cubism 2.1)</option>
-                    <option value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json">Haru (Cubism 4)</option>
-                    <option value="https://raw.githubusercontent.com/Eikanya/Live2d-model/refs/heads/master/崩坏学园2/bronya/model.json">Bronya (Cubism 2.1)</option>
-                    <option value="https://cdn.jsdelivr.net/gh/Eikanya/Live2d-model/%E7%A2%A7%E8%93%9D%E8%88%AA%E7%BA%BF%20Azue%20Lane/Azue%20Lane(JP)/abeikelongbi_3/abeikelongbi_3.model3.json">Aiko (Cubism 4)</option>
-                </select>
-                <button id="load-button">Load Selected</button> <!-- Text changed for clarity -->
+                <div class="model-loader-group">
+                    <label for="model-select" class="sr-only">Select Default Model</label>
+                    <select id="model-select">
+                        <option value="" disabled selected>Default Models</option>
+                        <option
+                            value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json">
+                            Shizuku (Cubism 2.1)</option>
+                        <option
+                            value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json">
+                            Haru (Cubism 4)</option>
+                        <option
+                            value="https://raw.githubusercontent.com/Eikanya/Live2d-model/refs/heads/master/崩坏学园2/bronya/model.json">
+                            Bronya (Cubism 2.1)</option>
+                        <option
+                            value="https://cdn.jsdelivr.net/gh/Eikanya/Live2d-model/%E7%A2%A7%E8%93%9D%E8%88%AA%E7%BA%BF%20Azue%20Lane/Azue%20Lane(JP)/abeikelongbi_3/abeikelongbi_3.model3.json">
+                            Aiko (Cubism 4)</option>
+                    </select>
+                    <button id="load-selected-button" title="Load the selected default model">Load Selected</button>
+                </div>
 
-                <!-- Existing file upload -->
-                <div class="file-input-container">
-                    <button id="upload-button">Upload Model</button>
-                    <input type="file" id="file-input" webkitdirectory multiple style="display: none;">
+                <div class="file-input-container model-loader-group">
+                    <label for="file-input" class="sr-only">Upload model from computer</label>
+                    <button id="upload-model-button" title="Upload model from your computer">Upload Model</button>
+                    <input type="file" id="file-input" webkitdirectory multiple style="display: none;"
+                        aria-hidden="true">
                 </div>
             </div>
-        </div>
+        </header>
 
-        <div class="main-content">
-            <div class="canvas-container">
-                <canvas id="live2d-canvas"></canvas>
-                <div class="loading-overlay" id="loading-overlay">
-                    <div class="spinner"></div>
+        <main class="main-content">
+            <div class="canvas-area">
+                <canvas id="live2d-canvas" aria-label="Live2D Model Display Area"></canvas>
+                <div class="loading-overlay" id="loading-overlay" role="status" aria-live="polite">
+                    <div class="spinner" aria-hidden="true"></div>
                     <div class="loading-text">Loading model...</div>
                 </div>
-                <div id="no-model-message">
-                    <i class="fas fa-user-circle"></i>
-                    <p>Select a model to display</p>
+                <div id="no-model-message" class="canvas-message">
+                    <i class="fas fa-user-circle" aria-hidden="true"></i>
+                    <p>Select or upload a model to display</p>
                 </div>
             </div>
-            
-            <div class="control-panel">
+
+            <aside class="control-panel" aria-labelledby="control-panel-heading">
+                <h2 id="control-panel-heading" class="sr-only">Model Controls</h2>
                 <div class="control-item">
-                    <input type="checkbox" id="show-hit-areas" />
-                    <label for="show-hit-areas">Show Hit Areas</label>
+                    <input type="checkbox" id="show-hit-areas-checkbox" />
+                    <label for="show-hit-areas-checkbox">Show Hit Areas</label>
                 </div>
-                
+
                 <div class="panel-section">
                     <h3>Expressions</h3>
-                    <div id="expressions-container" class="expressions-container">
-                        <p class="no-content">No expressions available</p>
+                    <div id="expressions-container" class="model-features-container" aria-live="polite">
+                        <p class="no-content-message">No expressions available</p>
                     </div>
                 </div>
 
                 <div class="panel-section">
                     <h3>Motions</h3>
-                    <div id="motions-container" class="motions-container">
-                        <p class="no-content">No motions available</p>
+                    <div id="motions-container" class="model-features-container" aria-live="polite">
+                        <p class="no-content-message">No motions available</p>
                     </div>
                 </div>
 
                 <div class="panel-section">
                     <h3>Hit Areas</h3>
-                    <div id="hit-areas-container" class="hit-areas-container">
-                        <p class="no-content">No hit areas available</p>
+                    <div id="hit-areas-container" class="model-features-container" aria-live="polite">
+                        <p class="no-content-message">No hit areas available</p>
                     </div>
                 </div>
-            </div>
-        </div>
+            </aside>
+        </main>
 
-        <div class="footer">
-            <p>Powered by <a href="https://github.com/guansss/pixi-live2d-display" target="_blank">pixi-live2d-display</a></p>
+        <footer class="site-footer">
+            <p>Powered by <a href="https://github.com/guansss/pixi-live2d-display" target="_blank"
+                    rel="noopener noreferrer">pixi-live2d-display</a></p>
             <p>Interact with the model: Click and drag to move, scroll to zoom</p>
-        </div>
+        </footer>
     </div>
 
     <!-- Libraries -->
@@ -88,8 +107,9 @@
     <script src="libs/live2dcubismcore.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/index.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/extra.min.js"></script>
-    
+
     <!-- Custom Script -->
-    <script src="js/script.js"></script>
+    <script src="js/script.js" defer></script>
 </body>
+
 </html>

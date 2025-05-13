@@ -5,33 +5,40 @@
 
 :root {
     /* --- Color Palette (Dark Mode) --- */
-    --bg-primary: #0f0f1a;            /* Main background */
-    --bg-secondary: #1a1a2e;          /* Card/Panel background */
-    --bg-element: #262639;            /* Interactive element background */
-    --bg-interactive: #3a3a50;        /* Lighter interactive elements (hover) */
-    --accent-primary: #8c5eff;        /* Main accent */
-    --accent-primary-rgb: 140, 94, 255; /* RGB version for rgba() */
-    --accent-secondary: #ff67d7;      /* Secondary accent */
-    --text-primary: #ffffff;          /* Main text */
-    --text-secondary: #b8b8d0;        /* Subdued text */
-    --border-color: #40405a;          /* Borders */
-    --error-color: #ff4757;           /* Error states */
-    --success-color: #2ecc71;         /* Success states */
+    --bg-primary: #0f0f1a;
+    --bg-secondary: #1a1a2e;
+    --bg-element: #262639;
+    --bg-interactive: #3a3a50;
+    --accent-primary: #8c5eff;
+    --accent-primary-rgb: 140, 94, 255;
+    --accent-secondary: #ff67d7;
+    --text-primary: #ffffff;
+    --text-secondary: #b8b8d0;
+    --border-color: #40405a;
+    --error-color: #ff4757;
+    --success-color: #2ecc71;
 
     /* --- Sizing & Effects --- */
     --base-font-size: 16px;
-    --border-radius: 0.75rem;                             /* 12px */
-    --border-radius-small: 0.375rem;                      /* 6px */
-    --shadow: 0 0.375rem 0.9375rem rgba(0, 0, 0, 0.2);  /* 6px 15px */
-    --transition: all 0.3s ease;
-    --standard-padding: 1.5rem;                           /* Common padding */
-    --standard-gap: 1.5rem;                               /* Common gap */
+    --border-radius: 0.75rem;
+    /* 12px */
+    --border-radius-small: 0.375rem;
+    /* 6px */
+    --shadow: 0 0.375rem 0.9375rem rgba(0, 0, 0, 0.2);
+    /* 6px 15px */
+    --transition-duration: 0.3s;
+    --transition-timing: ease;
+    --transition-main: all var(--transition-duration) var(--transition-timing);
+    --standard-padding: 1.5rem;
+    --standard-gap: 1.5rem;
 }
 
 /*=============================================
   BASE RESET & BODY SETUP
 =============================================*/
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -39,6 +46,7 @@
 
 html {
     font-size: var(--base-font-size);
+    scroll-behavior: smooth;
 }
 
 body {
@@ -48,26 +56,44 @@ body {
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
+    /* Ensures footer can be pushed down */
     flex-direction: column;
+    /* Stack app-container vertically */
+}
+
+/* Visually hide elements but keep them accessible */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 /*=============================================
-  LAYOUT CONTAINER
+  APP LAYOUT CONTAINER
 =============================================*/
-.container {
+.app-container {
     width: 100%;
-    margin: 0 auto; /* Center content if max-width is added later */
+    margin: 0 auto;
     padding: var(--standard-padding);
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* Takes up space between header and footer */
+    flex-grow: 1;
+    /* Takes up space between header and footer if body is flex */
     gap: var(--standard-gap);
 }
 
 /*=============================================
-  COMMON ELEMENT STYLES (Buttons, Selects, Inputs)
+  COMMON INTERACTIVE ELEMENT STYLES
 =============================================*/
-select, button, input[type="text"] {
+select,
+input[type="text"],
+button {
     padding: 0.6rem 1.2rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-small);
@@ -75,15 +101,17 @@ select, button, input[type="text"] {
     color: var(--text-primary);
     font-family: inherit;
     font-size: 0.9rem;
-    transition: var(--transition);
+    transition: var(--transition-main);
 }
 
-select, button {
+select,
+button {
     cursor: pointer;
 }
 
 input[type="text"] {
-    min-width: 15rem; /* Default min-width for URL input */
+    min-width: 18rem;
+    /* Default min-width for URL input */
 }
 
 input[type="text"]::placeholder {
@@ -91,17 +119,21 @@ input[type="text"]::placeholder {
     opacity: 0.7;
 }
 
-select:focus, button:focus, input[type="text"]:focus {
+select:focus,
+input[type="text"]:focus,
+button:focus-visible {
+    /* Use focus-visible for better accessibility */
     outline: none;
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.5); /* Focus ring using RGB variable */
+    box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.5);
 }
 
 button {
     font-weight: 600;
 }
 
-button:hover {
+button:hover,
+button:focus-visible {
     transform: translateY(-2px);
     box-shadow: var(--shadow);
 }
@@ -109,7 +141,7 @@ button:hover {
 /*=============================================
   HEADER COMPONENT
 =============================================*/
-.header {
+.site-header {
     background-color: var(--bg-secondary);
     padding: var(--standard-padding);
     border-radius: var(--border-radius);
@@ -119,72 +151,89 @@ button:hover {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 1rem;
-    flex-shrink: 0; /* Prevent header from shrinking */
+    gap: 1.5rem;
+    /* Increased gap for better spacing */
+    flex-shrink: 0;
 }
 
-.header h1 {
+.site-header h1 {
     font-size: 1.8rem;
     color: var(--accent-primary);
+    margin: 0;
+    /* Reset margin from user agent stylesheet */
 }
 
-.model-selector {
+.model-controls {
     display: flex;
-    gap: 0.75rem;
+    gap: 1rem;
+    /* Gap between groups */
     align-items: center;
     flex-wrap: wrap;
 }
 
-.model-selector select {
+.model-loader-group {
+    display: flex;
+    gap: 0.75rem;
+    /* Gap within a group */
+    align-items: center;
+}
+
+.model-controls select {
     min-width: 15rem;
 }
 
-/* Default button style in header (Load/Upload/Load URL) */
-.model-selector button,
-#upload-button,
-#load-url-button { /* Ensure new button gets accent color */
+/* Accent buttons in header */
+#load-url-button,
+#load-selected-button,
+#upload-model-button {
     background-color: var(--accent-primary);
-    border: none;
+    border-color: var(--accent-primary);
+    /* Ensure border matches for consistency */
     color: var(--text-primary);
 }
-.model-selector button:hover,
-.file-input-container:hover #upload-button,
-#load-url-button:hover {
+
+#load-url-button:hover,
+#load-selected-button:hover,
+#upload-model-button:hover,
+#load-url-button:focus-visible,
+#load-selected-button:focus-visible,
+#upload-model-button:focus-visible {
     background-color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
 }
 
 .file-input-container {
     position: relative;
-    display: inline-block;
+    /* For the hidden file input */
 }
 
-input[type="file"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-}
+/* input[type="file"] is visually hidden by JS, but if it were styled: */
+/* input[type="file"] { ... } */
 
 /*=============================================
   MAIN CONTENT AREA
 =============================================*/
 .main-content {
     display: flex;
-    flex-grow: 1; /* Takes available vertical space */
+    flex-grow: 1;
     gap: var(--standard-gap);
-    flex-wrap: wrap; /* Allow control panel to wrap below canvas on smaller screens */
-    min-height: 0; /* Prevent flexbox overflow issues */
+    flex-wrap: wrap;
+    min-height: 0;
+    /* Important for flex children with overflow */
 }
 
 /*=============================================
-  CANVAS CONTAINER & STATES
+  CANVAS AREA & STATES
 =============================================*/
-.canvas-container {
-    flex: 1; /* Grow to fill available space */
-    min-width: 0; /* Prevent flex item from overflowing container */
+.canvas-area {
+    flex: 3;
+    /* Give more space to canvas relative to control panel */
+    min-width: 0;
+    /* Prevent flex item from overflowing */
     min-height: 25rem;
+    /* Minimum drawing area */
+    max-height: 80vh;
+    /* Prevent canvas from becoming too tall */
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
@@ -192,7 +241,7 @@ input[type="file"] {
     overflow: hidden;
     border: 1px solid var(--border-color);
     display: flex;
-    flex-direction: column;
+    /* To center canvas if needed, or for overlays */
 }
 
 #live2d-canvas {
@@ -200,12 +249,12 @@ input[type="file"] {
     width: 100%;
     height: 100%;
     background-color: transparent;
-    object-fit: contain; /* Scale model correctly */
+    /* Controlled by PIXI app */
+    object-fit: contain;
 }
 
-/* Loading / Empty States */
 .loading-overlay,
-#no-model-message {
+.canvas-message {
     position: absolute;
     inset: 0;
     display: flex;
@@ -214,12 +263,14 @@ input[type="file"] {
     align-items: center;
     text-align: center;
     padding: 1rem;
-    z-index: 5;
+    z-index: 10;
+    /* Ensure overlays are on top */
 }
 
 .loading-overlay {
-    background-color: var(--bg-primary);
-    display: none; /* Controlled by JS */
+    background-color: rgba(var(--bg-primary-rgb, 15, 15, 26), 0.85);
+    /* Slightly transparent */
+    /* display: none; /* Controlled by JS */
 }
 
 .spinner {
@@ -233,7 +284,9 @@ input[type="file"] {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .loading-text {
@@ -242,13 +295,15 @@ input[type="file"] {
     font-weight: 500;
 }
 
-#no-model-message {
+.canvas-message {
+    /* For 'No model selected' message */
     color: var(--text-secondary);
     background-color: var(--bg-secondary);
+    /* Match canvas area background */
     font-size: 1.5rem;
 }
 
-#no-model-message i {
+.canvas-message i {
     font-size: 5rem;
     margin-bottom: 1rem;
     color: var(--accent-primary);
@@ -258,9 +313,13 @@ input[type="file"] {
   CONTROL PANEL
 =============================================*/
 .control-panel {
-    width: 20%;
-    max-height: calc(40rem - 1px); /* Fuck you 1px | Only looks good on 1920x1080 on not fullscreen | Don't know why*/
-    flex-shrink: 0; /* Prevent shrinking when space is limited */
+    flex: 1;
+    /* Take up remaining space, adjust ratio with canvas-area */
+    min-width: 18rem;
+    /* Minimum width before wrapping */
+    max-width: 20rem;
+    /* Maximum width */
+    max-height: calc(40rem - 1px);
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
@@ -269,68 +328,89 @@ input[type="file"] {
     display: flex;
     flex-direction: column;
     gap: var(--standard-gap);
-    overflow-y: auto; /* Enable scrolling if content exceeds height */
+    overflow-y: auto;
 }
 
 /* Custom Scrollbar for Control Panel */
-.control-panel::-webkit-scrollbar { width: 8px; }
-.control-panel::-webkit-scrollbar-track { background: var(--bg-element); border-radius: 10px; }
-.control-panel::-webkit-scrollbar-thumb { background-color: var(--accent-primary); border-radius: 10px; border: 2px solid var(--bg-element); }
-.control-panel::-webkit-scrollbar-thumb:hover { background-color: var(--accent-secondary); }
+.control-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.control-panel::-webkit-scrollbar-track {
+    background: var(--bg-element);
+    border-radius: var(--border-radius-small);
+}
+
+.control-panel::-webkit-scrollbar-thumb {
+    background-color: var(--accent-primary);
+    border-radius: var(--border-radius-small);
+    border: 2px solid var(--bg-element);
+}
+
+.control-panel::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-secondary);
+}
+
+.control-item {
+    /* For checkbox like "Show Hit Areas" */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
 .panel-section h3 {
     margin-bottom: 1rem;
     color: var(--accent-primary);
     font-size: 1.3rem;
     border-left: 0.25rem solid var(--accent-secondary);
-    border-radius: 5px 0 0 5px;
     padding-left: 0.75rem;
+    border-radius: 3px 0 0 3px;
+    /* Subtle rounding */
 }
 
-.expressions-container,
-.motions-container,
-.hit-areas-container {
+.model-features-container {
+    /* Container for expressions, motions, hit areas buttons */
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
 }
 
-/* Buttons within Control Panel */
-.expression-btn,
-.motion-btn,
-.hit-area-btn {
+.feature-btn {
+    /* Common class for expression, motion, hit-area buttons */
     padding: 0.5rem 1rem;
     background-color: var(--bg-element);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-small);
     cursor: pointer;
-    transition: var(--transition);
+    transition: var(--transition-main);
     font-size: 0.9rem;
     color: var(--text-secondary);
     text-align: center;
+    flex-grow: 1;
+    /* Allow buttons to grow if space allows */
+    min-width: calc(50% - 0.5rem);
+    /* Aim for two buttons per row, accounting for gap */
 }
 
-.expression-btn:hover,
-.motion-btn:hover,
-.hit-area-btn:hover {
+.feature-btn:hover,
+.feature-btn:focus-visible {
     background-color: var(--bg-interactive);
     color: var(--text-primary);
     border-color: var(--accent-primary);
     transform: translateY(-1px);
     box-shadow: none;
+    /* Override default button shadow on hover if not desired here */
 }
 
-/* Active state for control buttons */
-.expression-btn.active,
-.motion-btn.active,
-.hit-area-btn.active {
+.feature-btn.active {
     background-color: var(--accent-primary);
     color: var(--text-primary);
     border-color: var(--accent-primary);
-    font-weight: 500;
+    font-weight: 600;
+    /* Emphasize active state */
 }
 
-.no-content {
+.no-content-message {
     color: var(--text-secondary);
     font-style: italic;
     width: 100%;
@@ -338,12 +418,13 @@ input[type="file"] {
     padding: 1rem 0;
     background-color: var(--bg-element);
     border-radius: var(--border-radius-small);
+    font-size: 0.9rem;
 }
 
 /*=============================================
   FOOTER COMPONENT
 =============================================*/
-.footer {
+.site-footer {
     text-align: center;
     padding: var(--standard-padding);
     background-color: var(--bg-secondary);
@@ -352,24 +433,27 @@ input[type="file"] {
     border: 1px solid var(--border-color);
     flex-shrink: 0;
     margin-top: auto;
+    /* Pushes footer to bottom if body is flex container */
 }
 
-.footer p {
+.site-footer p {
     color: var(--text-secondary);
     font-size: 0.9rem;
     margin-bottom: 0.25rem;
 }
-.footer p:last-child {
+
+.site-footer p:last-child {
     margin-bottom: 0;
 }
 
-.footer a {
+.site-footer a {
     color: var(--accent-primary);
     text-decoration: none;
     font-weight: 500;
 }
 
-.footer a:hover {
+.site-footer a:hover,
+.site-footer a:focus-visible {
     color: var(--accent-secondary);
     text-decoration: underline;
 }
@@ -377,74 +461,99 @@ input[type="file"] {
 /*=============================================
   RESPONSIVE STYLES
 =============================================*/
-@media (max-width: 992px) { /* Tablet and below */
+@media (max-width: 1024px) {
+
+    /* Adjusted breakpoint for better control panel wrapping */
     .main-content {
-        flex-direction: column; /* Stack canvas and controls */
+        flex-direction: column;
+        /* Stack canvas and controls */
     }
 
     .control-panel {
-        width: 100%; /* Control panel takes full width */
+        width: 100%;
+        /* Control panel takes full width */
+        max-width: none;
+        /* Remove max-width constraint when stacked */
+        max-height: 40vh;
+        /* Limit height when stacked */
+        min-width: auto;
+        /* Reset min-width */
     }
 
-    .canvas-container {
-        max-height: 30rem; /* Adjust canvas height */
-        max-width: 100%; /* Prevent overflow */
+    .canvas-area {
+        min-height: 30rem;
+        /* Ensure canvas has enough height */
+        max-height: 55vh;
+        /* Adjust max height when stacked */
+        max-width: 100%;
+        /* Full width when stacked */
+        flex-basis: auto;
+        /* Allow canvas to size based on content and min/max height */
+    }
+
+    .feature-btn {
+        min-width: calc(33.33% - 0.75rem);
+        /* Aim for three buttons per row */
     }
 }
 
-@media (max-width: 768px) { /* Mobile */
-    .container {
+@media (max-width: 768px) {
+
+    /* Mobile */
+    .app-container {
         padding: 1rem;
         gap: 1rem;
     }
 
-    .header {
+    .site-header {
         flex-direction: column;
-        align-items: stretch; /* Make items full width */
+        align-items: stretch;
         padding: 1rem;
         gap: 1rem;
     }
 
-    .header h1 {
+    .site-header h1 {
         text-align: center;
-        margin-bottom: 0.5rem; /* Reduced margin */
+        margin-bottom: 0.5rem;
     }
 
-    .model-selector {
+    .model-controls,
+    .model-loader-group {
+        flex-direction: column;
         width: 100%;
-        flex-direction: column; /* Stack selector elements */
         gap: 0.75rem;
     }
 
-    /* Make controls full-width on mobile */
-    .model-selector select,
-    .model-selector button,
-    .model-selector input[type="text"], /* Ensure URL input is full-width */
-    .file-input-container,
-    #upload-button {
+    .model-controls select,
+    .model-controls button,
+    .model-controls input[type="text"],
+    .file-input-container {
         width: 100%;
     }
 
-    select,
-    input[type="text"] { /* Remove min-width for select and URL input */
+    input[type="text"],
+    .model-controls select {
         min-width: auto;
+        /* Remove min-width */
     }
 
     .control-panel {
         padding: 1rem;
+        max-height: 45vh;
+        /* Slightly more height for controls on mobile */
     }
 
-    .canvas-container {
-        min-height: 18rem; /* Adjust minimum height */
-        max-height: 50vh; /* Use viewport height for flexibility */
-        max-width: 100%; /* Prevent overflow */
+    .canvas-area {
+        min-height: 18rem;
+        max-height: 50vh;
+        max-width: 100%;
     }
 
-     /* Adjust padding for smaller control panel sections */
-    .expression-btn,
-    .motion-btn,
-    .hit-area-btn {
-        padding: 0.4rem 0.8rem;
+    .feature-btn {
+        padding: 0.6rem 0.8rem;
+        /* Slightly larger tap targets */
         font-size: 0.85rem;
+        min-width: calc(50% - 0.5rem);
+        /* Two buttons per row on smaller mobile */
     }
 }
