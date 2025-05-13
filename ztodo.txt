@@ -1,5 +1,3 @@
-folder imports dont work
-tap on hit areas dont work
 better theme for show hitarea checkbox
 
 refactor all files 1st, 

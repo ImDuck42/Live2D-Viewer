@@ -184,8 +184,7 @@ button:focus-visible {
 
 /* Accent buttons in header */
 #load-url-button,
-#load-selected-button,
-#upload-model-button {
+#load-selected-button {
     background-color: var(--accent-primary);
     border-color: var(--accent-primary);
     /* Ensure border matches for consistency */
@@ -194,17 +193,10 @@ button:focus-visible {
 
 #load-url-button:hover,
 #load-selected-button:hover,
-#upload-model-button:hover,
 #load-url-button:focus-visible,
-#load-selected-button:focus-visible,
-#upload-model-button:focus-visible {
+#load-selected-button:focus-visible {
     background-color: var(--accent-secondary);
     border-color: var(--accent-secondary);
-}
-
-.file-input-container {
-    position: relative;
-    /* For the hidden file input */
 }
 
 /* input[type="file"] is visually hidden by JS, but if it were styled: */
@@ -526,8 +518,7 @@ button:focus-visible {
 
     .model-controls select,
     .model-controls button,
-    .model-controls input[type="text"],
-    .file-input-container {
+    .model-controls input[type="text"] {
         width: 100%;
     }
 

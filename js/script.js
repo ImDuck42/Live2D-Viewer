@@ -47,8 +47,6 @@ const DOMElements = {
     loadSelectedButton: document.getElementById('load-selected-button'),
     modelUrlInput: document.getElementById('model-url-input'),
     loadUrlButton: document.getElementById('load-url-button'),
-    uploadModelButton: document.getElementById('upload-model-button'),
-    fileInput: document.getElementById('file-input'),
     showHitAreasCheckbox: document.getElementById('show-hit-areas-checkbox'),
     expressionsContainer: document.getElementById('expressions-container'),
     motionsContainer: document.getElementById('motions-container'),
@@ -65,7 +63,7 @@ const DOMElements = {
 function initApp() {
     const essentialElementIDs = [
         'canvas', 'loadingOverlay', 'noModelMessage', 'modelUrlInput', 'loadUrlButton',
-        'expressionsContainer', 'motionsContainer', 'hitAreasContainer', 'fileInput'
+        'expressionsContainer', 'motionsContainer', 'hitAreasContainer'
     ];
     for (const id of essentialElementIDs) {
         if (!DOMElements[id]) {
@@ -95,8 +93,6 @@ function initApp() {
     // Setup UI event listeners
     DOMElements.loadSelectedButton?.addEventListener('click', loadSelectedModelFromDropdown);
     DOMElements.loadUrlButton.addEventListener('click', loadModelFromUrlInput);
-    DOMElements.uploadModelButton?.addEventListener('click', () => DOMElements.fileInput.click());
-    DOMElements.fileInput.addEventListener('change', handleModelFileUpload);
     DOMElements.showHitAreasCheckbox?.addEventListener('change', toggleHitAreaFramesVisibility);
 
     setupModelInteractions();
@@ -153,48 +149,6 @@ async function loadModelFromUrlInput() {
         return;
     }
     await loadModel(modelUrl);
-}
-
-/**
- * Handles file input changes for loading models from local files/folders.
- * @param {Event} event - The file input change event.
- */
-async function handleModelFileUpload(event) {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    console.log(`Processing ${files.length} file(s) from input.`);
-
-    // Check if a primary model settings file is among the uploaded files.
-    const hasSettingsFile = Array.from(files).some(file =>
-        /\.model(3)?\.json$/i.test(file.name)
-    );
-    const isSingleJson = files.length === 1 && hasSettingsFile;
-
-    if (files.length > 1 && !hasSettingsFile) {
-        console.warn("Warning: No *.model.json or *.model3.json file detected. Folder uploads might fail if the main settings file is missing or misnamed.");
-    }
-
-    try {
-        let modelSource = files; // Default to FileList for folder/zip-like uploads
-        if (isSingleJson) {
-            console.log("Loading single model JSON file via Object URL.");
-            const fileUrl = URL.createObjectURL(files[0]);
-            // Revoke the object URL after a timeout to allow the library to load it.
-            setTimeout(() => URL.revokeObjectURL(fileUrl), CONFIG.FILE_URL_REVOKE_TIMEOUT);
-            modelSource = fileUrl;
-        } else {
-            console.log("Attempting to load model from FileList (typically for folder uploads).");
-        }
-        await loadModel(modelSource);
-    } catch (error) {
-        console.error('Error initiating model load from file input:', error);
-        alert(`Failed to start loading model from files. Error: ${error.message}`);
-        updateUIVisibility(!!currentModel); // Show 'no model' if loading failed and no model exists
-    } finally {
-        // Reset file input to allow re-selection of the same file(s)
-        event.target.value = null;
-    }
 }
 
 /**
@@ -660,15 +614,17 @@ function handleModelZoom(event) {
  */
 function handleStageTap(event) {
     if (wasDragging || isDragging) {
-        wasDragging = false;
+        wasDragging = false; // Reset drag flag
         return;
     }
     if (!currentModel || !event.data) return;
 
-    currentModel.updateTransform();
+    // currentModel.updateTransform(); // updateTransform is called within toModelPosition if needed
 
-    const localPos = currentModel.toLocal(event.data.global, undefined, undefined, true);
-    const hitAreaNames = currentModel.hitTest(localPos.x, localPos.y);
+    // Pass the GLOBAL coordinates directly to hitTest
+    // The Live2DModel's hitTest method expects coordinates that its
+    // toModelPosition method can convert from global to internal model space.
+    const hitAreaNames = currentModel.hitTest(event.data.global.x, event.data.global.y);
 
     if (hitAreaNames.length > 0) {
         const mainHitArea = hitAreaNames[0];
@@ -676,9 +632,16 @@ function handleStageTap(event) {
         highlightHitAreaButtonsInUI(hitAreaNames);
         triggerMotionForHitArea(mainHitArea);
     } else {
-        // console.log("Tap occurred on model, but no defined hit area detected at:", localPos);
+        // Optional: Check if the tap was on the model's general visible area
+        // even if not a specific hit area, for a generic tap motion.
+        // GetBounds() returns the bounds in global space by default.
+        const modelBounds = currentModel.getBounds();
+        if (modelBounds.contains(event.data.global.x, event.data.global.y)) {
+             console.log("Tap occurred on model (general bounds), but no defined hit area detected. Attempting generic tap motion.");
+             triggerMotionForHitArea(null); // Pass null or a specific identifier for "generic tap"
+        }
     }
-    wasDragging = false;
+    wasDragging = false; // Ensure this is reset if the tap didn't follow a drag
 }
 
 /**
@@ -729,6 +692,9 @@ function highlightHitAreaButtonsInUI(hitAreaNames, specificButtonToHighlight) {
 
 /**
  * Attempts to find and play a motion related to a hit area tap.
+ * Prioritizes motions directly related to the hitAreaName (e.g., "Head", "Tap_Head", "Flick_Head").
+ * If multiple such motions exist, one is chosen randomly.
+ * If no direct match, falls back to generic tap motions (e.g., "Tap", "IdleTap").
  * @param {string | null} hitAreaName - The name of the hit area.
  */
 function triggerMotionForHitArea(hitAreaName) {
@@ -741,54 +707,76 @@ function triggerMotionForHitArea(hitAreaName) {
 
     const definedGroupNames = Object.keys(motionManager.definitions);
     let motionPlayed = false;
-    const potentialMotionGroupsToTry = [];
+    const lowerHitAreaName = hitAreaName?.toLowerCase(); // Use optional chaining for null safety
 
-    if (hitAreaName) {
-        const lowerHitAreaName = hitAreaName.toLowerCase();
+    console.log(`Attempting to play motion for hit: '${hitAreaName || "Generic Tap"}'. Defined groups: [${definedGroupNames.join(', ')}]`);
 
-        // Pattern 1: tap_areaname (e.g., hit "Head" -> try "tap_head")
-        potentialMotionGroupsToTry.push(`tap_${lowerHitAreaName}`);
+    // 1. Primary Search: Motions directly related to the hitAreaName
+    if (lowerHitAreaName) {
+        const primaryCandidatePatterns = [
+            lowerHitAreaName,                   // e.g., "head"
+            `tap_${lowerHitAreaName}`,          // e.g., "tap_head"
+            `flick_${lowerHitAreaName}`,        // e.g., "flick_head" (from your log example)
+            `hit_${lowerHitAreaName}`,          // e.g., "hit_head" (another common pattern)
+            `tap${lowerHitAreaName}`            // e.g., "taphead" (no underscore)
+        ];
 
-        // Pattern 2: areaname (e.g., hit "Head" -> try "head")
-        potentialMotionGroupsToTry.push(lowerHitAreaName);
+        // Add variations if hitAreaName itself might be a prefixed version, e.g., "TapBody" -> also check for "Body"
+        if (lowerHitAreaName.startsWith('tap_') || lowerHitAreaName.startsWith('flick_') || lowerHitAreaName.startsWith('hit_')) {
+            primaryCandidatePatterns.push(lowerHitAreaName.substring(lowerHitAreaName.indexOf('_') + 1));
+        } else if (lowerHitAreaName.startsWith('tap') && !lowerHitAreaName.includes('_')) {
+             primaryCandidatePatterns.push(lowerHitAreaName.substring(3)); // e.g., "taphead" -> "head"
+        }
+        // Ensure no empty strings from substring operations if prefixes are short
+        const validPrimaryPatterns = [...new Set(primaryCandidatePatterns.filter(p => p))];
 
-        // Pattern 3: Handle cases where hitAreaName might be "TapHead" or "Head"
-        // and motion group is "Head" or "TapHead" (without underscore)
-        if (lowerHitAreaName.startsWith('tap')) {
-            // If hitAreaName is "TapHead", try "head"
-            potentialMotionGroupsToTry.push(lowerHitAreaName.substring(3));
-        } else {
-            // If hitAreaName is "Head", try "taphead"
-            potentialMotionGroupsToTry.push(`tap${lowerHitAreaName}`);
+
+        const actualPrimaryMotionGroups = definedGroupNames.filter(definedGroup =>
+            validPrimaryPatterns.some(pattern => definedGroup.toLowerCase() === pattern)
+        );
+
+        if (actualPrimaryMotionGroups.length > 0) {
+            console.log(`Found primary motion group(s) for '${hitAreaName}': [${actualPrimaryMotionGroups.join(', ')}]`);
+            const randomIndex = Math.floor(Math.random() * actualPrimaryMotionGroups.length);
+            const groupToPlay = actualPrimaryMotionGroups[randomIndex];
+            try {
+                console.log(`Playing randomly selected primary motion: Group='${groupToPlay}'`);
+                currentModel.motion(groupToPlay); // Play a random motion from this specific group
+                motionPlayed = true;
+            } catch (e) {
+                console.warn(`Primary motion group '${groupToPlay}' failed to play:`, e);
+            }
         }
     }
 
-    // Fallback to generic tap motions
-    potentialMotionGroupsToTry.push('tap');
-    potentialMotionGroupsToTry.push('idletap');
+    // 2. Secondary Search: Generic tap motions, if no primary motion was played
+    if (!motionPlayed) {
+        const genericTapGroupCandidates = ['tap', 'idletap']; // Add more generic fallbacks if needed
 
-    // Deduplicate and filter out empty strings if any were generated
-    const uniquePotentialGroups = [...new Set(potentialMotionGroupsToTry.filter(g => g))];
+        if (hitAreaName) { // Log only if a specific area was hit but found no primary motion
+            console.log(`No primary motion played for '${hitAreaName}'. Trying generic tap motions.`);
+        } else if (hitAreaName === null) { // Explicitly null, from a general tap
+            console.log(`No specific hit area identified. Trying generic tap motions.`);
+        }
 
-    console.log(`Attempting to play motion for hit: '${hitAreaName || "Generic Tap"}'. Defined groups: [${definedGroupNames.join(', ')}]. Potential attempts: [${uniquePotentialGroups.join(', ')}]`);
 
-    for (const groupToTry of uniquePotentialGroups) {
-        // Find a case-insensitive match in defined groups
-        const matchedGroup = definedGroupNames.find(defined => defined.toLowerCase() === groupToTry.toLowerCase());
-        if (matchedGroup) {
-            try {
-                console.log(`Playing motion: Group='${matchedGroup}' (matched with '${groupToTry}')`);
-                currentModel.motion(matchedGroup); // Play a random motion from this group
-                motionPlayed = true;
-                break; // Motion played, no need to try other groups
-            } catch (e) {
-                console.warn(`Motion group '${matchedGroup}' failed to play:`, e);
+        for (const genericGroupCandidate of genericTapGroupCandidates) {
+            const matchedGenericGroup = definedGroupNames.find(defined => defined.toLowerCase() === genericGroupCandidate.toLowerCase());
+            if (matchedGenericGroup) {
+                try {
+                    console.log(`Playing generic motion: Group='${matchedGenericGroup}'`);
+                    currentModel.motion(matchedGenericGroup); // Play a random motion from this generic group
+                    motionPlayed = true;
+                    break; // Generic motion played, no need to try others
+                } catch (e) {
+                    console.warn(`Generic motion group '${matchedGenericGroup}' failed to play:`, e);
+                }
             }
         }
     }
 
     if (!motionPlayed) {
-        console.log(`No suitable motion group found or played for hit: '${hitAreaName || '(No specific area)'}' from generated attempts.`);
+        console.log(`No suitable motion group found or played for hit: '${hitAreaName || '(No specific area)'}'.`);
     }
 }
 
