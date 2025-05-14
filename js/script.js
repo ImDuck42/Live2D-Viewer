@@ -109,18 +109,6 @@ function initApp() {
     console.log("Live2D Viewer initialized.");
 }
 
-// /**
-//  * Handles window resize events.
-//  * PIXI's `resizeTo` handles canvas element resizing.
-//  * We no longer refit the model scale here to prevent abrupt changes.
-//  */
-// function handleWindowResize() {
-//     // if (currentModel && app?.renderer) {
-//     //     // Optional: If you want to re-center the model or ensure it's within bounds
-//     //     // For now, model scale and position are preserved.
-//     // }
-// }
-
 //==============================================================================
 // MODEL LOADING
 //==============================================================================
@@ -199,9 +187,6 @@ async function loadModel(source) {
 
         if (PIXI.live2d.HitAreaFrames) {
             hitAreaFrames = new PIXI.live2d.HitAreaFrames();
-            // Example: Customize colors if needed
-            // hitAreaFrames.colors.default = 0xCCCCCC;
-            // hitAreaFrames.colors.triggered = CONFIG.BACKGROUND_COLOR === 0x1a1a2e ? 0x8c5eff : 0xFF8C00;
             currentModel.addChild(hitAreaFrames);
             hitAreaFrames.visible = DOMElements.showHitAreasCheckbox?.checked ?? false;
             if (DOMElements.showHitAreasCheckbox) DOMElements.showHitAreasCheckbox.disabled = false;

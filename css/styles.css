@@ -232,7 +232,7 @@ button:focus-visible {
     height: 100%;
     background-color: transparent;
     object-fit: contain;
-    /* Note: PIXI controls internal rendering, this more a fallback */
+    /* Note: PIXI controls internal rendering, this is more a fallback */
 }
 
 .loading-overlay,
