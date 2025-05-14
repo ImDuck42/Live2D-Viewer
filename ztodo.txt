@@ -5,3 +5,5 @@ also zoom out/in on mobile
 
 refactor all files 1st, 
 then work on a final robust design
+
+Thanks to 8con and Osaka for helping me (put credits in the footer)
