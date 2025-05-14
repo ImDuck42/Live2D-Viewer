@@ -1,6 +1,4 @@
 maybe moc/moc3 support, idk how tho
-fix models size random change on scroll
-also zoom out/in on mobile
 
 refactor all files 1st, 2nd, 
 then work on a final robust design
