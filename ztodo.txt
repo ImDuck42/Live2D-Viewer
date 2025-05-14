@@ -1,4 +1,7 @@
-better theme for show hitarea checkbox
+better theme for show hitarea checkbox (hide inbuilt and create custom ontop)
+maybe moc/moc3 support, idk how tho
+fix models size random change on scroll
+also zoom out/in on mobile
 
 refactor all files 1st, 
 then work on a final robust design

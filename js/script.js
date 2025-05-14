@@ -185,7 +185,7 @@ async function loadModel(source) {
             },
         });
 
-        console.log("Model loaded successfully:", model.internalModel?.settings?.name || "Unnamed Model");
+        console.log("Model loaded successfully:", model.internalModel?.settings?.name || "Unnamed Model", model);
         currentModel = model;
         app.stage.addChild(model);
 
@@ -312,14 +312,26 @@ function createControlButton(text, title, onClick, baseClassName, specificClassN
 
 /**
  * Sets or clears the "active" class on a button within a container.
+ * If highlightDurationMs is provided and positive, the active state is temporary.
  * @param {HTMLElement | null} container - The parent container of the buttons.
  * @param {HTMLElement | null} activeButton - The button to mark as active, or null to clear all.
+ * @param {number} [highlightDurationMs=0] - Duration in ms to keep the button highlighted. 0 means permanent until another is clicked.
  */
-function setActiveButton(container, activeButton) {
+function setActiveButton(container, activeButton, highlightDurationMs = 0) {
     if (!container) return;
+
+    // Clear 'active' class from all buttons in the container
     container.querySelectorAll('.active').forEach(btn => btn.classList.remove('active'));
+
     if (activeButton) {
         activeButton.classList.add('active');
+
+        // If a duration is specified, remove the 'active' class after the timeout
+        if (highlightDurationMs > 0) {
+            setTimeout(() => {
+                activeButton.classList.remove('active');
+            }, highlightDurationMs);
+        }
     }
 }
 
@@ -376,7 +388,8 @@ function populateMotionControls() {
                 () => {
                     try {
                         currentModel?.motion(group, index);
-                        setActiveButton(container, button);
+                        // Apply temporary active state
+                        setActiveButton(container, button, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
                         console.log(`Playing motion: Group='${group}', Index=${index}, Name='${motionName}'`);
                     } catch (e) {
                         console.error(`Error playing motion ${group}[${index}] ('${motionName}'):`, e);
@@ -432,7 +445,8 @@ function populateExpressionControls() {
             () => {
                 try {
                     currentModel?.expression(expressionName);
-                    setActiveButton(container, button);
+                    // Apply temporary active state
+                    setActiveButton(container, button, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
                     console.log(`Setting expression: '${expressionName}'`);
                 } catch (e) {
                     console.error(`Error setting expression '${expressionName}':`, e);
