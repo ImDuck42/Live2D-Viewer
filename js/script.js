@@ -42,6 +42,8 @@ let initialPinchDistance = 0;
 let initialPinchMidpoint = new PIXI.Point();
 let initialModelScaleOnPinchStart = 1;
 
+let previousCanvasWidth = 0; // Stores the canvas width before a resize, to detect actual width changes.
+
 
 // Cached DOM Elements
 const DOMElements = {
@@ -89,6 +91,13 @@ function initApp() {
             resolution: window.devicePixelRatio || 1,
             autoDensity: true,
         });
+
+        // Initialize previousCanvasWidth with the initial renderer width
+        previousCanvasWidth = app.renderer.width;
+
+        // Add resize listener for PIXI renderer
+        app.renderer.on('resize', handleCanvasResize);
+
     } catch (error) {
         console.error("Fatal Error: Failed to create PIXI Application.", error);
         alert(`Initialization failed: Could not create PixiJS Application. ${error.message}`);
@@ -101,10 +110,7 @@ function initApp() {
     DOMElements.showHitAreasCheckbox?.addEventListener('change', toggleHitAreaFramesVisibility);
 
     setupModelInteractions();
-    // Window resize is handled by PIXI's resizeTo for the canvas.
-    // We no longer call fitModelToScreen on general window resize to prevent abrupt scale changes.
-    // window.addEventListener('resize', handleWindowResize); // No longer needed for model refitting
-
+    
     updateUIVisibility(false); // No model initially
     console.log("Live2D Viewer initialized.");
 }
@@ -404,7 +410,12 @@ function populateMotionControls() {
             motionButtonsCreated++;
         });
     });
-    setNoContentMessage(container, 'motions'); // Will add or remove message based on motionButtonsCreated
+    if(motionButtonsCreated === 0) { // if only empty groups existed
+        setNoContentMessage(container, 'motions');
+    } else {
+        const messageElement = container.querySelector('.no-content-message');
+        if (messageElement) messageElement.remove();
+    }
 }
 
 /**
@@ -432,7 +443,7 @@ function populateExpressionControls() {
         setNoContentMessage(container, 'expressions');
         return;
     }
-
+    let expressionsCreated = 0;
     expressionList.forEach((expDef, index) => {
         const expressionName = expDef.Name || expDef.name || `Expression ${index + 1}`;
         const button = createControlButton(
@@ -451,8 +462,14 @@ function populateExpressionControls() {
             'feature-btn', 'expression-btn'
         );
         container.appendChild(button);
+        expressionsCreated++;
     });
-    setNoContentMessage(container, 'expressions');
+    if(expressionsCreated === 0) {
+        setNoContentMessage(container, 'expressions');
+    } else {
+        const messageElement = container.querySelector('.no-content-message');
+        if (messageElement) messageElement.remove();
+    }
 }
 
 
@@ -485,7 +502,13 @@ function populateHitAreaControls() {
         );
         container.appendChild(button);
     });
-    setNoContentMessage(container, validHitAreasFound > 0 ? 'hit areas' : 'hit areas (none valid)');
+
+    if(validHitAreasFound === 0) {
+        setNoContentMessage(container, 'hit areas (none valid)');
+    } else {
+        const messageElement = container.querySelector('.no-content-message');
+        if (messageElement) messageElement.remove();
+    }
 }
 
 /**
@@ -499,6 +522,30 @@ function toggleHitAreaFramesVisibility() {
         console.log(`Hit Area Frames visibility set to: ${isChecked}`);
     }
 }
+
+//==============================================================================
+// CANVAS AND RENDERER HANDLERS
+//==============================================================================
+
+/**
+ * Handles canvas resize events to re-center the model horizontally if the width changes.
+ * This function is called by PIXI's renderer 'resize' event.
+ * @param {number} newWidth - The new width of the renderer.
+ * @param {number} newHeight - The new height of the renderer.
+ */
+function handleCanvasResize(newWidth, newHeight) {
+    if (currentModel && app?.renderer) {
+        if (newWidth !== previousCanvasWidth) {
+            // console.log(`Canvas width changed from ${previousCanvasWidth} to ${newWidth}. Centering model horizontally.`);
+            currentModel.position.x = newWidth / 2;
+        }
+        // currentModel.position.y and currentModel.scale remain unchanged by this handler
+    }
+    // Always update previousCanvasWidth to the new current width for the next comparison.
+    // This handles cases where the model might not be loaded yet, but the canvas resizes.
+    previousCanvasWidth = newWidth;
+}
+
 
 //==============================================================================
 // MODEL INTERACTION (Dragging, Tapping, Zooming, Pinching)
@@ -640,24 +687,23 @@ function handlePointerRelease(event) {
         initialModelScaleOnPinchStart = 1; // Reset
         if (currentModel) currentModel.cursor = 'grab'; // Reset cursor
 
-        // If one finger remains, it might initiate a new drag on its next move.
-        // For now, simply end the pinch. If it was the last finger, drag also stops.
         if (numActivePointers < 2) { 
             isDragging = false; 
         }
-        // If numActivePointers is 1, the remaining finger might start a drag if it moves.
-        // Need to re-evaluate drag conditions if we want immediate drag continuation.
-        // For now, this is fine: user lifts one pinch finger, then has to move the other to start drag.
         if (numActivePointers === 1) {
-            // Potentially re-initialize drag for the remaining finger
+            // Re-initialize drag for the remaining finger
             const remainingPointerData = Object.values(activePointers)[0];
-            const hitObject = app.renderer.plugins.interaction.hitTest(remainingPointerData.global, currentModel);
-            if (hitObject) {
-                isDragging = true; // Re-enable dragging for the single remaining pointer
-                const pointerInModelParent = currentModel.parent.toLocal(remainingPointerData.global, null, undefined, true);
-                dragStartOffset.x = pointerInModelParent.x - currentModel.x;
-                dragStartOffset.y = pointerInModelParent.y - currentModel.y;
-                if (currentModel) currentModel.cursor = 'grabbing';
+            if (app?.renderer && currentModel?.parent) { // Check if context is valid
+                 const hitObject = app.renderer.plugins.interaction.hitTest(remainingPointerData.global, currentModel);
+                 if (hitObject) {
+                    isDragging = true; 
+                    const pointerInModelParent = currentModel.parent.toLocal(remainingPointerData.global, null, undefined, true);
+                    dragStartOffset.x = pointerInModelParent.x - currentModel.x;
+                    dragStartOffset.y = pointerInModelParent.y - currentModel.y;
+                    if (currentModel) currentModel.cursor = 'grabbing';
+                 } else {
+                    isDragging = false;
+                 }
             } else {
                 isDragging = false;
             }
@@ -665,11 +711,6 @@ function handlePointerRelease(event) {
 
 
     } else if (isDragging) { // Was dragging with a single finger
-        // Only stop dragging if the specific dragging pointer is released.
-        // This check is implicitly handled because if numActivePointers becomes 0, isDragging will be false.
-        // If there are other pointers (e.g. from a multi-touch device that didn't form a pinch), this might need refinement.
-        // However, our current logic: 1 finger -> drag, 2 fingers -> pinch.
-        // So if isDragging is true, numActivePointers was 1. Now it's 0.
         isDragging = false;
         if (currentModel) currentModel.cursor = 'grab';
     }
@@ -678,7 +719,6 @@ function handlePointerRelease(event) {
         isDragging = false;
         isPinching = false;
         if (currentModel) currentModel.cursor = 'grab';
-        // wasDragging is handled by the next pointerdown / tap logic
     }
 }
 
@@ -701,23 +741,17 @@ function handleModelZoom(event) {
 
     if (newScale === currentScale) return;
 
-    const pointer = new PIXI.Point(); // PIXI.InteractionData().getLocalPosition needs a DisplayObject.
-                                      // We need global coords first.
+    const pointer = new PIXI.Point(); 
     app.renderer.plugins.interaction.mapPositionToPoint(pointer, event.clientX, event.clientY);
 
-    // Convert global pointer position to stage's local coordinate system
-    // If stage is not transformed, this is same as global.
     const stagePointerPos = app.stage.toLocal(pointer, undefined, undefined, true);
     
-    // Get pointer position relative to the model's origin (anchor point)
     const modelLocalPointerPos = currentModel.toLocal(stagePointerPos, undefined, undefined, true);
 
     currentModel.scale.set(newScale);
 
-    // After scaling, find the new global position of that same model-local point
     const newGlobalPointerPosFromModel = currentModel.toGlobal(modelLocalPointerPos, undefined, true);
     
-    // Adjust model position to keep the model-local point under the mouse cursor
     currentModel.x -= (newGlobalPointerPosFromModel.x - stagePointerPos.x);
     currentModel.y -= (newGlobalPointerPosFromModel.y - stagePointerPos.y);
 }
@@ -727,10 +761,8 @@ function handleModelZoom(event) {
  * @param {PIXI.InteractionEvent} event - The PIXI interaction event.
  */
 function handleStageTap(event) {
-    // If a drag or pinch just happened or is in progress, don't treat as tap.
     if (wasDragging || isDragging || isPinching) {
-        wasDragging = false; // Reset for next interaction sequence
-        // isPinching and isDragging are reset by their respective handlers (pointerup)
+        wasDragging = false; 
         return;
     }
     if (!currentModel || !event.data) return;
@@ -743,13 +775,13 @@ function handleStageTap(event) {
         highlightHitAreaButtonsInUI(hitAreaNames);
         triggerMotionForHitArea(mainHitArea);
     } else {
-        const modelBounds = currentModel.getBounds(); // Global space bounds
+        const modelBounds = currentModel.getBounds(); 
         if (modelBounds.contains(event.data.global.x, event.data.global.y)) {
              console.log("Tap occurred on model (general bounds), but no defined hit area. Attempting generic tap motion.");
              triggerMotionForHitArea(null); 
         }
     }
-    wasDragging = false; // Ensure reset
+    wasDragging = false; 
 }
 
 /**
@@ -785,16 +817,13 @@ function highlightHitAreaButtonsInUI(hitAreaNames, specificButtonToHighlight) {
         if (specificButtonToHighlight) {
             if (button === specificButtonToHighlight) {
                 setActiveButton(DOMElements.hitAreasContainer, button, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
-            } else if (button.classList.contains('active') && !buttonMatches) {
-                // This case is tricky, setActiveButton already clears others
             }
         } else if (buttonMatches) {
-            // For tap on model, temporarily activate all matching buttons
-            button.classList.add('active'); // setActiveButton would clear others, direct add for multi-highlight
+            button.classList.add('active'); 
             setTimeout(() => button.classList.remove('active'), CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
         }
     });
-    if (specificButtonToHighlight) { // Ensure only one active if specific button is used
+    if (specificButtonToHighlight) { 
          setActiveButton(DOMElements.hitAreasContainer, specificButtonToHighlight, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
     }
 }
