@@ -10,13 +10,19 @@
     --bg-element: #262639;
     --bg-interactive: #3a3a50;
     --accent-primary: #8c5eff;
-    --accent-primary-rgb: 140, 94, 255;
     --accent-secondary: #ff67d7;
     --text-primary: #ffffff;
     --text-secondary: #b8b8d0;
     --border-color: #40405a;
     --error-color: #ff4757;
     --success-color: #2ecc71;
+
+    /* --- RGB Components for rgba() usage --- */
+    --bg-primary-rgb: 15, 15, 26;
+    /* Corresponds to #0f0f1a */
+    --accent-primary-rgb: 140, 94, 255;
+    /* Corresponds to #8c5eff */
+
 
     /* --- Sizing & Effects --- */
     --base-font-size: 16px;
@@ -31,6 +37,9 @@
     --transition-main: all var(--transition-duration) var(--transition-timing);
     --standard-padding: 1.5rem;
     --standard-gap: 1.5rem;
+    /* Main gap between larger sections */
+    --control-gap: 0.75rem;
+    /* Gap between smaller controls like buttons in a group */
 }
 
 /*=============================================
@@ -56,12 +65,9 @@ body {
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
-    /* Ensures footer can be pushed down */
     flex-direction: column;
-    /* Stack app-container vertically */
 }
 
-/* Visually hide elements but keep them accessible */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -84,7 +90,6 @@ body {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    /* Takes up space between header and footer if body is flex */
     gap: var(--standard-gap);
 }
 
@@ -111,7 +116,6 @@ button {
 
 input[type="text"] {
     min-width: 18rem;
-    /* Default min-width for URL input */
 }
 
 input[type="text"]::placeholder {
@@ -122,7 +126,6 @@ input[type="text"]::placeholder {
 select:focus,
 input[type="text"]:focus,
 button:focus-visible {
-    /* Use focus-visible for better accessibility */
     outline: none;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.5);
@@ -151,8 +154,7 @@ button:focus-visible {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 1.5rem;
-    /* Increased gap for better spacing */
+    gap: var(--standard-gap);
     flex-shrink: 0;
 }
 
@@ -160,21 +162,18 @@ button:focus-visible {
     font-size: 1.8rem;
     color: var(--accent-primary);
     margin: 0;
-    /* Reset margin from user agent stylesheet */
 }
 
 .model-controls {
     display: flex;
     gap: 1rem;
-    /* Gap between groups */
     align-items: center;
     flex-wrap: wrap;
 }
 
 .model-loader-group {
     display: flex;
-    gap: 0.75rem;
-    /* Gap within a group */
+    gap: var(--control-gap);
     align-items: center;
 }
 
@@ -182,12 +181,10 @@ button:focus-visible {
     min-width: 15rem;
 }
 
-/* Accent buttons in header */
 #load-url-button,
 #load-selected-button {
     background-color: var(--accent-primary);
     border-color: var(--accent-primary);
-    /* Ensure border matches for consistency */
     color: var(--text-primary);
 }
 
@@ -199,9 +196,6 @@ button:focus-visible {
     border-color: var(--accent-secondary);
 }
 
-/* input[type="file"] is visually hidden by JS, but if it were styled: */
-/* input[type="file"] { ... } */
-
 /*=============================================
   MAIN CONTENT AREA
 =============================================*/
@@ -211,7 +205,6 @@ button:focus-visible {
     gap: var(--standard-gap);
     flex-wrap: wrap;
     min-height: 0;
-    /* Important for flex children with overflow */
 }
 
 /*=============================================
@@ -219,13 +212,9 @@ button:focus-visible {
 =============================================*/
 .canvas-area {
     flex: 3;
-    /* Give more space to canvas relative to control panel */
     min-width: 0;
-    /* Prevent flex item from overflowing */
     min-height: 25rem;
-    /* Minimum drawing area */
     max-height: 80vh;
-    /* Prevent canvas from becoming too tall */
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
@@ -233,7 +222,6 @@ button:focus-visible {
     overflow: hidden;
     border: 1px solid var(--border-color);
     display: flex;
-    /* To center canvas if needed, or for overlays */
 }
 
 #live2d-canvas {
@@ -241,8 +229,8 @@ button:focus-visible {
     width: 100%;
     height: 100%;
     background-color: transparent;
-    /* Controlled by PIXI app */
     object-fit: contain;
+    /* Note: PIXI controls internal rendering, this more a fallback */
 }
 
 .loading-overlay,
@@ -256,13 +244,11 @@ button:focus-visible {
     text-align: center;
     padding: 1rem;
     z-index: 10;
-    /* Ensure overlays are on top */
 }
 
 .loading-overlay {
-    background-color: rgba(var(--bg-primary-rgb, 15, 15, 26), 0.85);
-    /* Slightly transparent */
-    /* display: none; /* Controlled by JS */
+    background-color: rgba(var(--bg-primary-rgb), 0.85);
+    /* Transparent version of primary background */
 }
 
 .spinner {
@@ -288,10 +274,8 @@ button:focus-visible {
 }
 
 .canvas-message {
-    /* For 'No model selected' message */
     color: var(--text-secondary);
     background-color: var(--bg-secondary);
-    /* Match canvas area background */
     font-size: 1.5rem;
 }
 
@@ -306,9 +290,7 @@ button:focus-visible {
 =============================================*/
 .control-panel {
     flex: 1;
-    /* Take up remaining space, adjust ratio with canvas-area */
     min-width: 18rem;
-    /* Minimum width before wrapping */
     max-width: 20rem;
     /* Maximum width */
     max-height: calc(40rem - 1px);
@@ -323,7 +305,6 @@ button:focus-visible {
     overflow-y: auto;
 }
 
-/* Custom Scrollbar for Control Panel */
 .control-panel::-webkit-scrollbar {
     width: 8px;
 }
@@ -346,16 +327,19 @@ button:focus-visible {
 .control-item {
     display: flex;
     align-items: center;
-    gap: 0.75rem; /* Adjusted from 0.5rem */
+    gap: var(--control-gap);
 }
 
-/* --- Custom Checkbox for "Show Hit Areas" --- */
 .control-item input[type="checkbox"]#show-hit-areas-checkbox {
     opacity: 0;
     position: absolute;
-    width: 1px; height: 1px; margin: -1px;
-    overflow: hidden; clip: rect(0, 0, 0, 0);
-    white-space: nowrap; border: 0;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .control-item label[for="show-hit-areas-checkbox"] {
@@ -382,7 +366,7 @@ button:focus-visible {
     border-radius: var(--border-radius-small);
     background-color: var(--bg-element);
     transition: background-color var(--transition-duration) var(--transition-timing),
-                border-color var(--transition-duration) var(--transition-timing);
+        border-color var(--transition-duration) var(--transition-timing);
 }
 
 .control-item label[for="show-hit-areas-checkbox"]::after {
@@ -399,16 +383,16 @@ button:focus-visible {
     transition: opacity var(--transition-duration) var(--transition-timing);
 }
 
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:checked + label[for="show-hit-areas-checkbox"]::before {
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:checked+label[for="show-hit-areas-checkbox"]::before {
     background-color: var(--accent-primary);
     border-color: var(--accent-primary);
 }
 
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:checked + label[for="show-hit-areas-checkbox"]::after {
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:checked+label[for="show-hit-areas-checkbox"]::after {
     opacity: 1;
 }
 
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:focus-visible + label[for="show-hit-areas-checkbox"]::before {
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:focus-visible+label[for="show-hit-areas-checkbox"]::before {
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.5);
 }
@@ -424,18 +408,15 @@ button:focus-visible {
     border-left: 0.25rem solid var(--accent-secondary);
     padding-left: 0.75rem;
     border-radius: 3px 0 0 3px;
-    /* Subtle rounding */
 }
 
 .model-features-container {
-    /* Container for expressions, motions, hit areas buttons */
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: var(--control-gap);
 }
 
 .feature-btn {
-    /* Common class for expression, motion, hit-area buttons */
     padding: 0.5rem 1rem;
     background-color: var(--bg-element);
     border: 1px solid var(--border-color);
@@ -446,9 +427,8 @@ button:focus-visible {
     color: var(--text-secondary);
     text-align: center;
     flex-grow: 1;
-    /* Allow buttons to grow if space allows */
-    min-width: calc(50% - 0.5rem);
-    /* Aim for two buttons per row, accounting for gap */
+    min-width: calc(50% - (var(--control-gap) / 2));
+    /* For 2 buttons per row considering the gap */
 }
 
 .feature-btn:hover,
@@ -458,7 +438,6 @@ button:focus-visible {
     border-color: var(--accent-primary);
     transform: translateY(-1px);
     box-shadow: none;
-    /* Override default button shadow on hover if not desired here */
 }
 
 .feature-btn.active {
@@ -466,7 +445,6 @@ button:focus-visible {
     color: var(--text-primary);
     border-color: var(--accent-primary);
     font-weight: 600;
-    /* Emphasize active state */
 }
 
 .no-content-message {
@@ -492,7 +470,6 @@ button:focus-visible {
     border: 1px solid var(--border-color);
     flex-shrink: 0;
     margin-top: auto;
-    /* Pushes footer to bottom if body is flex container */
 }
 
 .site-footer p {
@@ -521,44 +498,31 @@ button:focus-visible {
   RESPONSIVE STYLES
 =============================================*/
 @media (max-width: 1024px) {
-
-    /* Adjusted breakpoint for better control panel wrapping */
     .main-content {
         flex-direction: column;
-        /* Stack canvas and controls */
     }
 
     .control-panel {
         width: 100%;
-        /* Control panel takes full width */
         max-width: none;
-        /* Remove max-width constraint when stacked */
         max-height: 40vh;
-        /* Limit height when stacked */
         min-width: auto;
-        /* Reset min-width */
     }
 
     .canvas-area {
         min-height: 30rem;
-        /* Ensure canvas has enough height */
         max-height: 55vh;
-        /* Adjust max height when stacked */
         max-width: 100%;
-        /* Full width when stacked */
         flex-basis: auto;
-        /* Allow canvas to size based on content and min/max height */
     }
 
     .feature-btn {
-        min-width: calc(33.33% - 0.75rem);
-        /* Aim for three buttons per row */
+        /* For 3 buttons per row */
+        min-width: calc(33.333% - (var(--control-gap) * 2 / 3));
     }
 }
 
 @media (max-width: 768px) {
-
-    /* Mobile */
     .app-container {
         padding: 1rem;
         gap: 1rem;
@@ -580,7 +544,7 @@ button:focus-visible {
     .model-loader-group {
         flex-direction: column;
         width: 100%;
-        gap: 0.75rem;
+        gap: var(--control-gap);
     }
 
     .model-controls select,
@@ -592,26 +556,22 @@ button:focus-visible {
     input[type="text"],
     .model-controls select {
         min-width: auto;
-        /* Remove min-width */
     }
 
     .control-panel {
         padding: 1rem;
         max-height: 45vh;
-        /* Slightly more height for controls on mobile */
     }
 
     .canvas-area {
         min-height: 18rem;
         max-height: 50vh;
-        max-width: 100%;
     }
 
     .feature-btn {
         padding: 0.6rem 0.8rem;
-        /* Slightly larger tap targets */
         font-size: 0.85rem;
-        min-width: calc(50% - 0.5rem);
-        /* Two buttons per row on smaller mobile */
+        /* For 2 buttons per row on smaller mobile */
+        min-width: calc(50% - (var(--control-gap) / 2));
     }
 }
