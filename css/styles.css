@@ -66,6 +66,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden; /* Prevent horizontal scroll on body if content slightly overflows */
 }
 
 .sr-only {
@@ -222,6 +223,7 @@ button:focus-visible {
     overflow: hidden;
     border: 1px solid var(--border-color);
     display: flex;
+    touch-action: none; /* Prevent default browser touch actions like pinch-zoom, scroll on the canvas */
 }
 
 #live2d-canvas {
@@ -293,7 +295,7 @@ button:focus-visible {
     min-width: 18rem;
     max-width: 20rem;
     /* Maximum width */
-    max-height: calc(40rem - 1px);
+    max-height: calc(80vh - 1px); /* Align with canvas-area max-height */
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);

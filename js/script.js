@@ -31,12 +31,17 @@ let currentModel = null;
 /** @type {PIXI.live2d.HitAreaFrames | null} Optional HitAreaFrames visualizer */
 let hitAreaFrames = null;
 
-/** @type {boolean} Flag for model dragging state */
+// Interaction state variables
 let isDragging = false;
-/** @type {boolean} Flag to differentiate drag completion from a tap */
-let wasDragging = false; // Used to prevent tap after a drag
-/** @type {{x: number, y: number}} Offset from model anchor to drag start point */
+let wasDragging = false; // Used to prevent tap after a drag/pinch
 let dragStartOffset = { x: 0, y: 0 };
+
+let isPinching = false;
+const activePointers = {}; // Stores active pointer data, keyed by pointerId
+let initialPinchDistance = 0;
+let initialPinchMidpoint = new PIXI.Point();
+let initialModelScaleOnPinchStart = 1;
+
 
 // Cached DOM Elements
 const DOMElements = {
@@ -78,7 +83,7 @@ function initApp() {
         app = new PIXI.Application({
             view: DOMElements.canvas,
             autoStart: true,
-            resizeTo: DOMElements.canvas.parentElement,
+            resizeTo: DOMElements.canvas.parentElement, // PIXI handles canvas resize
             backgroundColor: CONFIG.BACKGROUND_COLOR,
             antialias: true,
             resolution: window.devicePixelRatio || 1,
@@ -96,21 +101,25 @@ function initApp() {
     DOMElements.showHitAreasCheckbox?.addEventListener('change', toggleHitAreaFramesVisibility);
 
     setupModelInteractions();
-    window.addEventListener('resize', handleWindowResize);
+    // Window resize is handled by PIXI's resizeTo for the canvas.
+    // We no longer call fitModelToScreen on general window resize to prevent abrupt scale changes.
+    // window.addEventListener('resize', handleWindowResize); // No longer needed for model refitting
 
     updateUIVisibility(false); // No model initially
     console.log("Live2D Viewer initialized.");
 }
 
-/**
- * Handles window resize events to refit the model.
- */
-function handleWindowResize() {
-    // PIXI's resizeTo handles canvas size. We only need to re-fit the model.
-    if (currentModel) {
-        fitModelToScreen();
-    }
-}
+// /**
+//  * Handles window resize events.
+//  * PIXI's `resizeTo` handles canvas element resizing.
+//  * We no longer refit the model scale here to prevent abrupt changes.
+//  */
+// function handleWindowResize() {
+//     // if (currentModel && app?.renderer) {
+//     //     // Optional: If you want to re-center the model or ensure it's within bounds
+//     //     // For now, model scale and position are preserved.
+//     // }
+// }
 
 //==============================================================================
 // MODEL LOADING
@@ -180,7 +189,6 @@ async function loadModel(source) {
         const model = await PIXI.live2d.Live2DModel.from(source, {
             onError: (e) => {
                 console.error("Error during Live2DModel.from operation:", e);
-                // This error might be caught by the outer try-catch as well
                 throw new Error(`Live2DModel.from failed: ${e.message || 'Unknown error during model instantiation'}`);
             },
         });
@@ -189,9 +197,11 @@ async function loadModel(source) {
         currentModel = model;
         app.stage.addChild(model);
 
-        // Setup HitAreaFrames if available (from pixi-live2d-display/extra)
         if (PIXI.live2d.HitAreaFrames) {
             hitAreaFrames = new PIXI.live2d.HitAreaFrames();
+            // Example: Customize colors if needed
+            // hitAreaFrames.colors.default = 0xCCCCCC;
+            // hitAreaFrames.colors.triggered = CONFIG.BACKGROUND_COLOR === 0x1a1a2e ? 0x8c5eff : 0xFF8C00;
             currentModel.addChild(hitAreaFrames);
             hitAreaFrames.visible = DOMElements.showHitAreasCheckbox?.checked ?? false;
             if (DOMElements.showHitAreasCheckbox) DOMElements.showHitAreasCheckbox.disabled = false;
@@ -200,9 +210,9 @@ async function loadModel(source) {
             if (DOMElements.showHitAreasCheckbox) DOMElements.showHitAreasCheckbox.disabled = true;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await new Promise(resolve => setTimeout(resolve, 150)); // Short delay for rendering setup
 
-        fitModelToScreen();
+        fitModelToScreen(); // Fit model initially
         populateModelControlPanels();
         currentModel.cursor = 'grab';
 
@@ -244,19 +254,29 @@ function updateUIVisibility(hasModel, isLoading = false) {
 
 /**
  * Scales and positions the model to fit within the canvas view.
+ * Called on initial model load.
  */
 function fitModelToScreen() {
     if (!currentModel || !app?.renderer || !DOMElements.canvas.parentElement) {
+        console.warn("fitModelToScreen: Pre-conditions not met.");
         return;
     }
 
     const parent = DOMElements.canvas.parentElement;
     const viewWidth = parent.clientWidth;
     const viewHeight = parent.clientHeight;
-    const modelWidth = currentModel.width;
-    const modelHeight = currentModel.height;
+
+    // Ensure model dimensions are valid
+    currentModel.updateTransform(); // Ensure bounds are up-to-date
+    const modelWidth = currentModel.width / currentModel.scale.x; // Use unscaled width
+    const modelHeight = currentModel.height / currentModel.scale.y; // Use unscaled height
 
     if (!modelWidth || !modelHeight || modelWidth <= 0 || modelHeight <= 0) {
+        console.warn("fitModelToScreen: Invalid model dimensions.", modelWidth, modelHeight);
+        // Set a small default scale if dimensions are weird
+        currentModel.scale.set(Math.min(viewWidth * 0.1 / (modelWidth || 100), viewHeight * 0.1 / (modelHeight || 100) ));
+        currentModel.anchor.set(0.5, 0.5);
+        currentModel.position.set(viewWidth / 2, viewHeight / 2);
         return;
     }
 
@@ -268,6 +288,7 @@ function fitModelToScreen() {
     currentModel.anchor.set(0.5, 0.5);
     currentModel.position.set(viewWidth / 2, viewHeight / 2);
 }
+
 
 /**
  * Populates all model-related UI control panels (Motions, Expressions, Hit Areas).
@@ -287,7 +308,7 @@ function clearModelControlPanels() {
     setNoContentMessage(DOMElements.hitAreasContainer, 'hit areas');
     if (DOMElements.showHitAreasCheckbox) {
         DOMElements.showHitAreasCheckbox.checked = false;
-        // DOMElements.showHitAreasCheckbox.disabled = true; // Disable if no model, re-enable on load
+        // DOMElements.showHitAreasCheckbox.disabled = true; // Re-enabled on model load
     }
 }
 
@@ -319,14 +340,9 @@ function createControlButton(text, title, onClick, baseClassName, specificClassN
  */
 function setActiveButton(container, activeButton, highlightDurationMs = 0) {
     if (!container) return;
-
-    // Clear 'active' class from all buttons in the container
     container.querySelectorAll('.active').forEach(btn => btn.classList.remove('active'));
-
     if (activeButton) {
         activeButton.classList.add('active');
-
-        // If a duration is specified, remove the 'active' class after the timeout
         if (highlightDurationMs > 0) {
             setTimeout(() => {
                 activeButton.classList.remove('active');
@@ -336,19 +352,21 @@ function setActiveButton(container, activeButton, highlightDurationMs = 0) {
 }
 
 /**
- * Displays a "no content" message in a given container if it's empty.
+ * Displays a "no content" message in a given container if it's empty or only contains the message itself.
  * @param {HTMLElement | null} container - The container element.
  * @param {string} contentType - Type of content (e.g., "expressions", "motions").
  */
 function setNoContentMessage(container, contentType) {
     if (container) {
-        if (container.children.length === 0 ||
-            (container.children.length === 1 && container.firstElementChild.classList.contains('no-content-message'))) {
-            container.innerHTML = `<p class="no-content-message">No ${contentType} available</p>`;
-        } else if (container.querySelector('.no-content-message') && container.children.length > 1) {
-            // Remove "no content" message if actual content (buttons) was added
-            const msgElement = container.querySelector('.no-content-message');
-            if (msgElement) msgElement.remove();
+        const hasContent = Array.from(container.children).some(child => !child.classList.contains('no-content-message'));
+        const messageElement = container.querySelector('.no-content-message');
+
+        if (!hasContent) {
+            if (!messageElement) {
+                container.innerHTML = `<p class="no-content-message">No ${contentType} available</p>`;
+            }
+        } else if (messageElement) {
+            messageElement.remove();
         }
     }
 }
@@ -388,7 +406,6 @@ function populateMotionControls() {
                 () => {
                     try {
                         currentModel?.motion(group, index);
-                        // Apply temporary active state
                         setActiveButton(container, button, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
                         console.log(`Playing motion: Group='${group}', Index=${index}, Name='${motionName}'`);
                     } catch (e) {
@@ -402,12 +419,7 @@ function populateMotionControls() {
             motionButtonsCreated++;
         });
     });
-
-    if (motionButtonsCreated === 0) {
-        setNoContentMessage(container, 'motions');
-    } else {
-        setNoContentMessage(container, 'motions'); // This will remove the message if buttons were added
-    }
+    setNoContentMessage(container, 'motions'); // Will add or remove message based on motionButtonsCreated
 }
 
 /**
@@ -438,14 +450,12 @@ function populateExpressionControls() {
 
     expressionList.forEach((expDef, index) => {
         const expressionName = expDef.Name || expDef.name || `Expression ${index + 1}`;
-
         const button = createControlButton(
             expressionName,
             `Set Expression: ${expressionName}`,
             () => {
                 try {
                     currentModel?.expression(expressionName);
-                    // Apply temporary active state
                     setActiveButton(container, button, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
                     console.log(`Setting expression: '${expressionName}'`);
                 } catch (e) {
@@ -457,12 +467,7 @@ function populateExpressionControls() {
         );
         container.appendChild(button);
     });
-
-    if (container.children.length === 0) {
-        setNoContentMessage(container, 'expressions');
-    } else {
-        setNoContentMessage(container, 'expressions'); // Clears message if buttons added
-    }
+    setNoContentMessage(container, 'expressions');
 }
 
 
@@ -495,12 +500,7 @@ function populateHitAreaControls() {
         );
         container.appendChild(button);
     });
-
-    if (validHitAreasFound === 0) {
-        setNoContentMessage(container, 'hit areas (none valid)');
-    } else {
-        setNoContentMessage(container, 'hit areas'); // Clears message if buttons added
-    }
+    setNoContentMessage(container, validHitAreasFound > 0 ? 'hit areas' : 'hit areas (none valid)');
 }
 
 /**
@@ -508,20 +508,26 @@ function populateHitAreaControls() {
  */
 function toggleHitAreaFramesVisibility() {
     if (!DOMElements.showHitAreasCheckbox) return;
-
     const isChecked = DOMElements.showHitAreasCheckbox.checked;
     if (hitAreaFrames && currentModel) {
         hitAreaFrames.visible = isChecked;
         console.log(`Hit Area Frames visibility set to: ${isChecked}`);
-    } else if (isChecked) {
-        // console.warn("Cannot show HitAreaFrames: Feature not loaded or no model present.");
-        // DOMElements.showHitAreasCheckbox.checked = false; 
     }
 }
 
 //==============================================================================
-// MODEL INTERACTION (Dragging, Tapping, Zooming)
+// MODEL INTERACTION (Dragging, Tapping, Zooming, Pinching)
 //==============================================================================
+
+/** Helper: Calculate distance between two PIXI.Point objects */
+function getDistance(p1, p2) {
+    return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+}
+
+/** Helper: Calculate midpoint between two PIXI.Point objects */
+function getMidpoint(p1, p2) {
+    return new PIXI.Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+}
 
 /**
  * Sets up primary interaction listeners on the PIXI stage for model manipulation.
@@ -533,63 +539,164 @@ function setupModelInteractions() {
     }
 
     app.stage.interactive = true;
-    app.stage.hitArea = app.screen;
+    app.stage.hitArea = app.screen; // Make the whole stage interactive
 
     app.stage.on('pointerdown', handlePointerDown);
     app.stage.on('pointermove', handlePointerMove);
-    app.stage.on('pointerup', handlePointerUp);
-    app.stage.on('pointerupoutside', handlePointerUp);
+    app.stage.on('pointerup', handlePointerRelease); // Use common release handler
+    app.stage.on('pointerupoutside', handlePointerRelease); // Use common release handler
     app.stage.on('pointertap', handleStageTap);
 
     DOMElements.canvas.addEventListener('wheel', handleModelZoom, { passive: false });
 }
 
 /**
- * Handles pointer down event for initiating model drag.
+ * Handles pointer down event for initiating model drag or pinch.
  * @param {PIXI.InteractionEvent} event - The PIXI interaction event.
  */
 function handlePointerDown(event) {
     if (!currentModel || !event.data || !app?.renderer) return;
 
-    wasDragging = false;
+    activePointers[event.data.pointerId] = event.data;
+    const numActivePointers = Object.keys(activePointers).length;
 
-    const hitObject = app.renderer.plugins.interaction.hitTest(event.data.global, currentModel);
+    wasDragging = false; // Reset for this interaction sequence
 
-    if (hitObject) {
-        isDragging = true;
-        const pointerInModelParent = currentModel.parent.toLocal(event.data.global, null, undefined, true);
-        dragStartOffset.x = pointerInModelParent.x - currentModel.x;
-        dragStartOffset.y = pointerInModelParent.y - currentModel.y;
-        currentModel.cursor = 'grabbing';
-    } else {
-        isDragging = false;
+    if (numActivePointers === 1) {
+        const hitObject = app.renderer.plugins.interaction.hitTest(event.data.global, currentModel);
+        if (hitObject) {
+            isDragging = true;
+            isPinching = false; // Ensure not pinching
+            const pointerInModelParent = currentModel.parent.toLocal(event.data.global, null, undefined, true);
+            dragStartOffset.x = pointerInModelParent.x - currentModel.x;
+            dragStartOffset.y = pointerInModelParent.y - currentModel.y;
+            currentModel.cursor = 'grabbing';
+        } else {
+            isDragging = false;
+        }
+    } else if (numActivePointers === 2) {
+        isDragging = false; // Stop single-finger drag if it was active
+        isPinching = true;
+        wasDragging = true; // A two-finger interaction should prevent a tap
+        if (currentModel) currentModel.cursor = 'default'; // Or 'move' or custom pinch cursor
+
+        const pointers = Object.values(activePointers);
+        initialPinchDistance = getDistance(pointers[0].global, pointers[1].global);
+        initialPinchMidpoint = getMidpoint(pointers[0].global, pointers[1].global);
+        initialModelScaleOnPinchStart = currentModel.scale.x;
     }
 }
 
 /**
- * Handles pointer move event for dragging the model.
+ * Handles pointer move event for dragging or pinching the model.
  * @param {PIXI.InteractionEvent} event - The PIXI interaction event.
  */
 function handlePointerMove(event) {
-    if (!isDragging || !currentModel || !event.data) return;
+    if (!currentModel || !event.data) return;
 
-    wasDragging = true;
-    const pointerInModelParent = currentModel.parent.toLocal(event.data.global, null, undefined, true);
-    currentModel.position.set(
-        pointerInModelParent.x - dragStartOffset.x,
-        pointerInModelParent.y - dragStartOffset.y
-    );
+    // Update the moving pointer's data
+    if (activePointers[event.data.pointerId]) {
+        activePointers[event.data.pointerId] = event.data;
+    } else { // Pointer move for a pointer not previously registered (shouldn't happen with proper down handling)
+        return;
+    }
+    
+    const numActivePointers = Object.keys(activePointers).length;
+
+    if (isPinching && numActivePointers === 2) {
+        wasDragging = true;
+        const pointers = Object.values(activePointers);
+        const currentPinchDistance = getDistance(pointers[0].global, pointers[1].global);
+
+        if (initialPinchDistance > 0) { // Avoid division by zero
+            const scaleFactor = currentPinchDistance / initialPinchDistance;
+            let newScale = initialModelScaleOnPinchStart * scaleFactor;
+            newScale = Math.max(CONFIG.MIN_ZOOM, Math.min(newScale, CONFIG.MAX_ZOOM));
+
+            if (newScale !== currentModel.scale.x) {
+                // Zoom around the initial pinch midpoint
+                const stagePointerPos = initialPinchMidpoint; // Global coords of the pinch center
+                const modelLocalPointerPos = currentModel.toLocal(stagePointerPos, undefined, undefined, true);
+                
+                currentModel.scale.set(newScale);
+                
+                const newGlobalPointerPosFromModel = currentModel.toGlobal(modelLocalPointerPos, undefined, true);
+                
+                currentModel.x -= (newGlobalPointerPosFromModel.x - stagePointerPos.x);
+                currentModel.y -= (newGlobalPointerPosFromModel.y - stagePointerPos.y);
+            }
+        }
+    } else if (isDragging && numActivePointers === 1 && activePointers[event.data.pointerId]) {
+        // Standard single-finger drag
+        wasDragging = true;
+        const pointerInModelParent = currentModel.parent.toLocal(event.data.global, null, undefined, true);
+        currentModel.position.set(
+            pointerInModelParent.x - dragStartOffset.x,
+            pointerInModelParent.y - dragStartOffset.y
+        );
+    }
 }
 
 /**
- * Handles pointer up event for ending model drag.
+ * Common handler for pointer up and pointer up outside events.
+ * @param {PIXI.InteractionEvent} event - The PIXI interaction event.
  */
-function handlePointerUp() {
-    if (isDragging) {
+function handlePointerRelease(event) {
+    const releasedPointerId = event.data.pointerId;
+
+    if (activePointers[releasedPointerId]) {
+        delete activePointers[releasedPointerId];
+    }
+    const numActivePointers = Object.keys(activePointers).length;
+
+    if (isPinching) {
+        // Pinching stops if either of the two fingers is lifted.
+        isPinching = false;
+        initialModelScaleOnPinchStart = 1; // Reset
+        if (currentModel) currentModel.cursor = 'grab'; // Reset cursor
+
+        // If one finger remains, it might initiate a new drag on its next move.
+        // For now, simply end the pinch. If it was the last finger, drag also stops.
+        if (numActivePointers < 2) { 
+            isDragging = false; 
+        }
+        // If numActivePointers is 1, the remaining finger might start a drag if it moves.
+        // Need to re-evaluate drag conditions if we want immediate drag continuation.
+        // For now, this is fine: user lifts one pinch finger, then has to move the other to start drag.
+        if (numActivePointers === 1) {
+            // Potentially re-initialize drag for the remaining finger
+            const remainingPointerData = Object.values(activePointers)[0];
+            const hitObject = app.renderer.plugins.interaction.hitTest(remainingPointerData.global, currentModel);
+            if (hitObject) {
+                isDragging = true; // Re-enable dragging for the single remaining pointer
+                const pointerInModelParent = currentModel.parent.toLocal(remainingPointerData.global, null, undefined, true);
+                dragStartOffset.x = pointerInModelParent.x - currentModel.x;
+                dragStartOffset.y = pointerInModelParent.y - currentModel.y;
+                if (currentModel) currentModel.cursor = 'grabbing';
+            } else {
+                isDragging = false;
+            }
+        }
+
+
+    } else if (isDragging) { // Was dragging with a single finger
+        // Only stop dragging if the specific dragging pointer is released.
+        // This check is implicitly handled because if numActivePointers becomes 0, isDragging will be false.
+        // If there are other pointers (e.g. from a multi-touch device that didn't form a pinch), this might need refinement.
+        // However, our current logic: 1 finger -> drag, 2 fingers -> pinch.
+        // So if isDragging is true, numActivePointers was 1. Now it's 0.
+        isDragging = false;
         if (currentModel) currentModel.cursor = 'grab';
     }
-    isDragging = false;
+
+    if (numActivePointers === 0) { // All pointers are up
+        isDragging = false;
+        isPinching = false;
+        if (currentModel) currentModel.cursor = 'grab';
+        // wasDragging is handled by the next pointerdown / tap logic
+    }
 }
+
 
 /**
  * Handles mouse wheel event for zooming the model.
@@ -609,17 +716,25 @@ function handleModelZoom(event) {
 
     if (newScale === currentScale) return;
 
-    const pointer = new PIXI.Point();
+    const pointer = new PIXI.Point(); // PIXI.InteractionData().getLocalPosition needs a DisplayObject.
+                                      // We need global coords first.
     app.renderer.plugins.interaction.mapPositionToPoint(pointer, event.clientX, event.clientY);
 
+    // Convert global pointer position to stage's local coordinate system
+    // If stage is not transformed, this is same as global.
     const stagePointerPos = app.stage.toLocal(pointer, undefined, undefined, true);
+    
+    // Get pointer position relative to the model's origin (anchor point)
     const modelLocalPointerPos = currentModel.toLocal(stagePointerPos, undefined, undefined, true);
 
     currentModel.scale.set(newScale);
-    const newGlobalPointerPos = currentModel.toGlobal(modelLocalPointerPos, undefined, true);
 
-    currentModel.x -= (newGlobalPointerPos.x - stagePointerPos.x);
-    currentModel.y -= (newGlobalPointerPos.y - stagePointerPos.y);
+    // After scaling, find the new global position of that same model-local point
+    const newGlobalPointerPosFromModel = currentModel.toGlobal(modelLocalPointerPos, undefined, true);
+    
+    // Adjust model position to keep the model-local point under the mouse cursor
+    currentModel.x -= (newGlobalPointerPosFromModel.x - stagePointerPos.x);
+    currentModel.y -= (newGlobalPointerPosFromModel.y - stagePointerPos.y);
 }
 
 /**
@@ -627,17 +742,14 @@ function handleModelZoom(event) {
  * @param {PIXI.InteractionEvent} event - The PIXI interaction event.
  */
 function handleStageTap(event) {
-    if (wasDragging || isDragging) {
-        wasDragging = false; // Reset drag flag
+    // If a drag or pinch just happened or is in progress, don't treat as tap.
+    if (wasDragging || isDragging || isPinching) {
+        wasDragging = false; // Reset for next interaction sequence
+        // isPinching and isDragging are reset by their respective handlers (pointerup)
         return;
     }
     if (!currentModel || !event.data) return;
 
-    // currentModel.updateTransform(); // updateTransform is called within toModelPosition if needed
-
-    // Pass the GLOBAL coordinates directly to hitTest
-    // The Live2DModel's hitTest method expects coordinates that its
-    // toModelPosition method can convert from global to internal model space.
     const hitAreaNames = currentModel.hitTest(event.data.global.x, event.data.global.y);
 
     if (hitAreaNames.length > 0) {
@@ -646,16 +758,13 @@ function handleStageTap(event) {
         highlightHitAreaButtonsInUI(hitAreaNames);
         triggerMotionForHitArea(mainHitArea);
     } else {
-        // Optional: Check if the tap was on the model's general visible area
-        // even if not a specific hit area, for a generic tap motion.
-        // GetBounds() returns the bounds in global space by default.
-        const modelBounds = currentModel.getBounds();
+        const modelBounds = currentModel.getBounds(); // Global space bounds
         if (modelBounds.contains(event.data.global.x, event.data.global.y)) {
-             console.log("Tap occurred on model (general bounds), but no defined hit area detected. Attempting generic tap motion.");
-             triggerMotionForHitArea(null); // Pass null or a specific identifier for "generic tap"
+             console.log("Tap occurred on model (general bounds), but no defined hit area. Attempting generic tap motion.");
+             triggerMotionForHitArea(null); 
         }
     }
-    wasDragging = false; // Ensure this is reset if the tap didn't follow a drag
+    wasDragging = false; // Ensure reset
 }
 
 /**
@@ -685,112 +794,88 @@ function highlightHitAreaButtonsInUI(hitAreaNames, specificButtonToHighlight) {
 
     const buttons = DOMElements.hitAreasContainer.querySelectorAll('.hit-area-btn');
     buttons.forEach(button => {
-        const buttonHitAreaName = button.textContent; // Name is in button's text
+        const buttonHitAreaName = button.textContent; 
         const buttonMatches = hitAreaNames.some(name => name.toLowerCase() === buttonHitAreaName.toLowerCase());
 
         if (specificButtonToHighlight) {
-            // If a specific button triggered this (e.g., UI click), only highlight that one
             if (button === specificButtonToHighlight) {
-                button.classList.add('active');
-                setTimeout(() => button.classList.remove('active'), CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
-            } else {
-                button.classList.remove('active'); // Ensure others are not highlighted from this direct call
+                setActiveButton(DOMElements.hitAreasContainer, button, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
+            } else if (button.classList.contains('active') && !buttonMatches) {
+                // This case is tricky, setActiveButton already clears others
             }
         } else if (buttonMatches) {
-            // If tap was on model, highlight all matching buttons
-            button.classList.add('active');
+            // For tap on model, temporarily activate all matching buttons
+            button.classList.add('active'); // setActiveButton would clear others, direct add for multi-highlight
             setTimeout(() => button.classList.remove('active'), CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
         }
     });
+    if (specificButtonToHighlight) { // Ensure only one active if specific button is used
+         setActiveButton(DOMElements.hitAreasContainer, specificButtonToHighlight, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION);
+    }
 }
 
 /**
  * Attempts to find and play a motion related to a hit area tap.
- * Prioritizes motions directly related to the hitAreaName (e.g., "Head", "Tap_Head", "Flick_Head").
- * If multiple such motions exist, one is chosen randomly.
- * If no direct match, falls back to generic tap motions (e.g., "Tap", "IdleTap").
  * @param {string | null} hitAreaName - The name of the hit area.
  */
 function triggerMotionForHitArea(hitAreaName) {
     if (!currentModel) return;
     const motionManager = currentModel.internalModel?.motionManager;
     if (!motionManager?.definitions || Object.keys(motionManager.definitions).length === 0) {
-        // console.warn("Cannot play hit motion: MotionManager or definitions not available.");
         return;
     }
 
     const definedGroupNames = Object.keys(motionManager.definitions);
     let motionPlayed = false;
-    const lowerHitAreaName = hitAreaName?.toLowerCase(); // Use optional chaining for null safety
+    const lowerHitAreaName = hitAreaName?.toLowerCase();
 
     console.log(`Attempting to play motion for hit: '${hitAreaName || "Generic Tap"}'. Defined groups: [${definedGroupNames.join(', ')}]`);
 
-    // 1. Primary Search: Motions directly related to the hitAreaName
     if (lowerHitAreaName) {
         const primaryCandidatePatterns = [
-            lowerHitAreaName,                   // e.g., "head"
-            `tap_${lowerHitAreaName}`,          // e.g., "tap_head"
-            `flick_${lowerHitAreaName}`,        // e.g., "flick_head" (from your log example)
-            `hit_${lowerHitAreaName}`,          // e.g., "hit_head" (another common pattern)
-            `tap${lowerHitAreaName}`            // e.g., "taphead" (no underscore)
+            lowerHitAreaName, `tap_${lowerHitAreaName}`, `flick_${lowerHitAreaName}`,
+            `hit_${lowerHitAreaName}`, `tap${lowerHitAreaName}`
         ];
-
-        // Add variations if hitAreaName itself might be a prefixed version, e.g., "TapBody" -> also check for "Body"
         if (lowerHitAreaName.startsWith('tap_') || lowerHitAreaName.startsWith('flick_') || lowerHitAreaName.startsWith('hit_')) {
             primaryCandidatePatterns.push(lowerHitAreaName.substring(lowerHitAreaName.indexOf('_') + 1));
         } else if (lowerHitAreaName.startsWith('tap') && !lowerHitAreaName.includes('_')) {
-             primaryCandidatePatterns.push(lowerHitAreaName.substring(3)); // e.g., "taphead" -> "head"
+             primaryCandidatePatterns.push(lowerHitAreaName.substring(3));
         }
-        // Ensure no empty strings from substring operations if prefixes are short
         const validPrimaryPatterns = [...new Set(primaryCandidatePatterns.filter(p => p))];
-
-
         const actualPrimaryMotionGroups = definedGroupNames.filter(definedGroup =>
             validPrimaryPatterns.some(pattern => definedGroup.toLowerCase() === pattern)
         );
 
         if (actualPrimaryMotionGroups.length > 0) {
-            console.log(`Found primary motion group(s) for '${hitAreaName}': [${actualPrimaryMotionGroups.join(', ')}]`);
-            const randomIndex = Math.floor(Math.random() * actualPrimaryMotionGroups.length);
-            const groupToPlay = actualPrimaryMotionGroups[randomIndex];
+            const groupToPlay = actualPrimaryMotionGroups[Math.floor(Math.random() * actualPrimaryMotionGroups.length)];
             try {
-                console.log(`Playing randomly selected primary motion: Group='${groupToPlay}'`);
-                currentModel.motion(groupToPlay); // Play a random motion from this specific group
+                currentModel.motion(groupToPlay);
                 motionPlayed = true;
-            } catch (e) {
-                console.warn(`Primary motion group '${groupToPlay}' failed to play:`, e);
-            }
+                console.log(`Playing primary motion: Group='${groupToPlay}'`);
+            } catch (e) { console.warn(`Primary motion group '${groupToPlay}' failed:`, e); }
         }
     }
 
-    // 2. Secondary Search: Generic tap motions, if no primary motion was played
     if (!motionPlayed) {
-        const genericTapGroupCandidates = ['tap', 'idletap']; // Add more generic fallbacks if needed
-
-        if (hitAreaName) { // Log only if a specific area was hit but found no primary motion
-            console.log(`No primary motion played for '${hitAreaName}'. Trying generic tap motions.`);
-        } else if (hitAreaName === null) { // Explicitly null, from a general tap
-            console.log(`No specific hit area identified. Trying generic tap motions.`);
-        }
-
+        const genericTapGroupCandidates = ['tap', 'idletap'];
+        if (hitAreaName) { console.log(`No primary motion for '${hitAreaName}'. Trying generic.`); }
+        else { console.log(`No specific hit area. Trying generic tap.`); }
 
         for (const genericGroupCandidate of genericTapGroupCandidates) {
             const matchedGenericGroup = definedGroupNames.find(defined => defined.toLowerCase() === genericGroupCandidate.toLowerCase());
             if (matchedGenericGroup) {
                 try {
-                    console.log(`Playing generic motion: Group='${matchedGenericGroup}'`);
-                    currentModel.motion(matchedGenericGroup); // Play a random motion from this generic group
+                    currentModel.motion(matchedGenericGroup);
                     motionPlayed = true;
-                    break; // Generic motion played, no need to try others
-                } catch (e) {
-                    console.warn(`Generic motion group '${matchedGenericGroup}' failed to play:`, e);
-                }
+                    console.log(`Playing generic motion: Group='${matchedGenericGroup}'`);
+                    break; 
+                } catch (e) { console.warn(`Generic motion group '${matchedGenericGroup}' failed:`, e); }
             }
         }
     }
 
     if (!motionPlayed) {
-        console.log(`No suitable motion group found or played for hit: '${hitAreaName || '(No specific area)'}'.`);
+        console.log(`No suitable motion found for hit: '${hitAreaName || '(No specific area)'}'.`);
     }
 }
 
