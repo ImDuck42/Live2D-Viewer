@@ -232,7 +232,6 @@ button:focus-visible {
     height: 100%;
     background-color: transparent;
     object-fit: contain;
-    /* Note: PIXI controls internal rendering, this is more a fallback */
 }
 
 .loading-overlay,
@@ -295,7 +294,7 @@ button:focus-visible {
     min-width: 18rem;
     max-width: 20rem;
     /* Maximum width */
-    max-height: calc(80vh - 1px); /* Align with canvas-area max-height */
+    max-height: calc(40rem - 1px);
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
