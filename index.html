@@ -44,6 +44,9 @@
                     </select>
                     <button id="load-selected-button" title="Load the selected default model">Load Selected</button>
                 </div>
+                <div class="model-loader-group model-actions-group">
+                    <button id="delete-selected-model-button" title="Delete the currently selected model" disabled>Delete Model</button>
+                </div>
             </div>
         </header>
 
@@ -63,7 +66,7 @@
             <aside class="control-panel" aria-labelledby="control-panel-heading">
                 <h2 id="control-panel-heading" class="sr-only">Model Controls</h2>
                 <div class="control-item">
-                    <input type="checkbox" id="show-hit-areas-checkbox" />
+                    <input type="checkbox" id="show-hit-areas-checkbox" disabled />
                     <label for="show-hit-areas-checkbox">Show Hit Areas</label>
                 </div>
 
@@ -93,7 +96,7 @@
         <footer class="site-footer">
             <p>Powered by <a href="https://github.com/guansss/pixi-live2d-display" target="_blank"
                     rel="noopener noreferrer">pixi-live2d-display</a></p>
-            <p>Interact with the model: Click and drag to move, scroll to zoom</p>
+            <p>Interact with the model: Click and drag to move, scroll to zoom (selected), tap to select/interact</p>
         </footer>
     </div>
 

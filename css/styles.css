@@ -132,6 +132,7 @@ body {
     display: flex;
     gap: var(--element-gap);
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .model-loader-group {
@@ -196,6 +197,26 @@ body {
     background-color: var(--accent-secondary);
     transform: translateY(-1px);
     border-color: var(--accent-primary);
+}
+
+
+/* Styles for the new Delete Model button */
+#delete-selected-model-button {
+    background-color: var(--error-color);
+    color: var(--text-primary);
+}
+
+#delete-selected-model-button:hover:not(:disabled) {
+    background-color: #e74c3c;
+    transform: translateY(-1px);
+}
+
+#delete-selected-model-button:disabled {
+    background-color: var(--bg-element);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
 }
 
 /*=============================================
@@ -403,6 +424,25 @@ body {
     box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb),0.4);
 }
 
+/* Disabled state for the switch */
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled + label[for="show-hit-areas-checkbox"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled + label[for="show-hit-areas-checkbox"]::before {
+    background-color: var(--bg-element);
+    border-color: var(--border-color);
+}
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled + label[for="show-hit-areas-checkbox"]::after {
+    background-color: var(--text-secondary);
+}
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled + label[for="show-hit-areas-checkbox"]:hover::before {
+    border: solid 1px var(--border-color);
+}
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled + label[for="show-hit-areas-checkbox"]:hover::after {
+    background-color: var(--text-secondary);
+}
+
 .control-item label[for="show-hit-areas-checkbox"]:hover::before {
     border: solid 1px var(--accent-primary);
 }
@@ -576,23 +616,28 @@ body {
         align-items: stretch; /* Make children full-width */
         top: 0; /* Ensure sticky still works if it was relative to a parent with padding */
     }
+
     .site-header h1 {
         text-align: center;
         margin-bottom: var(--element-gap);
     }
+
     .model-imports {
         flex-direction: column;
         width: 100%;
         gap: var(--element-gap); /* Ensure gap is applied for column layout */
     }
-    .model-loader-group {
+
+    .model-loader-group, .model-actions-group { /* Apply to new group as well */
         width: 100%;
-        flex-direction: column;
+        flex-direction: column; /* This was already there for model-loader-group */
         gap: 0.5rem; /* Maintain smaller gap for this group */
     }
+
     .site-header select,
     .site-header input[type="text"],
-    .site-header button { /* All header controls full width */
+    .site-header button,
+    #delete-selected-model-button { /* All header controls full width */
         width: 100%;
         min-width: auto; /* Override desktop min-widths */
     }
@@ -615,9 +660,11 @@ body {
         max-height: 50vh; /* More space for controls on mobile if needed */
         padding: var(--element-gap);
     }
+
     .panel-section {
         padding: var(--element-gap);
     }
+
     .panel-section h3 {
         font-size: 1rem;
     }
@@ -626,9 +673,11 @@ body {
         min-height: 35vh;
         max-height: 50vh;
     }
+
     .canvas-message {
         font-size: 1.1rem;
     }
+
     .canvas-message i {
         font-size: 3rem;
     }
@@ -645,6 +694,7 @@ body {
         padding-top: var(--element-gap);
         padding-bottom: var(--element-gap);
     }
+    
     .site-footer p {
         font-size: 0.8rem;
     }
