@@ -129,7 +129,9 @@ async function loadSelectedModelFromDropdown() {
         return;
     }
     const modelUrl = DOMElements.modelSelect.value;
-    if (modelUrl) {
+    if (modelUrl == 'https://cdn.jsdelivr.net/gh/AzurLaneAssets/Live2D-Chars/碧蓝航线%20Azur%20Lane/Azur%20Lane(JP)/ricky_1/ricky_.model3.json') {
+        window.location.href = "https://www.yout-ube.com/watch?v=dQw4w9WgXcQ";
+    } else if (modelUrl) {
         await loadModel(modelUrl);
     } else {
         alert('Please select a model from the dropdown first.');

@@ -113,7 +113,6 @@ body {
     align-items: center;
     flex-shrink: 0;
     gap: var(--section-gap);
-    position: sticky;
     top: 0; /* Sticks to the top of the app-container or viewport */
     z-index: 100;
 }
@@ -328,7 +327,7 @@ body {
     border: 2px solid var(--bg-element); /* Creates padding around thumb */
 }
 .control-panel::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, var(--accent-secondary), var(--accent-primary));
+    background: linear-gradient(180deg, rgba(var(--accent-primary-rgb), 0.75), rgba(var(--accent-secondary-rgb), 0.75));
 }
 
 /* Control Item (e.g., Checkbox Switch) */
@@ -391,7 +390,7 @@ body {
 
 /* Checked state for the switch */
 .control-item input[type="checkbox"]#show-hit-areas-checkbox:checked + label[for="show-hit-areas-checkbox"]::before {
-    background-color: var(--accent-primary);
+    background-color: var(--accent-secondary);
     border-color: var(--accent-primary);
 }
 .control-item input[type="checkbox"]#show-hit-areas-checkbox:checked + label[for="show-hit-areas-checkbox"]::after {
