@@ -19,7 +19,7 @@ const CONFIG = {
     SELECTION_OUTLINE_THICKNESS: 2,   // Thickness in pixels
     SELECTION_OUTLINE_ALPHA: 0.1,     // Opacity of the outline (0.0 to 1.0)
     SELECTION_OUTLINE_CORNER_RADIUS: 10, // Radius for rounded corners
-
+    CHANGES_HTML_URL: 'assets/changes.html', // Path to the changelog HTML file
 };
 
 /** @type {PIXI.Application | null} PIXI Application instance */
@@ -68,6 +68,11 @@ const DOMElements = {
     motionsContainer: document.getElementById('motions-container'),
     hitAreasContainer: document.getElementById('hit-areas-container'),
     deleteSelectedButton: document.getElementById('delete-selected-model-button'),
+    // Changelog elements
+    siteTitleButton: document.getElementById('site-title-button'),
+    changelogPlaceholder: document.getElementById('changelog-placeholder'), // Placeholder div
+    changelogModal: null, // Will be populated after fetch
+    changelogCloseButton: null, // Will be populated after fetch
 };
 
 //==============================================================================
@@ -76,7 +81,8 @@ const DOMElements = {
 function initApp() {
     const essentialElementIDs = [
         'canvas', 'loadingOverlay', 'noModelMessage', 'modelUrlInput', 'loadUrlButton',
-        'expressionsContainer', 'motionsContainer', 'hitAreasContainer', 'deleteSelectedButton'
+        'expressionsContainer', 'motionsContainer', 'hitAreasContainer', 'deleteSelectedButton',
+        'siteTitleButton', 'changelogPlaceholder' // Add siteTitleButton and placeholder to essential checks
     ];
     for (const id of essentialElementIDs) {
         if (!DOMElements[id]) {
@@ -125,12 +131,68 @@ function initApp() {
     DOMElements.deleteSelectedButton.addEventListener('click', deleteSelectedModel);
 
     setupModelInteractions();
+    loadAndSetupChangelog(); // Modified function call
     
     updateUIVisibility(false);
     clearAllControlPanelsAndState(); 
     updateDeleteButtonState();
     console.log("Live2D Viewer initialized.");
 }
+
+async function loadAndSetupChangelog() {
+    if (!DOMElements.changelogPlaceholder || !DOMElements.siteTitleButton) {
+        console.warn("Changelog placeholder or site title button not found. Changelog feature disabled.");
+        return;
+    }
+
+    try {
+        const response = await fetch(CONFIG.CHANGES_HTML_URL); // Fetch the external HTML
+        if (!response.ok) {
+            throw new Error(`Failed to fetch ${CONFIG.CHANGES_HTML_URL}: ${response.status} ${response.statusText}`);
+        }
+        const htmlContent = await response.text();
+        DOMElements.changelogPlaceholder.innerHTML = htmlContent; // Inject content
+
+        // Now that the content is loaded, find and cache the modal specific elements
+        DOMElements.changelogModal = document.getElementById('changelog-modal');
+        DOMElements.changelogCloseButton = document.getElementById('changelog-close-button');
+        
+        // Proceed to setup interactions if elements are found
+        setupChangelogModalInteractions();
+
+    } catch (error) {
+        console.error("Error loading changelog content:", error);
+        // Optionally, hide the trigger if loading fails
+        if (DOMElements.siteTitleButton) {
+            DOMElements.siteTitleButton.style.cursor = 'default';
+            DOMElements.siteTitleButton.title = 'Changelog unavailable';
+        }
+    }
+}
+
+
+function setupChangelogModalInteractions() {
+    // This function now relies on DOMElements.changelogModal and DOMElements.changelogCloseButton
+    // being correctly populated by loadAndSetupChangelog()
+    if (DOMElements.siteTitleButton && DOMElements.changelogModal && DOMElements.changelogCloseButton) {
+        DOMElements.siteTitleButton.addEventListener('click', () => {
+            DOMElements.changelogModal.classList.add('active');
+        });
+
+        DOMElements.changelogCloseButton.addEventListener('click', () => {
+            DOMElements.changelogModal.classList.remove('active');
+        });
+
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && DOMElements.changelogModal.classList.contains('active')) {
+                DOMElements.changelogModal.classList.remove('active');
+            }
+        });
+    } else {
+        console.warn("Changelog UI elements (modal or close button) not found after loading. Changelog interactions may be incomplete.");
+    }
+}
+
 
 //==============================================================================
 // MODEL MANAGEMENT (Load, Select, Delete)
@@ -144,7 +206,7 @@ async function loadSelectedModelFromDropdown() {
     }
     const modelUrl = DOMElements.modelSelect.value;
     if (modelUrl == 'https://cdn.jsdelivr.net/gh/AzurLaneAssets/Live2D-Chars/碧蓝航线%20Azur%20Lane/Azur%20Lane(JP)/ricky_1/ricky_.model3.json') {
-        window.location.href = "https://www.yout-ube.com/watch?v=dQw4w9WgXcQ";
+        window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"; // Easter egg
     } else if (modelUrl) {
         await loadModel(modelUrl);
     } else {
@@ -503,12 +565,12 @@ function populateHitAreaControls(model) {
         const hitAreaName = (hitAreaDef.name && hitAreaDef.name.trim() !== "") ? hitAreaDef.name : hitAreaDef.id;
         if (!hitAreaName) {
              console.warn("Hit area found with no name or id:", hitAreaDef);
-             return; // Skip this hit area if it has neither name nor id
+             return; 
         }
 
         validHitAreasFound++;
         const btn = createControlButton(hitAreaName, `Simulate Tap: ${hitAreaName}`,
-            () => simulateTapOnHitArea(model, hitAreaName, btn), // Pass actual name/id used for button
+            () => simulateTapOnHitArea(model, hitAreaName, btn), 
             'feature-btn', 'hit-area-btn');
         container.appendChild(btn);
     });
@@ -533,18 +595,17 @@ function updateSelectionOutline(model) {
     const bounds = model.getBounds(false); 
 
     if (bounds.width > 0 && bounds.height > 0) {
-        // Option 1: Just a rounded line (no fill)
         selectionOutline.lineStyle(
             CONFIG.SELECTION_OUTLINE_THICKNESS,
             CONFIG.SELECTION_OUTLINE_COLOR,
-            CONFIG.SELECTION_OUTLINE_ALPHA // Use the configured alpha for the line
+            CONFIG.SELECTION_OUTLINE_ALPHA 
         );
         selectionOutline.drawRoundedRect(
             bounds.x,
             bounds.y,
             bounds.width,
             bounds.height,
-            CONFIG.SELECTION_OUTLINE_CORNER_RADIUS // Added corner radius
+            CONFIG.SELECTION_OUTLINE_CORNER_RADIUS 
         );
     }
 }
@@ -605,9 +666,7 @@ function handlePointerDown(event) {
             if (selectedModel !== downOnModel) {
                 setSelectedModel(downOnModel);
             }
-            // setSelectedModel already brings model to front.
-
-            activeDragTarget = downOnModel; // downOnModel is now selectedModel (or was already)
+            activeDragTarget = downOnModel; 
             isDragging = true;
             isPinching = false;
             const pointerInModelParent = activeDragTarget.parent.toLocal(event.data.global, null, undefined, true);
@@ -697,7 +756,7 @@ function handlePointerRelease(event) {
                 if (selectedModel !== hitModel) {
                     setSelectedModel(hitModel);
                 }
-                isDragging = true; activeDragTarget = hitModel; // hitModel is now selectedModel
+                isDragging = true; activeDragTarget = hitModel; 
                 const pointerInModelParent = activeDragTarget.parent.toLocal(remainingPointerGlobalPos, null, undefined, true);
                 dragStartOffset.x = pointerInModelParent.x - activeDragTarget.x;
                 dragStartOffset.y = pointerInModelParent.y - activeDragTarget.y;
@@ -811,7 +870,7 @@ function simulateTapOnHitArea(model, hitAreaNameFromButton, buttonElement) {
     if (hitAreaFrames && hitAreaFrames.parent === model && typeof hitAreaFrames.highlight === 'function') {
         const hitAreaDef = model.internalModel?.settings?.hitAreas.find(ha => (ha.name === hitAreaNameFromButton || ha.id === hitAreaNameFromButton));
         if(hitAreaDef) {
-            hitAreaFrames.highlight(hitAreaDef.name || hitAreaDef.id); // Prefer name if available
+            hitAreaFrames.highlight(hitAreaDef.name || hitAreaDef.id); 
         }
     }
 }
@@ -861,13 +920,12 @@ function triggerMotionForHitArea(model, hitAreaName) {
         }
         const validPrimaryPatterns = [...new Set(primaryCandidatePatterns.filter(p => p))];
         const actualPrimaryMotionGroups = definedGroupNames.filter(definedGroup =>
-            validPrimaryPatterns.some(pattern => definedGroup.toLowerCase().includes(pattern)) // Use .includes for more flexible matching
+            validPrimaryPatterns.some(pattern => definedGroup.toLowerCase().includes(pattern)) 
         );
 
         if (actualPrimaryMotionGroups.length > 0) {
-            // Prioritize exact matches if any
             let groupToPlay = actualPrimaryMotionGroups.find(g => validPrimaryPatterns.some(p => g.toLowerCase() === p));
-            if (!groupToPlay) { // Fallback to first partial match
+            if (!groupToPlay) { 
                 groupToPlay = actualPrimaryMotionGroups[Math.floor(Math.random() * actualPrimaryMotionGroups.length)];
             }
 
@@ -880,7 +938,7 @@ function triggerMotionForHitArea(model, hitAreaName) {
     }
 
     if (!motionPlayed) {
-        const genericTapGroupCandidates = ['tap', 'idletap', 'tapbody']; // Added tapbody as a common generic
+        const genericTapGroupCandidates = ['tap', 'idletap', 'tapbody']; 
         
         for (const genericGroupCandidate of genericTapGroupCandidates) {
             const matchedGenericGroup = definedGroupNames.find(defined => defined.toLowerCase() === genericGroupCandidate.toLowerCase());

@@ -23,6 +23,7 @@
     --bg-secondary-rgb: 26, 26, 46;
     --accent-primary-rgb: 140, 94, 255;
     --accent-secondary-rgb: 255, 103, 215;
+    --text-primary-rgb: 255, 255, 255;
 
 
     /* --- Sizing & Effects --- */
@@ -43,6 +44,8 @@
     --main-padding: 1.5rem; /* Consistent padding for major containers */
     --element-gap: 1rem; /* Gap between elements within a section */
     --section-gap: 1.5rem; /* Gap between larger sections */
+
+    --changelog-margin: 1.5rem; /* Margin for the changelog modal */
 }
 
 /*=============================================
@@ -94,6 +97,7 @@ body {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 /*=============================================
@@ -127,6 +131,17 @@ body {
     margin: 0;
     white-space: nowrap;
 }
+
+/* Make site title clickable for changelog */
+.site-header h1#site-title-button {
+    cursor: pointer;
+    user-select: none; /* Prevents text selection on click */
+    transition: filter var(--transition-duration) var(--transition-timing);
+}
+.site-header h1#site-title-button:hover {
+    filter: brightness(1.25) saturate(1.1); /* Simple hover effect */
+}
+
 
 .model-imports {
     display: flex;
@@ -586,9 +601,157 @@ body {
 }
 
 /*=============================================
+  CHANGELOG MODAL
+=============================================*/
+.changelog-modal-container {
+    position: fixed;
+    top: var(--changelog-margin);
+    left: var(--changelog-margin);
+    right: var(--changelog-margin);
+    bottom: var(--changelog-margin);
+    background-color: rgba(var(--bg-secondary-rgb), 0.65); /* Base for glassmorphism */
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%); /* For Safari */
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(var(--text-primary-rgb), 0.12); /* Subtle border for glass */
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    padding: calc(var(--main-padding) * 1.2);
+    box-shadow: 0 8px 32px 0 rgba(var(--bg-primary-rgb), 0.4);
+    color: var(--text-primary);
+    overflow: hidden; /* Prevent content from breaking out before inner scroll */
+}
+
+.changelog-modal-container.active {
+    display: flex; /* Show it */
+}
+
+.changelog-close-btn {
+    position: absolute;
+    top: var(--element-gap);
+    right: var(--element-gap);
+    background: rgba(var(--bg-element), 0.7);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 50%; /* Circular button */
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: var(--transition-main);
+    z-index: 1001; /* Above content */
+    line-height: 1; /* Ensure icon is centered */
+}
+
+.changelog-close-btn:hover,
+.changelog-close-btn:focus-visible {
+    background: var(--accent-primary);
+    color: var(--text-primary);
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: var(--shadow-glow-accent);
+}
+
+.changelog-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-top: var(--element-gap); /* Space below title */
+    padding-right: 1rem; /* Space for scrollbar */
+}
+/* Custom scrollbar for changelog content */
+.changelog-content::-webkit-scrollbar {
+    width: 10px;
+}
+.changelog-content::-webkit-scrollbar-track {
+    background: rgba(var(--bg-element), 0.3);
+    border-radius: var(--border-radius-small);
+    margin: calc(var(--element-gap) * 2.5) 0 var(--element-gap) 0; /* Space for close button */
+}
+.changelog-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--accent-secondary), var(--accent-primary));
+    border-radius: var(--border-radius-small);
+    background-clip: content-box;
+}
+.changelog-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(var(--accent-secondary-rgb), 0.75), rgba(var(--accent-primary-rgb), 0.75));
+}
+
+.changelog-content h2 {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: var(--section-gap);
+    padding-bottom: var(--element-gap);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.changelog-entry {
+    background-color: rgba(var(--bg-primary-rgb), 0.5);
+    border-radius: var(--border-radius-small);
+    padding: var(--main-padding);
+    margin-bottom: var(--section-gap);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(var(--bg-primary-rgb), 0.3);
+}
+
+.changelog-entry h3.changelog-version {
+    font-size: 1.4rem;
+    color: var(--accent-primary);
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+}
+
+.changelog-entry .changelog-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--element-gap);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.changelog-entry ul {
+    list-style-type: none;
+    padding-left: 0.5rem;
+}
+
+.changelog-entry ul li {
+    margin-bottom: 0.6rem;
+    line-height: 1.6;
+    padding-left: 1.5em;
+    position: relative;
+    color: var(--text-secondary);
+}
+
+.changelog-entry ul li::before {
+    content: '\f005'; /* Font Awesome star icon */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900; /* Solid star */
+    position: absolute;
+    left: 0;
+    top: 0.1em;
+    color: var(--accent-secondary);
+    font-size: 0.9em;
+}
+.changelog-entry ul li strong {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+
+/*=============================================
   RESPONSIVE STYLES
 =============================================*/
 @media (max-width: 1024px) { /* Tablet and below */
+    :root {
+        --changelog-margin: 1rem;
+    }
     .main-content {
         flex-direction: column; /* Stack canvas and control panel */
         height: auto; /* Allow content to define height */
@@ -641,6 +804,16 @@ body {
         width: 100%;
         min-width: auto; /* Override desktop min-widths */
     }
+
+    .changelog-modal-container {
+        padding: var(--main-padding);
+    }
+    .changelog-content h2 {
+        font-size: 1.6rem;
+    }
+    .changelog-entry h3.changelog-version {
+        font-size: 1.2rem;
+    }
 }
 
 @media (max-width: 768px) { /* Mobile */
@@ -649,6 +822,7 @@ body {
         --element-gap: 0.75rem;
         --section-gap: 1rem;
         --base-font-size: 15px; /* Slightly smaller base font for mobile */
+        --changelog-margin: 0.75rem;
     }
     
     .site-header h1 {
@@ -697,5 +871,28 @@ body {
     
     .site-footer p {
         font-size: 0.8rem;
+    }
+
+    .changelog-modal-container {
+        padding: var(--element-gap);
+    }
+     .changelog-close-btn {
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 2.2rem;
+        height: 2.2rem;
+        font-size: 1rem;
+    }
+    .changelog-content h2 {
+        font-size: 1.4rem;
+    }
+    .changelog-entry {
+        padding: var(--element-gap);
+    }
+    .changelog-entry h3.changelog-version {
+        font-size: 1.1rem;
+    }
+    .changelog-entry ul li {
+        font-size: 0.9rem;
     }
 }

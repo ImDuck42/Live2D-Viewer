@@ -17,7 +17,7 @@
 <body>
     <div class="app-container">
         <header class="site-header">
-            <h1>Live2D Viewer</h1>
+            <h1 id="site-title-button">Live2D Viewer</h1>
             <div class="model-imports">
                 <div class="model-loader-group">
                     <label for="model-url-input" class="sr-only">Model URL</label>
@@ -96,8 +96,12 @@
         <footer class="site-footer">
             <p>Powered by <a href="https://github.com/guansss/pixi-live2d-display" target="_blank"
                     rel="noopener noreferrer">pixi-live2d-display</a></p>
-            <p>Interact with the model: Click and drag to move, scroll to zoom (selected), tap to select/interact || Live2D Viewer version 3.1</p>
+            <p>Interact with the model: Click and drag to move, scroll to zoom (selected), tap to select/interact</p>
         </footer>
+
+        <!-- Placeholder for Changelog Modal -->
+        <div id="changelog-placeholder"></div>
+
     </div>
 
     <!-- Libraries -->
