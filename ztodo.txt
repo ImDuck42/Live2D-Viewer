@@ -1,5 +1,4 @@
 Thanks to 8con and Osaka for helping me (put credits in the footer)
-maybe changes viewer on pressing site name -- glossy like header, full screen not all edges touch screen edges
 
 maybe buttons glow as long as the motion lasts
 
