@@ -4,7 +4,38 @@
         <i class="fas fa-times"></i>
     </button>
     <div class="changelog-content">
-        <h2>V3.1 -- What's New:</h2>
+        <h2>V4.0 -- What's New:</h2>
+
+    <!-- May 17, 2025 -->
+    <article class="changelog-entry">
+        <h3 class="changelog-version">Live2D Viewer Version 4.0 Released!</h3>
+        <p class="changelog-date">May 17, 2025</p>
+        <p>We are thrilled to announce the launch of <strong>Live2D Viewer version 4.0</strong>! This major update
+            introduces a new way to discover and load models, alongside internal improvements.</p>
+        <ul>
+            <li>
+                <strong>New Feature: GitHub Repository Explorer!</strong>
+                <ul>
+                    You can now directly browse GitHub repositories for Live2D models using the new File Explorer.
+                    <br>
+                    Access it via the <strong>folder icon</strong> located to the left of the model URL input field.
+                    <br>
+                    Enter any GitHub repository owner and name to explore its contents.
+                    A default repository, rich with numerous Live2D models, is pre-filled for convenience.
+                    <br>
+                    (<em>Please note: While this repository offers a wide selection, compatibility with every model is not guaranteed.</em>)
+                </ul>
+            </li>
+            <li>
+                <strong>Core Enhancements:</strong>
+                <ul>
+                    Introduced new core files: <code>js/repoexplorer.js</code> and <code>css/repoexplorer.css</code> to power the File Explorer functionality.
+                    <br>
+                    Internal file structure has been reorganized for better project management (e.g., some assets moved to an <code>aaMisc</code> directory).
+                </ul>
+            </li>
+        </ul>
+    </article>
 
         <!-- May 16, 2025 -->
         <article class="changelog-entry">
@@ -32,7 +63,8 @@
             <h3 class="changelog-version">Commits on May 17, 2025</h3>
             <p class="changelog-date">May 17, 2025</p>
             <ul>
-                <li><strong>[NONEYET]</strong>
+                <li><strong>[NONEYET]</strong> version 4 release introducing a gh-repo explorer and minor improvements</li>
+                <li><strong>[41118c1]</strong>
                     fixed a issue on mobile where the hit area labels did stack from old models and did not get removed -> Changes in extra.js
                     <br>
                     also only make a tap play a motion if its not the selecting tap.

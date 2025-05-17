@@ -289,6 +289,7 @@ async function loadModel(source) {
         updateUIVisibility(models.length > 0, false);
     }
 }
+window.loadLive2DModel = loadModel;
 
 
 function setSelectedModel(modelToSelect) {

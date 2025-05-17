@@ -9,6 +9,7 @@
     <title>Live2D Viewer</title>
     <link rel="icon" type="image/svg+xml" href="assets/icon.svg" sizes="any">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/repoexplorer.css"> <!-- ADDED FILE EXPLORER CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
         integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -20,6 +21,10 @@
             <h1 id="site-title-button">Live2D Viewer</h1>
             <div class="model-imports">
                 <div class="model-loader-group">
+                    <!-- ADDED File Explorer Trigger -->
+                    <button id="open-file-explorer-btn" class="header-icon-button" title="Open GitHub File Explorer">
+                        <i class="fas fa-folder-open"></i>
+                    </button>
                     <label for="model-url-input" class="sr-only">Model URL</label>
                     <input type="text" id="model-url-input" placeholder="Enter model (.json/.model3.json) URL...">
                     <button id="load-url-button" title="Load model from the entered URL">Load URL</button>
@@ -96,11 +101,61 @@
         <footer class="site-footer">
             <p>Powered by <a href="https://github.com/guansss/pixi-live2d-display" target="_blank"
                     rel="noopener noreferrer">pixi-live2d-display</a></p>
-            <p>Interact with the model: Click and drag to move, scroll to zoom (selected), tap to select/interact</p>
+            <p>Interact with the model: Click/Drag to move, Scroll/Zoom (selected), tap to Select/Interact</p>
         </footer>
 
         <!-- Placeholder for Changelog Modal -->
         <div id="changelog-placeholder"></div>
+
+        <!-- File Explorer Modal -->
+        <div id="file-explorer-modal" class="file-explorer-modal-container">
+            <button id="file-explorer-close-btn" class="file-explorer-close-btn" title="Close File Explorer">×</button>
+            <div class="file-explorer-header">
+                <h2>GitHub Repository Explorer</h2>
+                <div class="fe-repo-input-container">
+                    <input type="text" id="feOwnerInput" placeholder="GitHub Owner" value="haojiezhe12345">
+                    <span>/</span>
+                    <input type="text" id="feRepoInput" placeholder="Repository Name" value="Live2d-model">
+                    <button id="feLoadRepoBtn">Load Repository</button>
+                </div>
+            </div>
+            <div class="file-explorer-main-content">
+                <div class="fe-content-area-header">
+                    <button id="feUpDirectoryBtn" class="fe-icon-button" title="Up one level" style="display: none;">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <div class="fe-breadcrumbs" id="feMainBreadcrumbs">
+                        <!-- Breadcrumbs will be populated here -->
+                    </div>
+                </div>
+                <div class="fe-file-listing-container scrollable" id="feFileListingContainer">
+                    <p class="fe-placeholder-text">Load a repository to see its content.</p>
+                </div>
+
+                <div class="fe-file-preview-container" id="feFilePreviewContainer" style="display: none;">
+                    <div class="fe-preview-header">
+                        <h4 id="fePreviewFileName"></h4>
+                        <button id="feClosePreviewBtn" class="fe-icon-button fe-close-btn" title="Close preview">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="fe-preview-content scrollable" id="fePreviewContent">
+                        <!-- File preview content -->
+                    </div>
+                    <div id="fePreviewActions" class="fe-preview-actions"></div>
+                </div>
+            </div>
+            <div class="file-explorer-footer">
+                <p>Status: <span id="feStatusMessage">Idle</span></p>
+            </div>
+        </div>
+        <!-- End File Explorer Modal -->
+
+        <!-- Loader for File Explorer -->
+        <div id="feLoader" class="fe-loader-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading Repository Data...</p>
+        </div>
 
     </div>
 
@@ -114,8 +169,9 @@
     <!-- Using local modified version for HitAreaFrames styling -->
     <script src="libs/extra.js"></script>
 
-    <!-- Custom Script -->
+    <!-- Custom Scripts -->
     <script src="js/script.js" defer></script>
+    <script src="js/repoexplorer.js" defer></script> <!-- ADDED FILE EXPLORER SCRIPT -->
 </body>
 
 </html>
