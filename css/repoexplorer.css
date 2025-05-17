@@ -36,15 +36,15 @@
 =============================================*/
 .file-explorer-close-btn {
     position: absolute;
-    top: calc(var(--element-gap) / 2);
-    right: calc(var(--element-gap) / 2);
+    top: var(--element-gap);
+    right: var(--element-gap);
     background: rgba(var(--bg-element), 0.7);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
     border-radius: 50%;
     width: 2.5rem;
     height: 2.5rem;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 900;
     cursor: pointer;
     display: flex;

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Me</title>
+  <style>
+    :root {
+      --bg: #0f0f1c;
+      --modal-bg: rgba(255, 255, 255, 0.05);
+      --accent: #5865f2;
+      --text: #f0f0f0;
+      --border: rgba(255, 255, 255, 0.2);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .card {
+      text-align: center;
+      background: linear-gradient(145deg, #121222, #0c0c18);
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: 2.2rem;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+      color: #bbb;
+    }
+
+    button {
+      padding: 12px 28px;
+      font-size: 1rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #4752c4;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(6px);
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .modal-content {
+      background: var(--modal-bg);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 500px;
+      display: grid;
+      gap: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: #1a1a2f;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 1rem;
+    }
+
+    textarea {
+      resize: vertical;
+      height: 100px;
+    }
+
+    .close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 28px;
+      color: #ccc;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .close:hover {
+      color: white;
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        padding: 2rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Let's Talk</h1>
+    <p>Click below to send me a custom email message.</p>
+    <button onclick="openModal()">Contact</button>
+  </div>
+
+  <div class="modal" id="emailModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Send Email</h2>
+      <input type="text" id="emailSubject" placeholder="Subject" />
+      <textarea id="emailBody" placeholder="Your message..."></textarea>
+      <button onclick="sendEmail()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    function openModal() {
+      document.getElementById("emailModal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("emailModal").style.display = "none";
+    }
+
+    function sendEmail() {
+        const subject = encodeURIComponent(document.getElementById("emailSubject").value);
+        const body = encodeURIComponent(document.getElementById("emailBody").value);
+        const email = "imduck42@duck.com";
+        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+        closeModal();
+    }
+    window.onclick = function(e) {
+      const modal = document.getElementById("emailModal");
+      if (e.target === modal) closeModal();
+    }
+  </script>
+</body>
+</html>

@@ -2,8 +2,14 @@ Thanks to 8con and Osaka for helping me (put credits in the footer)
 maybe buttons glow as long as the motion lasts
 
 update readme with feature of file explorer, nah redo entire md, hight of mobile imgs bit higher, maybe real mockups
+update ipad size header, delete model button
+on mobile if hitarea alreday selected/outlined and said area is tapped, itl glow pink instead of purple
+hitareas toggle on activated, white outline
+preview content in explorer tile as row, left/right
+
 
 refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 
 
 known issues:
 mobile: On mobile if website was in background, the hitboxes and selected model indicator stop working
+general: if motion etc name is just big enough for 2, on click-scale up it gets to big and for press duration takees up one whale row
