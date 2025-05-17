@@ -1,5 +1,8 @@
 Thanks to 8con and Osaka for helping me (put credits in the footer)
-
 maybe buttons glow as long as the motion lasts
 
-refactor all files 1st, 2nd, 3rd(css), 4th, 
+potential support for mikumiku dance
+refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 
+
+known issues:
+mobile: On mobile if website was in background, the hitboxes and selected model indicator stop working

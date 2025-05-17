@@ -1,5 +1,6 @@
 <div id="changelog-modal" class="changelog-modal-container">
-    <button id="changelog-close-button" class="changelog-close-btn" title="Close Changelog" aria-label="Close Changelog">
+    <button id="changelog-close-button" class="changelog-close-btn" title="Close Changelog"
+        aria-label="Close Changelog">
         <i class="fas fa-times"></i>
     </button>
     <div class="changelog-content">
@@ -19,11 +20,29 @@
                     <br>
                     We believe this will greatly improve how you find and select your favorite models.
                     <br>
-                    Here's the really cool part: while you're browsing, if you spot a file that looks like a model's main configuration (it will usually have "model" in its name and a ".json" extension), you can import it directly with a single click, right from the explorer!
+                    Here's the really cool part: while you're browsing, if you spot a file that looks like a model's main configuration (it will usually have "model" in its name and a ".json" extension),
+                    <br>
+                    you can import it directly with a single click, right from the explorer!
                 </li>
             </ul>
         </article>
 
+        <!-- May 17, 2025 -->
+        <article class="changelog-entry">
+            <h3 class="changelog-version">Commits on May 17, 2025</h3>
+            <p class="changelog-date">May 17, 2025</p>
+            <ul>
+                <li><strong>[NONEYET]</strong>
+                    fixed a issue on mobile where the hit area labels did stack from old models and did not get removed -> Changes in extra.js
+                    <br>
+                    also only make a tap play a motion if its not the selecting tap.
+                    <br>
+                    reformated all files, removing whitespaces empty lines etc
+                </li>
+            </ul>
+        </article>
+
+        <!-- May 16, 2025 -->
         <article class="changelog-entry">
             <h3 class="changelog-version">Commits on May 16, 2025</h3>
             <p class="changelog-date">May 16, 2025</p>
@@ -62,7 +81,7 @@
                 <li><strong>[9160896]</strong> test for mobile</li>
                 <li><strong>[c0f5c7e]</strong> .</li>
                 <li><strong>[7a592e5]</strong> addded design for checkbox</li>
-                <li><strong>[18a8adf]</strong> added a site icon meta tags and renamed backeups to aabackups so it stays on top</li>
+                <li><strong>[18a8adf]</strong> added a site icon meta tags and renamed backeups to aabackups so it stayson top</li>
                 <li><strong>[5c99ed5]</strong> credits plan in footer</li>
                 <li><strong>[cedcd6f]</strong> unmin'ed local files (I don't like the look of them), changed styles of hitareas by modifying the extra.js (prev. extra.min.js) file</li>
             </ul>
@@ -91,7 +110,7 @@
     </div>
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Check if this window is the top-most window (not in an iframe)
         if (window.self === window.top) {
             const modal = document.getElementById('changelog-modal');

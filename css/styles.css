@@ -28,8 +28,10 @@
 
     /* --- Sizing & Effects --- */
     --base-font-size: 16px;
-    --border-radius: 0.75rem; /* 12px */
-    --border-radius-small: 0.5rem; /* 8px */
+    --border-radius: 0.75rem;
+    /* 12px */
+    --border-radius-small: 0.5rem;
+    /* 8px */
     --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.25);
     --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.3);
     --shadow-glow-accent: 0 0 15px rgba(var(--accent-primary-rgb), 0.3);
@@ -39,13 +41,19 @@
     --transition-timing: ease-in-out;
     --transition-main: all var(--transition-duration) var(--transition-timing);
 
-    --header-height: 4.5rem; /* Approx 72px */
-    --footer-height: 4rem; /* Approx 64px */
-    --main-padding: 1.5rem; /* Consistent padding for major containers */
-    --element-gap: 1rem; /* Gap between elements within a section */
-    --section-gap: 1.5rem; /* Gap between larger sections */
+    --header-height: 4.5rem;
+    /* Approx 72px */
+    --footer-height: 4rem;
+    /* Approx 64px */
+    --main-padding: 1.5rem;
+    /* Consistent padding for major containers */
+    --element-gap: 1rem;
+    /* Gap between elements within a section */
+    --section-gap: 1.5rem;
+    /* Gap between larger sections */
 
-    --changelog-margin: 1.5rem; /* Margin for the changelog modal */
+    --changelog-margin: 1.5rem;
+    /* Margin for the changelog modal */
 }
 
 /*=============================================
@@ -73,6 +81,10 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+}
+
+body.no-scroll {
+    overflow: hidden;
 }
 
 .sr-only {
@@ -117,7 +129,8 @@ body {
     align-items: center;
     flex-shrink: 0;
     gap: var(--section-gap);
-    top: 0; /* Sticks to the top of the app-container or viewport */
+    top: 0;
+    /* Sticks to the top of the app-container or viewport */
     z-index: 100;
 }
 
@@ -135,11 +148,14 @@ body {
 /* Make site title clickable for changelog */
 .site-header h1#site-title-button {
     cursor: pointer;
-    user-select: none; /* Prevents text selection on click */
+    user-select: none;
+    /* Prevents text selection on click */
     transition: filter var(--transition-duration) var(--transition-timing);
 }
+
 .site-header h1#site-title-button:hover {
-    filter: brightness(1.25) saturate(1.1); /* Simple hover effect */
+    filter: brightness(1.25) saturate(1.1);
+    /* Simple hover effect */
 }
 
 
@@ -173,6 +189,7 @@ body {
 .site-header input[type="text"] {
     min-width: 15rem;
 }
+
 .site-header input[type="text"]::placeholder {
     color: var(--text-secondary);
     opacity: 0.7;
@@ -205,6 +222,10 @@ body {
 #model-url-input:hover,
 #model-select:hover {
     border-color: var(--accent-primary);
+}
+
+#model-url-input {
+    cursor: text;
 }
 
 #load-url-button:hover,
@@ -242,7 +263,8 @@ body {
     flex-grow: 1;
     padding: var(--main-padding);
     gap: var(--main-padding);
-    min-height: 0; /* Important for flex children with overflow */
+    min-height: 0;
+    /* Important for flex children with overflow */
     height: calc(100vh - var(--header-height) - var(--footer-height) - (2 * var(--main-padding)));
 }
 
@@ -250,8 +272,10 @@ body {
   CANVAS AREA
 =============================================*/
 .canvas-area {
-    flex: 3; /* Canvas takes more space */
-    min-width: 0; /* Important for flex item */
+    flex: 3;
+    /* Canvas takes more space */
+    min-width: 0;
+    /* Important for flex item */
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-medium);
@@ -325,6 +349,7 @@ body {
     color: var(--accent-primary);
     opacity: 0.8;
 }
+
 .canvas-message p {
     max-width: 80%;
 }
@@ -345,23 +370,28 @@ body {
     flex-direction: column;
     gap: var(--section-gap);
     overflow-y: auto;
-    max-height: 100%; /* Ensure it doesn't overflow parent main-content */
+    max-height: 100%;
+    /* Ensure it doesn't overflow parent main-content */
 }
 
 /* Custom Scrollbar for Control Panel */
 .control-panel::-webkit-scrollbar {
     width: 10px;
 }
+
 .control-panel::-webkit-scrollbar-track {
     background: var(--bg-element);
     border-radius: var(--border-radius-small);
     margin: 5px 0;
 }
+
 .control-panel::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
     border-radius: var(--border-radius-small);
-    border: 2px solid var(--bg-element); /* Creates padding around thumb */
+    border: 2px solid var(--bg-element);
+    /* Creates padding around thumb */
 }
+
 .control-panel::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, rgba(var(--accent-primary-rgb), 0.75), rgba(var(--accent-secondary-rgb), 0.75));
 }
@@ -373,12 +403,18 @@ body {
 
 /* Specific styling for the "show-hit-areas-checkbox" as a switch */
 .control-item input[type="checkbox"]#show-hit-areas-checkbox {
-    opacity: 0; /* Visually hide the default checkbox */
+    opacity: 0;
+    /* Visually hide the default checkbox */
     position: absolute;
-    width: 1px; height: 1px; margin: -1px;
-    overflow: hidden; clip: rect(0,0,0,0);
-    white-space: nowrap; border: 0;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
+
 .control-item label[for="show-hit-areas-checkbox"] {
     cursor: pointer;
     position: relative;
@@ -391,6 +427,7 @@ body {
     min-height: 1.5em;
     transition: color var(--transition-duration) var(--transition-timing);
 }
+
 .control-item label[for="show-hit-areas-checkbox"]:hover {
     color: var(--text-primary);
 }
@@ -425,36 +462,41 @@ body {
 }
 
 /* Checked state for the switch */
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:checked + label[for="show-hit-areas-checkbox"]::before {
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:checked+label[for="show-hit-areas-checkbox"]::before {
     background-color: var(--accent-secondary);
     border-color: var(--accent-primary);
 }
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:checked + label[for="show-hit-areas-checkbox"]::after {
+
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:checked+label[for="show-hit-areas-checkbox"]::after {
     background-color: var(--text-primary);
     transform: translateY(-50%) translateX(1.2em);
 }
 
 /* Focus state for the switch */
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:focus-visible + label[for="show-hit-areas-checkbox"]::before {
-    box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb),0.4);
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:focus-visible+label[for="show-hit-areas-checkbox"]::before {
+    box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.4);
 }
 
 /* Disabled state for the switch */
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled + label[for="show-hit-areas-checkbox"] {
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled+label[for="show-hit-areas-checkbox"] {
     cursor: not-allowed;
     opacity: 0.6;
 }
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled + label[for="show-hit-areas-checkbox"]::before {
+
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled+label[for="show-hit-areas-checkbox"]::before {
     background-color: var(--bg-element);
     border-color: var(--border-color);
 }
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled + label[for="show-hit-areas-checkbox"]::after {
+
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled+label[for="show-hit-areas-checkbox"]::after {
     background-color: var(--text-secondary);
 }
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled + label[for="show-hit-areas-checkbox"]:hover::before {
+
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled+label[for="show-hit-areas-checkbox"]:hover::before {
     border: solid 1px var(--border-color);
 }
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled + label[for="show-hit-areas-checkbox"]:hover::after {
+
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled+label[for="show-hit-areas-checkbox"]:hover::after {
     background-color: var(--text-secondary);
 }
 
@@ -472,7 +514,7 @@ body {
     border-radius: var(--border-radius-small);
     padding: var(--element-gap);
     border: 1px solid var(--border-color);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .panel-section h3 {
@@ -485,18 +527,31 @@ body {
     display: flex;
     align-items: center;
 }
+
 .panel-section h3::before {
     font-family: "Font Awesome 6 Free";
-    font-weight: 900; /* For solid icons */
+    font-weight: 900;
+    /* For solid icons */
     margin-right: 0.5em;
     color: var(--accent-secondary);
     font-size: 0.9em;
 }
 
 /* Font awesome icons */
-.panel-section:nth-of-type(2) h3::before { content: '\f06e'; /* expressions */}
-.panel-section:nth-of-type(3) h3::before { content: '\f0b2'; /* motions */}
-.panel-section:nth-of-type(4) h3::before { content: '\f05b'; /* hit areas */}
+.panel-section:nth-of-type(2) h3::before {
+    content: '\f06e';
+    /* expressions */
+}
+
+.panel-section:nth-of-type(3) h3::before {
+    content: '\f0b2';
+    /* motions */
+}
+
+.panel-section:nth-of-type(4) h3::before {
+    content: '\f05b';
+    /* hit areas */
+}
 
 .model-features-container {
     display: flex;
@@ -516,7 +571,8 @@ body {
     color: var(--text-secondary);
     text-align: center;
     flex-grow: 1;
-    min-width: calc(50% - (0.75rem / 2)); /* 2 buttons per row, accounting for gap */
+    min-width: calc(50% - (0.75rem / 2));
+    /* 2 buttons per row, accounting for gap */
     font-weight: 500;
 }
 
@@ -528,6 +584,7 @@ body {
     transform: translateY(-2px) scale(1.02);
     box-shadow: var(--shadow-soft);
 }
+
 .feature-btn:focus-visible {
     box-shadow: var(--shadow-soft), 0 0 0 2px rgba(var(--accent-primary-rgb), 0.3);
 }
@@ -539,11 +596,13 @@ body {
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(var(--accent-primary-rgb), 0.4);
 }
+
 .feature-btn.active:hover,
 .feature-btn.active:focus-visible {
     background: var(--accent-secondary);
     border-color: var(--accent-secondary);
-    transform: translateY(-2px) scale(1.02); /* Keep hover effect */
+    transform: translateY(-2px) scale(1.02);
+    /* Keep hover effect */
     box-shadow: 0 4px 12px rgba(var(--accent-secondary-rgb), 0.5);
 }
 
@@ -590,14 +649,14 @@ body {
     text-decoration: none;
     font-weight: 500;
     transition: color var(--transition-duration) var(--transition-timing),
-                text-shadow var(--transition-duration) var(--transition-timing);
+        text-shadow var(--transition-duration) var(--transition-timing);
 }
 
 .site-footer a:hover,
 .site-footer a:focus-visible {
     color: var(--accent-secondary);
     text-decoration: underline;
-    text-shadow: 0 0 5px rgba(var(--accent-secondary-rgb),0.5);
+    text-shadow: 0 0 5px rgba(var(--accent-secondary-rgb), 0.5);
 }
 
 /*=============================================
@@ -609,22 +668,28 @@ body {
     left: var(--changelog-margin);
     right: var(--changelog-margin);
     bottom: var(--changelog-margin);
-    background-color: rgba(var(--bg-secondary-rgb), 0.65); /* Base for glassmorphism */
+    background-color: rgba(var(--bg-secondary-rgb), 0.65);
+    /* Base for glassmorphism */
     backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%); /* For Safari */
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    /* For Safari */
     border-radius: var(--border-radius);
-    border: 1px solid rgba(var(--text-primary-rgb), 0.12); /* Subtle border for glass */
+    border: 1px solid rgba(var(--text-primary-rgb), 0.12);
+    /* Subtle border for glass */
     z-index: 1000;
-    display: none; /* Hidden by default */
+    display: none;
+    /* Hidden by default */
     flex-direction: column;
     padding: calc(var(--main-padding) * 1.2);
     box-shadow: 0 8px 32px 0 rgba(var(--bg-primary-rgb), 0.4);
     color: var(--text-primary);
-    overflow: hidden; /* Prevent content from breaking out before inner scroll */
+    overflow: hidden;
+    /* Prevent content from breaking out before inner scroll */
 }
 
 .changelog-modal-container.active {
-    display: flex; /* Show it */
+    display: flex;
+    /* Show it */
 }
 
 .changelog-close-btn {
@@ -634,7 +699,8 @@ body {
     background: rgba(var(--bg-element), 0.7);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
-    border-radius: 50%; /* Circular button */
+    border-radius: 50%;
+    /* Circular button */
     width: 2.5rem;
     height: 2.5rem;
     font-size: 1.2rem;
@@ -643,8 +709,10 @@ body {
     justify-content: center;
     align-items: center;
     transition: var(--transition-main);
-    z-index: 1001; /* Above content */
-    line-height: 1; /* Ensure icon is centered */
+    z-index: 1001;
+    /* Above content */
+    line-height: 1;
+    /* Ensure icon is centered */
 }
 
 .changelog-close-btn:hover,
@@ -658,23 +726,30 @@ body {
 .changelog-content {
     flex-grow: 1;
     overflow-y: auto;
-    padding-top: var(--element-gap); /* Space below title */
-    padding-right: 1rem; /* Space for scrollbar */
+    padding-top: var(--element-gap);
+    /* Space below title */
+    padding-right: 1rem;
+    /* Space for scrollbar */
 }
+
 /* Custom scrollbar for changelog content */
 .changelog-content::-webkit-scrollbar {
     width: 10px;
 }
+
 .changelog-content::-webkit-scrollbar-track {
     background: rgba(var(--bg-element), 0.3);
     border-radius: var(--border-radius-small);
-    margin: calc(var(--element-gap) * 2.5) 0 var(--element-gap) 0; /* Space for close button */
+    margin: calc(var(--element-gap) * 2.5) 0 var(--element-gap) 0;
+    /* Space for close button */
 }
+
 .changelog-content::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg, var(--accent-secondary), var(--accent-primary));
     border-radius: var(--border-radius-small);
     background-clip: content-box;
 }
+
 .changelog-content::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, rgba(var(--accent-secondary-rgb), 0.75), rgba(var(--accent-primary-rgb), 0.75));
 }
@@ -730,15 +805,18 @@ body {
 }
 
 .changelog-entry ul li::before {
-    content: '\f005'; /* Font Awesome star icon */
+    content: '\f005';
+    /* Font Awesome star icon */
     font-family: "Font Awesome 6 Free";
-    font-weight: 900; /* Solid star */
+    font-weight: 900;
+    /* Solid star */
     position: absolute;
     left: 0;
     top: 0.1em;
     color: var(--accent-secondary);
     font-size: 0.9em;
 }
+
 .changelog-entry ul li strong {
     color: var(--text-primary);
     font-weight: 500;
@@ -748,36 +826,51 @@ body {
 /*=============================================
   RESPONSIVE STYLES
 =============================================*/
-@media (max-width: 1024px) { /* Tablet and below */
+@media (max-width: 1024px) {
+
+    /* Tablet and below */
     :root {
         --changelog-margin: 1rem;
     }
+
     .main-content {
-        flex-direction: column; /* Stack canvas and control panel */
-        height: auto; /* Allow content to define height */
-        overflow-y: auto; /* Allow main content itself to scroll if stacked children overflow */
+        flex-direction: column;
+        /* Stack canvas and control panel */
+        height: auto;
+        /* Allow content to define height */
+        overflow-y: auto;
+        /* Allow main content itself to scroll if stacked children overflow */
     }
 
     .control-panel {
         width: 100%;
         max-width: none;
         min-width: auto;
-        max-height: 45vh; /* Limit height when stacked, content inside scrolls */
-        flex: 0 0 auto; /* Don't grow or shrink, take specified height or content height up to max-height */
+        max-height: 45vh;
+        /* Limit height when stacked, content inside scrolls */
+        flex: 0 0 auto;
+        /* Don't grow or shrink, take specified height or content height up to max-height */
     }
 
     .canvas-area {
-        min-height: 40vh; /* Ensure canvas has decent height */
-        max-height: 60vh; /* Limit canvas height, can be adjusted */
-        flex: 1 1 auto; /* Allow canvas to grow and shrink within available space */
+        min-height: 40vh;
+        /* Ensure canvas has decent height */
+        max-height: 60vh;
+        /* Limit canvas height, can be adjusted */
+        flex: 1 1 auto;
+        /* Allow canvas to grow and shrink within available space */
     }
 
     .site-header {
-        height: auto; /* Allow header to wrap if content becomes too wide */
-        padding: var(--element-gap) var(--main-padding); /* Adjust padding for potentially taller header */
+        height: auto;
+        /* Allow header to wrap if content becomes too wide */
+        padding: var(--element-gap) var(--main-padding);
+        /* Adjust padding for potentially taller header */
         flex-direction: column;
-        align-items: stretch; /* Make children full-width */
-        top: 0; /* Ensure sticky still works if it was relative to a parent with padding */
+        align-items: stretch;
+        /* Make children full-width */
+        top: 0;
+        /* Ensure sticky still works if it was relative to a parent with padding */
     }
 
     .site-header h1 {
@@ -788,50 +881,64 @@ body {
     .model-imports {
         flex-direction: column;
         width: 100%;
-        gap: var(--element-gap); /* Ensure gap is applied for column layout */
+        gap: var(--element-gap);
+        /* Ensure gap is applied for column layout */
     }
 
-    .model-loader-group, .model-actions-group { /* Apply to new group as well */
+    .model-loader-group,
+    .model-actions-group {
+        /* Apply to new group as well */
         width: 100%;
-        flex-direction: column; /* This was already there for model-loader-group */
-        gap: 0.5rem; /* Maintain smaller gap for this group */
+        flex-direction: column;
+        /* This was already there for model-loader-group */
+        gap: 0.5rem;
+        /* Maintain smaller gap for this group */
     }
 
     .site-header select,
     .site-header input[type="text"],
     .site-header button,
-    #delete-selected-model-button { /* All header controls full width */
+    #delete-selected-model-button {
+        /* All header controls full width */
         width: 100%;
-        min-width: auto; /* Override desktop min-widths */
+        min-width: auto;
+        /* Override desktop min-widths */
     }
 
     .changelog-modal-container {
         padding: var(--main-padding);
     }
+
     .changelog-content h2 {
         font-size: 1.6rem;
     }
+
     .changelog-entry h3.changelog-version {
         font-size: 1.2rem;
     }
 }
 
-@media (max-width: 768px) { /* Mobile */
-    :root { /* Override global variables for smaller screens */
+@media (max-width: 768px) {
+
+    /* Mobile */
+    :root {
+        /* Override global variables for smaller screens */
         --main-padding: 1rem;
         --element-gap: 0.75rem;
         --section-gap: 1rem;
-        --base-font-size: 15px; /* Slightly smaller base font for mobile */
+        --base-font-size: 15px;
+        /* Slightly smaller base font for mobile */
         --changelog-margin: 0.75rem;
     }
-    
+
     .site-header h1 {
         font-size: 1.5rem;
     }
 
     .control-panel {
         min-width: auto;
-        max-height: 50vh; /* More space for controls on mobile if needed */
+        max-height: 50vh;
+        /* More space for controls on mobile if needed */
         padding: var(--element-gap);
     }
 
@@ -860,15 +967,16 @@ body {
         font-size: 0.8rem;
         padding: 0.5rem 0.7rem;
         /* Ensures 2 buttons per row even with smaller element-gap */
-        min-width: calc(50% - (var(--element-gap) / 2)); 
+        min-width: calc(50% - (var(--element-gap) / 2));
     }
 
     .site-footer {
-        height: auto; /* Allow footer height to be determined by content */
+        height: auto;
+        /* Allow footer height to be determined by content */
         padding-top: var(--element-gap);
         padding-bottom: var(--element-gap);
     }
-    
+
     .site-footer p {
         font-size: 0.8rem;
     }
@@ -876,22 +984,27 @@ body {
     .changelog-modal-container {
         padding: var(--element-gap);
     }
-     .changelog-close-btn {
+
+    .changelog-close-btn {
         top: 0.5rem;
         right: 0.5rem;
         width: 2.2rem;
         height: 2.2rem;
         font-size: 1rem;
     }
+
     .changelog-content h2 {
         font-size: 1.4rem;
     }
+
     .changelog-entry {
         padding: var(--element-gap);
     }
+
     .changelog-entry h3.changelog-version {
         font-size: 1.1rem;
     }
+
     .changelog-entry ul li {
         font-size: 0.9rem;
     }
