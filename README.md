@@ -25,9 +25,20 @@ Built with plain HTML, CSS, and JavaScript, it supports touch gestures, dynamic 
 ## Preview
 
 Live Preview: [https://imduck42.github.io/Live2D-Viewer](https://imduck42.github.io/Live2D-Viewer)  
-<img src="assets/screenshots/changelog.png" width="690" height="auto" alt="Change Log Image" style="vertical-align: middle;">
-<img src="assets/screenshots/repoexplorer.png" width="690" height="auto" alt="Repo Explorer Preview" style="vertical-align: middle;">
-<img src="assets/screenshots/live2dviewer.png" width="690" height="auto" alt="L2D Viewer Preview" style="vertical-align: middle;"> 
+<details>
+<summary>Screenshots</summary>
+<img src="assets/screenshots/EmptyPC.png" width="420" height="auto" alt="Empty PC" style="vertical-align: middle;">
+<img src="assets/screenshots/EmptyMobile.png" width="auto" height="200" alt="Empty Mobile" style="vertical-align: middle;">
+|
+<img src="assets/screenshots/PreviewPC.png" width="420" height="auto" alt="Preview PC" style="vertical-align: middle;">
+<img src="assets/screenshots/PreviewMobile.png" width="auto" height="200" alt="Preview Mobile" style="vertical-align: middle;">
+  
+<img src="assets/screenshots/NewsPC.png" width="420" height="auto" alt="News PC" style="vertical-align: middle;">
+<img src="assets/screenshots/NewsMobile.png" width="auto" height="200" alt="News Mobile" style="vertical-align: middle;">
+|
+<img src="assets/screenshots/ExplorerPC.png" width="420" height="auto" alt="Explorer PC" style="vertical-align: middle;">
+<img src="assets/screenshots/ExplorerMobile.png" width="auto" height="200" alt="Explorer Mobile" style="vertical-align: middle;">
+</details>
 
 ---
 
