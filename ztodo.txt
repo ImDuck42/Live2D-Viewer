@@ -1,6 +1,8 @@
 Thanks to 8con and Osaka for helping me (put credits in the footer)
 maybe buttons glow as long as the motion lasts
 
+update readme with feature of file explorer, nah redo entire md, hight of mobile imgs bit higher, maybe real mockups
+
 refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 
 
 known issues:

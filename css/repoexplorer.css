@@ -42,9 +42,10 @@
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
     border-radius: 50%;
-    width: 2.2rem;
-    height: 2.2rem;
-    font-size: 1.1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.5rem;
+    font-weight: 900;
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -428,12 +429,12 @@
 }
 
 .scrollable::-webkit-scrollbar-thumb {
-    background: var(--bg-interactive);
+    background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
     border-radius: 10px;
 }
 
 .scrollable::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in srgb, var(--bg-interactive) 80%, white);
+    background: linear-gradient(180deg, rgba(var(--accent-primary-rgb), 0.75), rgba(var(--accent-secondary-rgb), 0.75));
 }
 
 /*=============================================

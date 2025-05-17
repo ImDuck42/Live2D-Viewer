@@ -439,11 +439,19 @@ function updateControlPanelForSelectedModel() {
     }
 }
 
+// Stopid 8con, how'd u mess up this one ???
 function clearIndividualControlPanels() {
-    const msgSuffix = '(No model selected)';
-    setNoContentMessage(DOMElements.expressionsContainer, `expressions ${msgSuffix}`);
-    setNoContentMessage(DOMElements.motionsContainer, `motions ${msgSuffix}`);
-    setNoContentMessage(DOMElements.hitAreasContainer, `hit areas ${msgSuffix}`);
+    const noModelSelectedMessage = '<p class="no-content-message">No model selected</p>';
+
+    if (DOMElements.expressionsContainer) {
+        DOMElements.expressionsContainer.innerHTML = noModelSelectedMessage;
+    }
+    if (DOMElements.motionsContainer) {
+        DOMElements.motionsContainer.innerHTML = noModelSelectedMessage;
+    }
+    if (DOMElements.hitAreasContainer) {
+        DOMElements.hitAreasContainer.innerHTML = noModelSelectedMessage;
+    }
 }
 
 function clearAllControlPanelsAndState() {

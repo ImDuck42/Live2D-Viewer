@@ -744,13 +744,13 @@ body.no-scroll {
 }
 
 .changelog-content::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--accent-secondary), var(--accent-primary));
+    background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
     border-radius: var(--border-radius-small);
     background-clip: content-box;
 }
 
 .changelog-content::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(var(--accent-secondary-rgb), 0.75), rgba(var(--accent-primary-rgb), 0.75));
+    background: linear-gradient(180deg, rgba(var(--accent-primary-rgb), 0.75), rgba(var(--accent-secondary-rgb), 0.75));
 }
 
 .changelog-content h2 {
