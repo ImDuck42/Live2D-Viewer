@@ -25,7 +25,8 @@ Built with plain HTML, CSS, and JavaScript, it supports touch gestures, dynamic 
 ## Preview
 
 Live Preview: [https://imduck42.github.io/Live2D-Viewer](https://imduck42.github.io/Live2D-Viewer)  
-<img src="assets/screenshots/changelog.png" width="690" height="auto" alt="Change Log Image" style="vertical-align: middle;"> 
+<img src="assets/screenshots/changelog.png" width="690" height="auto" alt="Change Log Image" style="vertical-align: middle;">
+<img src="assets/screenshots/repoexplorer.png" width="690" height="auto" alt="Repo Explorer Preview" style="vertical-align: middle;">
 <img src="assets/screenshots/live2dviewer.png" width="690" height="auto" alt="L2D Viewer Preview" style="vertical-align: middle;"> 
 
 ---

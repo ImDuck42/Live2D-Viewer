@@ -230,11 +230,10 @@ body.no-scroll {
 
 #load-url-button:hover,
 #load-selected-button:hover {
-    background-color: var(--accent-secondary);
-    transform: translateY(-1px);
+    background-color: var(--accent-primary);
     border-color: var(--accent-primary);
+    box-shadow: var(--shadow-glow-accent);
 }
-
 
 /* Styles for the new Delete Model button */
 #delete-selected-model-button {
