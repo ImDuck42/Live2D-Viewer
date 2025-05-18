@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         li.appendChild(nameSpan);
 
         // Check for Live2D model file
-        if (item.type === 'file' && item.name.toLowerCase().includes('model') && item.name.toLowerCase().endsWith('.json')) {
+        if (item.type === 'file' && item.name.toLowerCase().includes('model.json') || item.name.toLowerCase().includes('model3.json')) {
             const importBtn = document.createElement('button');
             importBtn.textContent = 'Import Model';
             importBtn.className = 'fe-import-model-btn';

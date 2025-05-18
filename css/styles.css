@@ -462,7 +462,7 @@ body.no-scroll {
 
 /* Checked state for the switch */
 .control-item input[type="checkbox"]#show-hit-areas-checkbox:checked+label[for="show-hit-areas-checkbox"]::before {
-    background-color: var(--accent-secondary);
+    background-color: var(--accent-primary);
     border-color: var(--accent-primary);
 }
 
