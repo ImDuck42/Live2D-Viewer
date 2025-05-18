@@ -235,25 +235,6 @@ body.no-scroll {
     box-shadow: var(--shadow-glow-accent);
 }
 
-/* Styles for the new Delete Model button */
-#delete-selected-model-button {
-    background-color: var(--error-color);
-    color: var(--text-primary);
-}
-
-#delete-selected-model-button:hover:not(:disabled) {
-    background-color: #e74c3c;
-    transform: translateY(-1px);
-}
-
-#delete-selected-model-button:disabled {
-    background-color: var(--bg-element);
-    color: var(--text-secondary);
-    cursor: not-allowed;
-    opacity: 0.6;
-    transform: none;
-}
-
 /*=============================================
   MAIN CONTENT LAYOUT (2-COLUMN)
 =============================================*/
@@ -398,6 +379,9 @@ body.no-scroll {
 /* Control Item (e.g., Checkbox Switch) */
 .control-item {
     padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 /* Specific styling for the "show-hit-areas-checkbox" as a switch */
@@ -506,6 +490,42 @@ body.no-scroll {
 .control-item label[for="show-hit-areas-checkbox"]:hover::after {
     background-color: var(--accent-primary);
 }
+
+/* Styles for the new Delete Model icon button in the control panel */
+#delete-selected-model-button {
+    background-color: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    border-radius: var(--border-radius-small);
+    transition: var(--transition-main);
+    line-height: 1;
+}
+
+#delete-selected-model-button:hover:not(:disabled),
+#delete-selected-model-button:focus-visible:not(:disabled) {
+    color: var(--error-color);
+    background-color: rgba(255, 71, 87, 0.1);
+}
+
+#delete-selected-model-button:focus-visible:not(:disabled) {
+    outline: 2px solid var(--error-color);
+    outline-offset: 1px;
+}
+
+#delete-selected-model-button:disabled {
+    color: var(--border-color);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+#delete-selected-model-button:disabled:hover {
+    color: var(--text-primary);
+    background-color: transparent;
+}
+
 
 /* Panel Sections (Cards) */
 .panel-section {
@@ -825,7 +845,7 @@ body.no-scroll {
 /*=============================================
   RESPONSIVE STYLES
 =============================================*/
-@media (max-width: 1024px) {
+@media (max-width: 1050px) { /* not 1024 because header contents will behave weird*/
 
     /* Tablet and below */
     :root {
@@ -884,24 +904,17 @@ body.no-scroll {
         /* Ensure gap is applied for column layout */
     }
 
-    .model-loader-group,
-    .model-actions-group {
-        /* Apply to new group as well */
+    .model-loader-group {
         width: 100%;
         flex-direction: column;
-        /* This was already there for model-loader-group */
         gap: 0.5rem;
-        /* Maintain smaller gap for this group */
     }
 
     .site-header select,
     .site-header input[type="text"],
-    .site-header button,
-    #delete-selected-model-button {
-        /* All header controls full width */
+    .site-header button {
         width: 100%;
         min-width: auto;
-        /* Override desktop min-widths */
     }
 
     .changelog-modal-container {
