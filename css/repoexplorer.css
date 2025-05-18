@@ -11,16 +11,13 @@
     left: var(--changelog-margin, 1.5rem);
     right: var(--changelog-margin, 1.5rem);
     bottom: var(--changelog-margin, 1.5rem);
-    background-color: rgba(var(--bg-secondary-rgb), 0.75);
-    /* Darker than changelog */
+    background-color: rgba(var(--bg-secondary-rgb), 0.75); /* Darker than changelog */
     backdrop-filter: blur(10px) saturate(150%);
     -webkit-backdrop-filter: blur(10px) saturate(150%);
     border-radius: var(--border-radius);
     border: 1px solid rgba(var(--text-primary-rgb), 0.1);
-    z-index: 2000;
-    /* Higher than changelog modal */
-    display: none;
-    /* Hidden by default */
+    z-index: 2000; /* Higher than changelog modal */
+    display: none; /* Hidden by default */
     flex-direction: column;
     box-shadow: 0 10px 40px 0 rgba(var(--bg-primary-rgb), 0.5);
     color: var(--text-primary);
@@ -151,6 +148,7 @@
     justify-content: center;
     background-color: var(--bg-interactive);
     min-width: 36px;
+    height: 36px;
 }
 
 .fe-icon-button i {
@@ -214,8 +212,7 @@
 =============================================*/
 .fe-file-listing-container {
     flex-grow: 1;
-    overflow-y: auto;
-    /* Scroll for list if it overflows its flex space */
+    overflow-y: auto; /* Scroll for list if it overflows its flex space */
     background-color: rgba(var(--bg-primary-rgb), 0.3);
     padding: var(--element-gap);
     border-radius: var(--border-radius-small);
@@ -240,8 +237,7 @@
     margin-bottom: 0.3rem;
     border-radius: var(--border-radius-small);
     cursor: pointer;
-    transition: background-color var(--transition-duration) var(--transition-timing),
-        color var(--transition-duration) var(--transition-timing);
+    transition: background-color var(--transition-duration) var(--transition-timing), color var(--transition-duration) var(--transition-timing);
     gap: 0.75rem;
     background-color: rgba(var(--bg-element), 0.5);
     border: 1px solid transparent;
@@ -290,10 +286,14 @@
     color: var(--text-primary);
     background-color: var(--accent-secondary);
     white-space: nowrap;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-main);
 }
 
 .fe-import-model-btn:hover {
     background-color: color-mix(in srgb, var(--accent-secondary) 85%, white);
+    box-shadow: var(--shadow-glow-accent-secondary);
 }
 
 /*=============================================
@@ -327,6 +327,9 @@
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
+    overflow: hidden; /* Prevent long names from breaking layout */
+    text-overflow: ellipsis; /* Show ellipsis for long names */
+    white-space: nowrap; /* Keep name on one line */
 }
 
 .fe-close-btn {
@@ -334,6 +337,8 @@
     border: none;
     color: var(--text-secondary);
     padding: 0.25rem;
+    font-size: 1.2rem;
+    line-height: 1;
 }
 
 .fe-close-btn:hover {
@@ -354,6 +359,7 @@
     margin: 0 auto;
     background-color: rgba(var(--bg-primary-rgb), 0.5);
     padding: 0.5rem;
+    border: 1px solid var(--border-color);
 }
 
 .fe-preview-content pre {
@@ -374,7 +380,6 @@
     gap: 0.5rem;
     flex-shrink: 0;
     flex-wrap: wrap;
-    /* Allow actions to wrap */
 }
 
 .fe-preview-actions .fe-open-link,
@@ -386,20 +391,24 @@
     border-radius: var(--border-radius-small);
     text-decoration: none;
     text-align: center;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-main);
 }
 
 .fe-preview-actions .fe-open-link:hover,
 .fe-preview-actions .fe-import-model-btn-preview:hover {
     background-color: color-mix(in srgb, var(--accent-primary) 85%, white);
+    box-shadow: var(--shadow-glow-accent);
 }
 
 .fe-preview-actions .fe-import-model-btn-preview {
-    /* Specific style for import button */
     background-color: var(--accent-secondary);
 }
 
 .fe-preview-actions .fe-import-model-btn-preview:hover {
     background-color: color-mix(in srgb, var(--accent-secondary) 85%, white);
+    box-shadow: var(--shadow-glow-accent-secondary);
 }
 
 /*=============================================
@@ -434,7 +443,7 @@
 }
 
 .scrollable::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(var(--accent-primary-rgb), 0.75), rgba(var(--accent-secondary-rgb), 0.75));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 85%, white), color-mix(in srgb, var(--accent-secondary) 85%, white));
 }
 
 /*=============================================
@@ -448,6 +457,7 @@
     height: 100%;
     background-color: rgba(var(--bg-secondary-rgb), 0.85);
     backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -457,19 +467,27 @@
     border-radius: var(--border-radius);
 }
 
-/* Spinner class is reused from main styles.css */
-
 .fe-error-message {
     color: var(--error-color);
-    background-color: rgba(255, 71, 87, 0.1);
+    background-color: rgba(var(--error-color-rgb, 255, 71, 87), 0.1);
     border: 1px solid var(--error-color);
     padding: 0.75rem;
     border-radius: var(--border-radius-small);
     margin-top: 0.5rem;
 }
 
+/* Status message styling in footer */
+#feStatusMessage.fe-status-error {
+    color: var(--error-color);
+    font-weight: 500;
+}
+#feStatusMessage.fe-status-success {
+    color: var(--success-color);
+    font-weight: 500;
+}
+
 /*=============================================
-  SHARED ICON BUTTON STYLE
+  SHARED ICON BUTTON STYLE (for #open-file-explorer-btn)
 =============================================*/
 .header-icon-button {
     background-color: var(--bg-element);
@@ -485,6 +503,7 @@
     justify-content: center;
     width: 36px;
     height: 36px;
+    line-height: 1;
 }
 
 .header-icon-button:hover {
@@ -517,6 +536,7 @@
     .fe-repo-input-container input[type="text"] {
         font-size: 0.85rem;
         padding: 0.5rem 0.7rem;
+        min-width: 120px;
     }
 
     .fe-repo-input-container button {
@@ -526,5 +546,15 @@
 
     .fe-file-preview-container {
         max-height: 30vh;
+    }
+
+    .fe-list-item {
+        padding: 0.5rem 0.6rem;
+        gap: 0.5rem;
+    }
+
+    .fe-import-model-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
     }
 }

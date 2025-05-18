@@ -1,20 +1,20 @@
 <svg width="200" height="200" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <!-- 
     VIEWBOX:
-    The viewBox="0 0 100 100" is added because the icon was designed
-    within a 100x100 unit space. The coordinates used in paths/circles 
-    are generally within this range. This allows the icon to scale 
-    cleanly to the specified width/height (200x200).
+      The viewBox="0 0 100 100" is added because the icon was designed
+      within a 100x100 unit space. The coordinates used in paths/circles 
+      are generally within this range. This allows the icon to scale 
+      cleanly to the specified width/height (200x200).
   -->
 
   <!-- DEFINITIONS: Contains reusable elements like gradients -->
   <defs>
     <!-- 
       Linear Gradient: PurPiGradient
-      A vertical gradient from Purple (top) to Pink (bottom).
-      - x1, y1: Start point of the gradient vector (0%, 0% = top-left of the object's bounding box)
-      - x2, y2: End point of the gradient vector (0%, 100% = bottom-left of the object's bounding box)
-                This creates a vertical gradient.
+        A vertical gradient from Purple (top) to Pink (bottom).
+        - x1, y1: Start point of the gradient vector (0%, 0% = top-left of the object's bounding box)
+        - x2, y2: End point of the gradient vector (0%, 100% = bottom-left of the object's bounding box)
+                  This creates a vertical gradient.
     -->
     <linearGradient id="PurPiGradient" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" style="stop-color:#8c5eff;stop-opacity:1" />

@@ -1,14 +1,19 @@
-Thanks to 8con and Osaka for helping me (put credits in the footer)
-maybe buttons glow as long as the motion lasts
+Some Day:
+    - Thanks to 8con and Osaka for helping me (put credits in the footer)
+    - Maybe buttons glow as long as the motion lasts
+    - Destroy model with texture: true if last one of its kind
 
-update readme with feature of file explorer, nah redo entire md, hight of mobile imgs bit higher, maybe real mockups
-on mobile if hitarea alreday selected/outlined and said area is tapped, itl glow pink instead of purple
-preview content in explorer tile as row, left/right
-improve import model button in explorer
-mode delete model into just icon button to  the right of the hit area toggle
+Priority:
+    - Preview content in explorer tile as row, left/right
+    - Improve import model button in explorer
+    - Cutom look for title="" like tool tip
+    - Smoother animations
+    - Jsdelivr url fetching behaves weird
 
-refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 
+Other:
+    - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 
 
-known issues:
-mobile: On mobile if website was in background, the hitboxes and selected model indicator stop working
-general: if motion etc name is just big enough for 2, on click-scale up it gets to big and for press duration takees up one whale row
+Known Issues:
+    - general:
+        - If motion etc name is just big enough for 2, on click-scale up it gets to big and for press duration takees up one whale row
+        - Model counter just goes up, number of models on canvas is correct but model id just grows

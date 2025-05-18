@@ -38,26 +38,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const GITHUB_API_BASE = 'https://api.github.com/repos';
     const JSDELIVR_CDN_BASE = 'https://cdn.jsdelivr.net/gh';
+    const MODEL_FILE_REGEX = /(.*)(model3?|model)\.json$/i; // Precise regex for model files
+    // ✅ Matches (allowed)
+    // Ends exactly in "model.json"
+    "model.json";                // ✅ no prefix, ends with model.json
+    "model3.json";               // ✅ no prefix, ends with model3.json
+    "bronya.model.json";         // ✅ has prefix, ends with model.json
+    "kiana-model3.json";         // ✅ has prefix, ends with model3.json
+    "abc.model3.json";           // ✅ valid prefix, ends with model3.json
+    "json.model.json";           // ✅ valid prefix, ends with model.json
+    "dir/abc.model3.json";       // ✅ full path, filename ends with model3.json
+
+    // ❌ Non-matches (rejected)
+    // Invalid due to extra chars between 'model' and '.json' or bad ending
+    "modelx.json";               // ❌ "modelx" is not allowed — must be exactly "model"
+    "model3a.json";              // ❌ extra 'a' after "model3" — only "model" or "model3" allowed
+    "model.json.bak";            // ❌ ends with ".bak", not ".json"
+    "modeljson";                 // ❌ missing dot before "json"
+    "some.model2.json";          // ❌ "model2" is not allowed — only "model" or "model3"
+    "model.3.json";              // ❌ invalid pattern — "model.3" is not "model3"
+    "file.model3.json.backup";   // ❌ ends with ".backup", not ".json"
 
     //==============================================================================
     // MODAL VISIBILITY & CONTROL
     //==============================================================================
     openExplorerBtn.addEventListener('click', () => {
         explorerModal.classList.add('active');
+        openExplorerBtn.setAttribute('aria-expanded', 'true');
         document.body.classList.add('no-scroll'); // Prevent main page scroll
         if (ownerInput.value.trim() && repoInput.value.trim() && fileListingContainer.querySelector('.fe-placeholder-text')) {
         }
     });
 
-    closeExplorerBtn.addEventListener('click', () => {
+    const closeExplorer = () => {
         explorerModal.classList.remove('active');
+        openExplorerBtn.setAttribute('aria-expanded', 'false');
         document.body.classList.remove('no-scroll');
-    });
+    };
+
+    closeExplorerBtn.addEventListener('click', closeExplorer);
 
     window.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && explorerModal.classList.contains('active')) {
-            explorerModal.classList.remove('active');
-            document.body.classList.remove('no-scroll');
+            closeExplorer();
         }
     });
 
@@ -111,14 +134,18 @@ document.addEventListener('DOMContentLoaded', () => {
         updateStatus(`Fetching from API: ${path || 'root'}`);
         showLoaderFE(true);
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json' // Recommended header
+                }
+            });
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ message: response.statusText }));
                 throw new Error(`GitHub API Error (${response.status}): ${errorData.message}`);
             }
             const data = await response.json();
             updateStatus(`API Fetched: ${path || 'root'}`, false, true);
-            return Array.isArray(data) ? data : [data]; // Ensure array for consistency
+            return Array.isArray(data) ? data : [data];
         } catch (error) {
             console.error('GitHub API Fetch error:', error);
             updateStatus(`Error: ${error.message}`, true);
@@ -139,17 +166,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const cachedItem = sessionStorage.getItem(cacheKey);
 
         if (cachedItem) {
-            const { timestamp, data } = JSON.parse(cachedItem);
-            if (Date.now() - timestamp < CACHE_DURATION_MS) {
-                updateStatus(`Using cached data for: ${path || 'root'}`);
-                return data;
-            } else {
+            try {
+                const { timestamp, data } = JSON.parse(cachedItem);
+                if (Date.now() - timestamp < CACHE_DURATION_MS) {
+                    updateStatus(`Using cached data for: ${path || 'root'}`);
+                    return data;
+                } else {
+                    sessionStorage.removeItem(cacheKey); // Cache expired
+                }
+            } catch (e) {
+                console.warn("Failed to parse cached item, removing:", e);
                 sessionStorage.removeItem(cacheKey);
             }
         }
         const data = await fetchGitHubContentsFE(path);
         if (data) {
-            sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data }));
+            try {
+                sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data }));
+            } catch (e) {
+                console.warn("Failed to save to session storage (possibly full):", e);
+            }
         }
         return data;
     }
@@ -171,13 +207,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const contents = await fetchGitHubContentsWithCacheFE(path);
 
         if (!contents) {
-            fileListingContainer.innerHTML = '<p class="fe-placeholder-text fe-error-message">Failed to load content.</p>';
+            // Error message is already set by fetchGitHubContentsFE in this case
+            // fileListingContainer.innerHTML = '<p class="fe-placeholder-text fe-error-message">Failed to load content.</p>';
             return;
         }
 
         renderItemsFE(contents.sort((a, b) => {
-            if (a.type === b.type) return a.name.localeCompare(b.name);
-            return a.type === 'dir' ? -1 : 1;
+            if (a.type === b.type) return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+            return a.type === 'dir' ? -1 : 1; // Directories first
         }));
     }
 
@@ -186,13 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {Array} items - Array of item objects from GitHub API.
      */
     function renderItemsFE(items) {
-        fileListingContainer.innerHTML = '';
+        fileListingContainer.innerHTML = ''; // Clear previous content
         if (items.length === 0) {
             fileListingContainer.innerHTML = '<p class="fe-placeholder-text">This folder is empty.</p>';
             return;
         }
         const ul = document.createElement('ul');
-        ul.style.listStyleType = 'none';
+        ul.style.listStyleType = 'none'; // CSS should handle this, but defensive
         ul.style.padding = '0';
         ul.style.margin = '0';
 
@@ -219,12 +256,13 @@ document.addEventListener('DOMContentLoaded', () => {
         icon.className = 'fe-item-icon';
         const faIcon = document.createElement('i');
         faIcon.className = 'fas'; // Font Awesome base class
+        faIcon.setAttribute('aria-hidden', 'true'); // Icon is decorative
 
         if (item.type === 'dir') {
             faIcon.classList.add('fa-folder');
             icon.classList.add('folder-icon');
         } else {
-            faIcon.classList.add(getFileIconFA(item.name)); // Using Font Awesome icons
+            faIcon.classList.add(getFileIconFA(item.name));
         }
         icon.appendChild(faIcon);
 
@@ -235,8 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
         li.appendChild(icon);
         li.appendChild(nameSpan);
 
-        // Check for Live2D model file
-        if (item.type === 'file' && item.name.toLowerCase().includes('model.json') || item.name.toLowerCase().includes('model3.json')) {
+        // Check for Live2D model file using the refined regex
+        if (item.type === 'file' && MODEL_FILE_REGEX.test(item.name)) {
             const importBtn = document.createElement('button');
             importBtn.textContent = 'Import Model';
             importBtn.className = 'fe-import-model-btn';
@@ -248,15 +286,14 @@ document.addEventListener('DOMContentLoaded', () => {
             li.appendChild(importBtn);
         }
 
-
         li.addEventListener('click', () => {
             if (selectedFileItemElement && selectedFileItemElement !== li) {
                 selectedFileItemElement.classList.remove('selected');
             }
             if (item.type === 'dir') {
                 fetchAndDisplayContentsFE(item.path);
-                selectedFileItemElement = null;
-            } else {
+                selectedFileItemElement = null; // Deselect if navigating to a new directory
+            } else { // It's a file
                 fetchAndDisplayFilePreviewFE(item);
                 li.classList.add('selected');
                 selectedFileItemElement = li;
@@ -271,30 +308,34 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function updateBreadcrumbsFE(path) {
         mainBreadcrumbs.innerHTML = '';
-        const segments = path.split('/').filter(s => s);
+        const segments = path.split('/').filter(s => s); // Filter out empty segments
 
         const rootLink = document.createElement('a');
-        rootLink.href = '#';
+        rootLink.href = '#'; // Prevent page jump
         rootLink.textContent = 'Root';
+        rootLink.title = `Navigate to root of ${currentOwner}/${currentRepo}`;
         rootLink.addEventListener('click', (e) => {
             e.preventDefault();
             fetchAndDisplayContentsFE('');
         });
         mainBreadcrumbs.appendChild(rootLink);
 
+        let currentBuiltPath = '';
         segments.forEach((segment, index) => {
             mainBreadcrumbs.appendChild(document.createTextNode(' / '));
-            if (index < segments.length - 1) {
+            currentBuiltPath += (currentBuiltPath ? '/' : '') + segment;
+            if (index < segments.length - 1) { // Not the last segment
                 const link = document.createElement('a');
                 link.href = '#';
                 link.textContent = segment;
-                const pathForLink = segments.slice(0, index + 1).join('/');
+                link.title = `Navigate to ${segment}`;
+                const pathForLink = currentBuiltPath; // Closure will capture this
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     fetchAndDisplayContentsFE(pathForLink);
                 });
                 mainBreadcrumbs.appendChild(link);
-            } else {
+            } else { // Last segment
                 const span = document.createElement('span');
                 span.textContent = segment;
                 mainBreadcrumbs.appendChild(span);
@@ -329,28 +370,29 @@ document.addEventListener('DOMContentLoaded', () => {
         filePreviewContainer.style.display = 'flex';
         showLoaderFE(true);
 
-        const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}/${fileItem.path}`;
-        const rawGitHubUrl = fileItem.download_url;
+        const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}/${fileItem.path}/`;
+        const rawGitHubUrl = fileItem.open_url; // open_url is usually the raw content URL
 
         try {
             const extension = fileItem.name.split('.').pop().toLowerCase();
             const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
-            let fileSourceUrl = jsDelivrUrl;
+            let fileSourceUrl = jsDelivrUrl; // Start with jsDelivr
 
             if (imageExtensions.includes(extension)) {
                 const img = document.createElement('img');
+                img.alt = `Preview of ${fileItem.name}`;
                 img.src = fileSourceUrl;
-                img.alt = fileItem.name;
                 img.onerror = () => {
                     console.warn(`Image load failed from jsDelivr: ${fileSourceUrl}. Trying raw GitHub URL.`);
-                    img.src = rawGitHubUrl;
-                    img.onerror = () => {
+                    img.src = rawGitHubUrl; // Fallback to raw GitHub URL
+                    fileSourceUrl = rawGitHubUrl; // Update source URL if fallback is used
+                    img.onerror = () => { // Final error
                         previewContent.innerHTML = '<p class="fe-placeholder-text fe-error-message">Could not load image from both sources.</p>';
                     };
                 };
-                previewContent.innerHTML = '';
+                previewContent.innerHTML = ''; // Clear loading text
                 previewContent.appendChild(img);
-            } else {
+            } else { // For text-based files
                 let response = await fetch(fileSourceUrl);
                 if (!response.ok) {
                     console.warn(`Fetch failed from jsDelivr (${response.status}): ${fileSourceUrl}. Trying raw GitHub URL.`);
@@ -364,38 +406,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderTextPreviewFE(text, extension);
             }
 
-            // Add "Open" button
+            // Add "Open" button (uses the URL that successfully loaded the content)
             const openBtn = document.createElement('a');
-            openBtn.href = fileSourceUrl; // Use the URL that successfully loaded the content
+            openBtn.href = fileSourceUrl;
             openBtn.textContent = `Open ${fileItem.name}`;
             openBtn.className = 'fe-open-link';
             openBtn.target = "_blank";
+            openBtn.rel = "noopener noreferrer"; // Security for external links
             previewActions.appendChild(openBtn);
 
             // Add "Import Model" button to preview if applicable
-            if (fileItem.type === 'file' && fileItem.name.toLowerCase().includes('model') && fileItem.name.toLowerCase().endsWith('.json')) {
+            if (fileItem.type === 'file' && MODEL_FILE_REGEX.test(fileItem.name)) {
                 const importBtnPreview = document.createElement('button');
                 importBtnPreview.textContent = 'Import Model';
                 importBtnPreview.className = 'fe-import-model-btn-preview';
                 importBtnPreview.title = `Import ${fileItem.name} to Live2D Viewer`;
-                importBtnPreview.addEventListener('click', (e) => {
+                importBtnPreview.addEventListener('click', () => {
                     handleImportModel(fileItem, fileSourceUrl); // Pass the successful source URL
                 });
                 previewActions.appendChild(importBtnPreview);
             }
 
-        } catch (error) {
+        } catch (error) { // Didn't happen yet, not really tested
             console.error('File preview error:', error);
             previewContent.innerHTML = `<p class="fe-placeholder-text fe-error-message">Error loading preview: ${error.message}</p>`;
+            // Add a link to view on GitHub as a last resort for any error
             const githubLink = document.createElement('a');
             githubLink.href = fileItem.html_url; // Link to view on GitHub main site
             githubLink.textContent = `View on GitHub`;
             githubLink.className = 'fe-open-link';
             githubLink.target = "_blank";
+            githubLink.rel = "noopener noreferrer";
             previewActions.appendChild(githubLink);
         } finally {
             showLoaderFE(false);
-            filePreviewContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            // Scroll the preview into view smoothly
+            if (filePreviewContainer.style.display === 'flex') {
+                filePreviewContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         }
     }
 
@@ -408,12 +456,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const pre = document.createElement('pre');
         if (extension === 'json') {
             try {
-                pre.textContent = JSON.stringify(JSON.parse(text), null, 2);
-            } catch { pre.textContent = text; } // Display raw if JSON parsing fails
+                pre.textContent = JSON.stringify(JSON.parse(text), null, 2); // Pretty print JSON
+            } catch {
+                pre.textContent = text; // Display raw if JSON parsing fails
+            }
         } else {
             pre.textContent = text;
         }
-        previewContent.innerHTML = '';
+        previewContent.innerHTML = ''; // Clear loading/error message
         previewContent.appendChild(pre);
     }
 
@@ -441,16 +491,29 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function getFileIconFA(filename) {
         const ext = filename.split('.').pop().toLowerCase();
-        if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) return 'fa-image';
-        if (ext === 'json') return 'fa-code';
-        if (['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'c', 'cpp', 'cs', 'html', 'css', 'rb', 'php', 'go', 'sh', 'bat'].includes(ext)) return 'fa-code';
-        if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) return 'fa-file-zipper';
-        if (['md', 'markdown', 'txt', 'log'].includes(ext)) return 'fa-file-lines';
-        if (['pdf'].includes(ext)) return 'fa-file-pdf';
-        if (['doc', 'docx', 'odt'].includes(ext)) return 'fa-file-word';
-        if (['xls', 'xlsx', 'csv'].includes(ext)) return 'fa-file-excel';
-        if (['ppt', 'pptx'].includes(ext)) return 'fa-file-powerpoint';
-        return 'fa-file'; // Generic file icon
+        const iconMap = {
+            // Images
+            'png': 'fa-image', 'jpg': 'fa-image', 'jpeg': 'fa-image', 'gif': 'fa-image', 'webp': 'fa-image', 'svg': 'fa-image', 'bmp': 'fa-image', 'ico': 'fa-image',
+            // Code/Text
+            'json': 'fa-code', 'js': 'fa-code', 'jsx': 'fa-code', 'ts': 'fa-code', 'tsx': 'fa-code',
+            'html': 'fa-code', 'css': 'fa-code', 'scss': 'fa-code', 'less': 'fa-code',
+            'py': 'fa-code', 'java': 'fa-code', 'c': 'fa-code', 'cpp': 'fa-code', 'cs': 'fa-code',
+            'rb': 'fa-code', 'php': 'fa-code', 'go': 'fa-code', 'sh': 'fa-terminal', 'bat': 'fa-terminal',
+            'md': 'fa-file-lines', 'markdown': 'fa-file-lines', 'txt': 'fa-file-lines', 'log': 'fa-file-lines',
+            // Archives
+            'zip': 'fa-file-zipper', 'rar': 'fa-file-zipper', 'tar': 'fa-file-zipper', 'gz': 'fa-file-zipper', '7z': 'fa-file-zipper',
+            // Documents
+            'pdf': 'fa-file-pdf',
+            'doc': 'fa-file-word', 'docx': 'fa-file-word', 'odt': 'fa-file-word',
+            'xls': 'fa-file-excel', 'xlsx': 'fa-file-excel', 'csv': 'fa-file-csv',
+            'ppt': 'fa-file-powerpoint', 'pptx': 'fa-file-powerpoint',
+            // Audio/Video
+            'mp3': 'fa-file-audio', 'wav': 'fa-file-audio', 'ogg': 'fa-file-audio',
+            'mp4': 'fa-file-video', 'mov': 'fa-file-video', 'avi': 'fa-file-video', 'webm': 'fa-file-video',
+            // Default
+            'default': 'fa-file'
+        };
+        return iconMap[ext] || iconMap['default'];
     }
 
     /**
@@ -480,15 +543,18 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Handles the import of a Live2D model file.
      * @param {object} fileItem - The GitHub file item object for the model.
-     * @param {string|null} [sourceUrlOverride=null]
+     * @param {string|null} [sourceUrlOverride=null] - Optional override for the model URL.
      */
     function handleImportModel(fileItem, sourceUrlOverride = null) {
-        const modelUrl = sourceUrlOverride || fileItem.download_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}/${fileItem.path}`;
+        // Prefer open_url if available and no override, as it's the direct raw content link.
+        // Fallback to jsDelivr if open_url is not present (should be rare for files).
+        const modelUrl = sourceUrlOverride || fileItem.open_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}/${fileItem.path}`;
         console.log(`Attempting to import Live2D Model: ${modelUrl}`);
 
         if (window.loadLive2DModel && typeof window.loadLive2DModel === 'function') {
-            window.loadLive2DModel(modelUrl);
+            window.loadLive2DModel(modelUrl); // This function is exposed by script.js
             updateStatus(`Sent ${fileItem.name} to Live2D viewer.`, false, true);
+            // closeExplorer();
         } else {
             console.error('Live2D import function (window.loadLive2DModel) not found.');
             updateStatus('Error: Live2D import function not available.', true);

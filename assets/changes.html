@@ -3,14 +3,22 @@
         <i class="fas fa-xmark"></i>
     </button>
     <div class="changelog-content">
-        <h2>V4.0 -- What's New:</h2>
+        <h2>V4.1 -- What's New:</h2>
 
     <!-- May 18, 2025 -->
     <article class="changelog-entry">
-        <h3 class="changelog-version">Big Plans for the Website</h3>
+        <h3 class="changelog-version">Commits on May 18, 2025</h3>
         <p class="changelog-date">May 16, 2025</p>
         <ul>
-            <li><strong>[NONEYET]</strong> new remove model button placement</li>
+            <li><strong>[NONEYET] Fck ton of refactoring: 4.0 -> 4.1</strong><br>
+                refactor: script.js, repoexplorer.js, styles.css, repoexplorer.css
+                <br>
+                small modifications: icon.svg, changes.html, ztodo.txt, index.html, extra.js
+                <br>
+                added repoexplorer to README.md 
+                
+            </li>
+            <li><strong>[fc047e8]</strong> new remove model button placement</li>
             <li><strong>[21f7df4]</strong> small design fixes</li>
         </ul>
     </article>
@@ -80,7 +88,7 @@
                 <li><strong>[41118c1]</strong>
                     fixed a issue on mobile where the hit area labels did stack from old models and did not get removed -> Changes in extra.js
                     <br>
-                    also only make a tap play a motion if its not the selecting tap.
+                    also only make a tap play a motion if its not the selecting tap
                     <br>
                     reformated all files, removing whitespaces empty lines etc
                 </li>
@@ -160,7 +168,7 @@
         if (window.self === window.top) {
             const modal = document.getElementById('changelog-modal');
             if (modal) {
-                modal.style.display = 'None';
+                modal.style.display = 'none';
             }
         }
     });

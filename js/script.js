@@ -370,14 +370,12 @@ function deleteSelectedModel() {
     modelToDelete.destroy({ children: true, texture: false, baseTexture: false });
     console.log("Destroyed model with texture:false, baseTexture:false to preserve shared resources.");
 
-
     const nextSelected = models.length > 0 ? models[models.length - 1] : null;
     setSelectedModel(nextSelected);
 
     updateUIVisibility(models.length > 0, false);
     console.log('Model deleted. Remaining models:', models.length);
 }
-
 
 //==============================================================================
 // UI MANAGEMENT & MODEL CONTROLS
