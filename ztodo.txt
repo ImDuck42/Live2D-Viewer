@@ -5,10 +5,8 @@ Some Day:
 
 Priority:
     - Preview content in explorer tile as row, left/right
-    - Improve import model button in explorer
     - Cutom look for title="" like tool tip
     - Smoother animations
-    - Search in repoexplorer when beginning to type
 
 Other:
     - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 

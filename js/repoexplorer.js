@@ -277,9 +277,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check for Live2D model file using the refined regex
         if (item.type === 'file' && MODEL_FILE_REGEX.test(item.name)) {
             const importBtn = document.createElement('button');
-            importBtn.textContent = 'Import Model';
             importBtn.className = 'fe-import-model-btn';
             importBtn.title = `Import ${item.name} to Live2D Viewer`;
+
+            const importIcon = document.createElement('i');
+            importIcon.className = 'fas fa-file-import';
+            importIcon.setAttribute('aria-hidden', 'true');
+            importIcon.style.marginRight = '0.4em'; // Add some space between icon and text
+
+            importBtn.appendChild(importIcon); // Icon first
+            importBtn.appendChild(document.createTextNode('Import Model')); // Then text
+
             importBtn.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent li click event
                 handleImportModel(item);
@@ -372,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoaderFE(true);
 
         const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCHE}/${fileItem.path}`;
-        const rawGitHubUrl = fileItem.open_url; // open_url is usually the raw content URL
+        const rawGitHubUrl = fileItem.download_url; // download_url is usually the raw content URL (GitHub API preference)
 
         try {
             const extension = fileItem.name.split('.').pop().toLowerCase();
@@ -419,16 +427,24 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add "Import Model" button to preview if applicable
             if (fileItem.type === 'file' && MODEL_FILE_REGEX.test(fileItem.name)) {
                 const importBtnPreview = document.createElement('button');
-                importBtnPreview.textContent = 'Import Model';
                 importBtnPreview.className = 'fe-import-model-btn-preview';
                 importBtnPreview.title = `Import ${fileItem.name} to Live2D Viewer`;
+
+                const importIconPreview = document.createElement('i');
+                importIconPreview.className = 'fas fa-file-import';
+                importIconPreview.setAttribute('aria-hidden', 'true');
+                importIconPreview.style.marginRight = '0.4em';
+
+                importBtnPreview.appendChild(importIconPreview);
+                importBtnPreview.appendChild(document.createTextNode('Import Model'));
+
                 importBtnPreview.addEventListener('click', () => {
                     handleImportModel(fileItem, fileSourceUrl); // Pass the successful source URL
                 });
                 previewActions.appendChild(importBtnPreview);
             }
 
-        } catch (error) { // Didn't happen yet, not really tested
+        } catch (error) {
             console.error('File preview error:', error);
             previewContent.innerHTML = `<p class="fe-placeholder-text fe-error-message">Error loading preview: ${error.message}</p>`;
             // Add a link to view on GitHub as a last resort for any error
@@ -547,9 +563,9 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {string|null} [sourceUrlOverride=null] - Optional override for the model URL.
      */
     function handleImportModel(fileItem, sourceUrlOverride = null) {
-        // Prefer open_url if available and no override, as it's the direct raw content link.
-        // Fallback to jsDelivr if open_url is not present (should be rare for files).
-        const modelUrl = sourceUrlOverride || fileItem.open_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCHE}/${fileItem.path}`;
+        // Prefer download_url if available and no override, as it's the direct raw content link.
+        // Fallback to jsDelivr if download_url is not present (should be rare for files).
+        const modelUrl = sourceUrlOverride || fileItem.download_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCHE}/${fileItem.path}`;
         console.log(`Attempting to import Live2D Model: ${modelUrl}`);
 
         if (window.loadLive2DModel && typeof window.loadLive2DModel === 'function') {
