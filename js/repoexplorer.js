@@ -38,26 +38,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const GITHUB_API_BASE = 'https://api.github.com/repos';
     const JSDELIVR_CDN_BASE = 'https://cdn.jsdelivr.net/gh';
+    const DEFAULT_BRANCHE = '@master';
     const MODEL_FILE_REGEX = /(.*)(model3?|model)\.json$/i; // Precise regex for model files
-    // ✅ Matches (allowed)
-    // Ends exactly in "model.json"
-    "model.json";                // ✅ no prefix, ends with model.json
-    "model3.json";               // ✅ no prefix, ends with model3.json
-    "bronya.model.json";         // ✅ has prefix, ends with model.json
-    "kiana-model3.json";         // ✅ has prefix, ends with model3.json
-    "abc.model3.json";           // ✅ valid prefix, ends with model3.json
-    "json.model.json";           // ✅ valid prefix, ends with model.json
-    "dir/abc.model3.json";       // ✅ full path, filename ends with model3.json
+        // ✅ Matches (allowed)
+        // Ends exactly in "model.json"
+        "model.json";                // ✅ no prefix, ends with model.json
+        "model3.json";               // ✅ no prefix, ends with model3.json
+        "bronya.model.json";         // ✅ has prefix, ends with model.json
+        "kiana-model3.json";         // ✅ has prefix, ends with model3.json
+        "abc.model3.json";           // ✅ valid prefix, ends with model3.json
+        "json.model.json";           // ✅ valid prefix, ends with model.json
+        "dir/abc.model3.json";       // ✅ full path, filename ends with model3.json
 
-    // ❌ Non-matches (rejected)
-    // Invalid due to extra chars between 'model' and '.json' or bad ending
-    "modelx.json";               // ❌ "modelx" is not allowed — must be exactly "model"
-    "model3a.json";              // ❌ extra 'a' after "model3" — only "model" or "model3" allowed
-    "model.json.bak";            // ❌ ends with ".bak", not ".json"
-    "modeljson";                 // ❌ missing dot before "json"
-    "some.model2.json";          // ❌ "model2" is not allowed — only "model" or "model3"
-    "model.3.json";              // ❌ invalid pattern — "model.3" is not "model3"
-    "file.model3.json.backup";   // ❌ ends with ".backup", not ".json"
+        // ❌ Non-matches (rejected)
+        // Invalid due to extra chars between 'model' and '.json' or bad ending
+        "modelx.json";               // ❌ "modelx" is not allowed — must be exactly "model"
+        "model3a.json";              // ❌ extra 'a' after "model3" — only "model" or "model3" allowed
+        "model.json.bak";            // ❌ ends with ".bak", not ".json"
+        "modeljson";                 // ❌ missing dot before "json"
+        "some.model2.json";          // ❌ "model2" is not allowed — only "model" or "model3"
+        "model.3.json";              // ❌ invalid pattern — "model.3" is not "model3"
+        "file.model3.json.backup";   // ❌ ends with ".backup", not ".json"
 
     //==============================================================================
     // MODAL VISIBILITY & CONTROL
@@ -370,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
         filePreviewContainer.style.display = 'flex';
         showLoaderFE(true);
 
-        const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}/${fileItem.path}/`;
+        const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCHE}/${fileItem.path}`;
         const rawGitHubUrl = fileItem.open_url; // open_url is usually the raw content URL
 
         try {
@@ -548,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleImportModel(fileItem, sourceUrlOverride = null) {
         // Prefer open_url if available and no override, as it's the direct raw content link.
         // Fallback to jsDelivr if open_url is not present (should be rare for files).
-        const modelUrl = sourceUrlOverride || fileItem.open_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}/${fileItem.path}`;
+        const modelUrl = sourceUrlOverride || fileItem.open_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCHE}/${fileItem.path}`;
         console.log(`Attempting to import Live2D Model: ${modelUrl}`);
 
         if (window.loadLive2DModel && typeof window.loadLive2DModel === 'function') {
