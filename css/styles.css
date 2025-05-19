@@ -138,10 +138,9 @@ body.no-scroll {
     white-space: nowrap;
 }
 
-/* Make site title clickable for changelog */
 .site-header h1#site-title-button {
     cursor: pointer;
-    user-select: none; /* Prevents text selection on click */
+    user-select: none;
     transition: filter var(--transition-duration) var(--transition-timing);
 }
 
@@ -162,7 +161,6 @@ body.no-scroll {
     align-items: center;
 }
 
-/* Input fields and Selects in Header */
 .site-header select,
 .site-header input[type="text"],
 .site-header button:not(.header-icon-button) {
@@ -173,15 +171,19 @@ body.no-scroll {
     border-radius: var(--border-radius-small);
     color: var(--text-primary);
     transition: var(--transition-main);
-    cursor: pointer;
     height: 36px;
     display: inline-flex;
     align-items: center;
 }
 
+.site-header select,
+.site-header button:not(.header-icon-button) {
+    cursor: pointer;
+}
+
 .site-header input[type="text"] {
     min-width: 15rem;
-    cursor: text; /* Specific cursor for text input */
+    cursor: text;
 }
 
 .site-header input[type="text"]::placeholder {
@@ -227,8 +229,6 @@ body.no-scroll {
     padding: var(--main-padding);
     gap: var(--main-padding);
     min-height: 0;
-    /* Important for flex children with overflow */
-    /* Calculated height for main content area, considering header, footer, and their margins */
     height: calc(100vh - var(--header-height) - var(--footer-height) - (2 * var(--main-padding)));
 }
 
@@ -237,7 +237,7 @@ body.no-scroll {
 =============================================*/
 .canvas-area {
     flex: 3;
-    min-width: 0; /* Important for flex item */
+    min-width: 0;
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-medium);
@@ -248,7 +248,6 @@ body.no-scroll {
     align-items: center;
     justify-content: center;
     touch-action: none;
-    /* Prevent default touch actions like scrolling/zooming page */
 }
 
 #live2d-canvas {
@@ -257,6 +256,7 @@ body.no-scroll {
     height: 100%;
     background-color: transparent;
     object-fit: contain;
+    /* PIXI sets cursor (grab, grabbing) */
 }
 
 .loading-overlay,
@@ -318,7 +318,7 @@ body.no-scroll {
 }
 
 /*=============================================
-  CONTROL SIDEBAR (formerly .control-panel)
+  CONTROL SIDEBAR
 =============================================*/
 .control-panel {
     flex: 1;
@@ -336,7 +336,6 @@ body.no-scroll {
     max-height: 100%;
 }
 
-/* Custom Scrollbar for Control Panel */
 .control-panel::-webkit-scrollbar {
     width: 10px;
 }
@@ -357,7 +356,6 @@ body.no-scroll {
     background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 85%, white), color-mix(in srgb, var(--accent-secondary) 85%, white));
 }
 
-/* Control Item (e.g., Checkbox Switch) */
 .control-item {
     padding: 0.5rem 0;
     display: flex;
@@ -365,17 +363,16 @@ body.no-scroll {
     justify-content: space-between;
 }
 
-/* Specific styling for the "show-hit-areas-checkbox" as a switch */
 .control-item input[type="checkbox"]#show-hit-areas-checkbox {
-    opacity: 0; /* Visually hide the default checkbox */
     position: absolute;
     width: 1px;
     height: 1px;
+    padding: 0;
     margin: -1px;
     overflow: hidden;
-    clip: rect(0, 0, 0, 0);
+    clip: rect(0,0,0,0);
     white-space: nowrap;
-    border: 0;
+    border-width: 0;
 }
 
 .control-item label[for="show-hit-areas-checkbox"] {
@@ -395,7 +392,6 @@ body.no-scroll {
     color: var(--text-primary);
 }
 
-/* Switch track */
 .control-item label[for="show-hit-areas-checkbox"]::before {
     content: "";
     position: absolute;
@@ -410,7 +406,6 @@ body.no-scroll {
     transition: var(--transition-main);
 }
 
-/* Switch thumb */
 .control-item label[for="show-hit-areas-checkbox"]::after {
     content: "";
     position: absolute;
@@ -424,54 +419,32 @@ body.no-scroll {
     transition: var(--transition-main), transform var(--transition-duration) var(--transition-timing);
 }
 
-/* Checked state for the switch */
 .control-item input[type="checkbox"]#show-hit-areas-checkbox:checked+label[for="show-hit-areas-checkbox"]::before {
     background-color: var(--accent-primary);
     border-color: var(--accent-primary);
 }
-
 .control-item input[type="checkbox"]#show-hit-areas-checkbox:checked+label[for="show-hit-areas-checkbox"]::after {
     background-color: var(--text-primary);
     transform: translateY(-50%) translateX(1.2em);
 }
-
-/* Focus state for the switch */
 .control-item input[type="checkbox"]#show-hit-areas-checkbox:focus-visible+label[for="show-hit-areas-checkbox"]::before {
     box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.4);
 }
-
-/* Disabled state for the switch */
 .control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled+label[for="show-hit-areas-checkbox"] {
     cursor: not-allowed;
     opacity: 0.6;
 }
-
 .control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled+label[for="show-hit-areas-checkbox"]::before {
     background-color: var(--bg-element);
     border-color: var(--border-color);
 }
-
 .control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled+label[for="show-hit-areas-checkbox"]::after {
     background-color: var(--text-secondary);
 }
-
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled+label[for="show-hit-areas-checkbox"]:hover::before {
-    border-color: var(--border-color);
-}
-
-.control-item input[type="checkbox"]#show-hit-areas-checkbox:disabled+label[for="show-hit-areas-checkbox"]:hover::after {
-    background-color: var(--text-secondary);
-}
-
-.control-item label[for="show-hit-areas-checkbox"]:not(:has(+ input:disabled)):hover::before {
+.control-item input[type="checkbox"]#show-hit-areas-checkbox:not(:disabled)+label[for="show-hit-areas-checkbox"]:hover::before {
     border-color: var(--accent-primary);
 }
 
-.control-item label[for="show-hit-areas-checkbox"]:not(:has(+ input:disabled)):hover::after {
-    background-color: var(--accent-primary);
-}
-
-/* Styles for the new Delete Model icon button in the control panel */
 #delete-selected-model-button {
     background-color: transparent;
     border: none;
@@ -504,12 +477,6 @@ body.no-scroll {
     opacity: 0.5;
 }
 
-#delete-selected-model-button:disabled:hover {
-    color: var(--text-primary);
-    background-color: transparent;
-}
-
-/* Panel Sections (Cards) */
 .panel-section {
     background-color: rgba(var(--bg-primary-rgb), 0.3);
     border-radius: var(--border-radius-small);
@@ -531,13 +498,12 @@ body.no-scroll {
 
 .panel-section h3::before {
     font-family: "Font Awesome 6 Free";
-    font-weight: 900; /* For solid icons */
+    font-weight: 900;
     margin-right: 0.5em;
     color: var(--accent-secondary);
     font-size: 0.9em;
 }
 
-/* Font awesome icons */
 .panel-section:nth-of-type(2) h3::before { /* Expressions */
     content: '\f06e';
 }
@@ -554,7 +520,6 @@ body.no-scroll {
     gap: 0.75rem;
 }
 
-/* Feature Buttons */
 .feature-btn {
     padding: 0.6rem 0.8rem;
     background-color: var(--bg-element);
@@ -566,10 +531,10 @@ body.no-scroll {
     color: var(--text-secondary);
     text-align: center;
     flex-grow: 1;
-    min-width: calc(50% - (0.75rem / 2)); /* 2 buttons per row, accounting for gap */
+    min-width: calc(50% - (0.75rem / 2));
     font-weight: 500;
     line-height: 1.4;
-    word-break: break-word; /* Prevent long names from breaking layout */
+    word-break: break-word;
 }
 
 .feature-btn:hover,
@@ -589,7 +554,6 @@ body.no-scroll {
     background: var(--accent-primary);
     color: var(--text-primary);
     border-color: var(--accent-primary);
-    font-weight: 600;
     box-shadow: 0 2px 8px rgba(var(--accent-primary-rgb), 0.4);
 }
 
@@ -655,193 +619,38 @@ body.no-scroll {
 }
 
 /*=============================================
-  CHANGELOG MODAL
-=============================================*/
-.changelog-modal-container {
-    position: fixed;
-    top: var(--changelog-margin);
-    left: var(--changelog-margin);
-    right: var(--changelog-margin);
-    bottom: var(--changelog-margin);
-    background-color: rgba(var(--bg-secondary-rgb), 0.65); /* Base for glassmorphism */
-    backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(var(--text-primary-rgb), 0.12); /* Subtle border for glass */
-    z-index: 1000;
-    display: none;
-    flex-direction: column;
-    padding: calc(var(--main-padding) * 1.2);
-    box-shadow: 0 8px 32px 0 rgba(var(--bg-primary-rgb), 0.4);
-    color: var(--text-primary);
-    overflow: hidden;
-}
-
-.changelog-modal-container.active {
-    display: flex; /* Show it */
-}
-
-.changelog-close-btn {
-    position: absolute;
-    top: var(--element-gap);
-    right: var(--element-gap);
-    background: rgba(var(--bg-element), 0.7);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 50%;
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1.2rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: var(--transition-main);
-    z-index: 1001; /* Above content */
-    line-height: 1;
-}
-
-.changelog-close-btn:hover,
-.changelog-close-btn:focus-visible {
-    background: var(--accent-primary);
-    color: var(--text-primary);
-    transform: scale(1.1) rotate(90deg);
-    box-shadow: var(--shadow-glow-accent);
-}
-
-.changelog-content {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding-top: var(--element-gap);
-    padding-right: 1rem; /* Space for scrollbar */
-}
-
-/* Custom scrollbar for changelog content */
-.changelog-content::-webkit-scrollbar {
-    width: 10px;
-}
-
-.changelog-content::-webkit-scrollbar-track {
-    background: rgba(var(--bg-element), 0.3);
-    border-radius: var(--border-radius-small);
-    margin: calc(var(--element-gap) * 2.5) 0 var(--element-gap) 0; /* Space for close button */
-}
-
-.changelog-content::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
-    border-radius: var(--border-radius-small);
-}
-
-.changelog-content::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 85%, white), color-mix(in srgb, var(--accent-secondary) 85%, white));
-}
-
-.changelog-content h2 {
-    text-align: center;
-    font-size: 1.8rem;
-    font-weight: 700;
-    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: var(--section-gap);
-    padding-bottom: var(--element-gap);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.changelog-entry {
-    background-color: rgba(var(--bg-primary-rgb), 0.5);
-    border-radius: var(--border-radius-small);
-    padding: var(--main-padding);
-    margin-bottom: var(--section-gap);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 4px rgba(var(--bg-primary-rgb), 0.3);
-}
-
-.changelog-entry:hover {
-    border-color: var(--accent-primary);
-}
-
-.changelog-entry h3.changelog-version {
-    font-size: 1.4rem;
-    color: var(--accent-primary);
-    margin-bottom: 0.35rem;
-    font-weight: 600;
-}
-
-.changelog-entry .changelog-date {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: var(--element-gap);
-    font-style: italic;
-    opacity: 0.8;
-}
-
-.changelog-entry ul {
-    list-style-type: none;
-    padding-left: 0.5rem;
-}
-
-.changelog-entry ul li {
-    margin-bottom: 0.6rem;
-    line-height: 1.6;
-    padding-left: 1.5em;
-    position: relative;
-    color: var(--text-secondary);
-}
-
-.changelog-entry ul li::before {
-    content: '\f005'; /* Font Awesome star icon */
-    font-family: "Font Awesome 6 Free";
-    font-weight: 900; /* Solid star */
-    position: absolute;
-    left: 0;
-    top: 0.1em;
-    color: var(--accent-secondary);
-    font-size: 0.9em;
-}
-
-.changelog-entry ul li strong {
-    color: var(--text-primary);
-    font-weight: 500;
-}
-
-
-/*=============================================
   RESPONSIVE STYLES
 =============================================*/
-@media (max-width: 1050px) { /* not 1024 because header contents will behave weird */
-
-    /* Tablet and below */
+@media (max-width: 1050px) {
     :root {
         --changelog-margin: 1rem;
     }
 
     .main-content {
-        flex-direction: column; /* Stack canvas and control panel */
-        height: auto; /* Allow content to define height */
-        overflow-y: auto; /* Allow main content itself to scroll if stacked children overflow */
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
     }
 
     .control-panel {
         width: 100%;
         max-width: none;
         min-width: auto;
-        max-height: 45vh; /* Limit height when stacked, content inside scrolls */
-        flex: 0 0 auto; /* Don't grow or shrink, take specified height or content height up to max-height */
+        max-height: 45vh;
+        flex: 0 0 auto;
     }
 
     .canvas-area {
-        min-height: 40vh; /* Ensure canvas has decent height */
-        max-height: 60vh; /* Limit canvas height, can be adjusted */
-        flex: 1 1 auto; /* Allow canvas to grow and shrink within available space */
+        min-height: 40vh;
+        max-height: 60vh;
+        flex: 1 1 auto;
     }
 
     .site-header {
-        height: auto; /* Allow header to wrap if content becomes too wide */
-        padding: var(--element-gap) var(--main-padding); /* Adjust padding for potentially taller header */
+        height: auto;
+        padding: var(--element-gap) var(--main-padding);
         flex-direction: column;
-        align-items: stretch; /* Make children full-width */
+        align-items: stretch;
     }
 
     .site-header h1 {
@@ -852,48 +661,28 @@ body.no-scroll {
     .model-imports {
         flex-direction: column;
         width: 100%;
-        gap: var(--element-gap); /* Ensure gap is applied for column layout */
+        gap: var(--element-gap);
     }
 
     .model-loader-group {
         width: 100%;
         flex-direction: column;
-        gap: 0.5rem;
     }
 
     .site-header select,
     .site-header input[type="text"],
-    .site-header button { /* This will also target .header-icon-button */
+    .site-header button {
         width: 100%;
         min-width: auto;
-    }
-    .site-header .header-icon-button {
-        width: 100%;
-    }
-
-    .changelog-modal-container {
-        padding: var(--main-padding);
-    }
-
-    .changelog-content h2 {
-        font-size: 1.6rem;
-    }
-
-    .changelog-entry h3.changelog-version {
-        font-size: 1.2rem;
     }
 }
 
 @media (max-width: 768px) {
-
-    /* Mobile */
     :root {
-        /* Override global variables for smaller screens */
         --main-padding: 1rem;
         --element-gap: 0.75rem;
         --section-gap: 1rem;
         --base-font-size: 15px;
-        /* Slightly smaller base font for mobile */
         --changelog-margin: 0.75rem;
     }
 
@@ -902,8 +691,7 @@ body.no-scroll {
     }
 
     .control-panel {
-        min-width: auto;
-        max-height: 50vh; /* More space for controls on mobile if needed */
+        max-height: 50vh;
         padding: var(--element-gap);
     }
 
@@ -930,45 +718,17 @@ body.no-scroll {
 
     .feature-btn {
         font-size: 0.8rem;
-        padding: 0.5rem 0.7rem; /* Ensures 2 buttons per row even with smaller element-gap */
+        padding: 0.5rem 0.7rem;
         min-width: calc(50% - (var(--element-gap) / 2));
     }
 
     .site-footer {
-        height: auto; /* Allow footer height to be determined by content */
+        height: auto;
         padding-top: var(--element-gap);
         padding-bottom: var(--element-gap);
     }
 
     .site-footer p {
         font-size: 0.8rem;
-    }
-
-    .changelog-modal-container {
-        padding: var(--element-gap);
-    }
-
-    .changelog-close-btn {
-        top: 0.5rem;
-        right: 0.5rem;
-        width: 2.2rem;
-        height: 2.2rem;
-        font-size: 1rem;
-    }
-
-    .changelog-content h2 {
-        font-size: 1.4rem;
-    }
-
-    .changelog-entry {
-        padding: var(--element-gap);
-    }
-
-    .changelog-entry h3.changelog-version {
-        font-size: 1.1rem;
-    }
-
-    .changelog-entry ul li {
-        font-size: 0.9rem;
     }
 }

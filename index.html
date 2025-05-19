@@ -10,6 +10,7 @@
     <link rel="icon" type="image/svg+xml" href="assets/icon.svg" sizes="any">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/repoexplorer.css">
+    <link rel="stylesheet" href="css/newsmodal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"
         integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -21,7 +22,7 @@
             <h1 id="site-title-button">Live2D Viewer</h1>
             <div class="model-imports">
                 <div class="model-loader-group">
-                    <!-- ADDED File Explorer Trigger -->
+                    <!-- File Explorer Trigger -->
                     <button id="open-file-explorer-btn" class="header-icon-button" title="Open GitHub File Explorer" aria-controls="file-explorer-modal" aria-expanded="false">
                         <i class="fas fa-folder-open"></i>
                     </button>
@@ -150,14 +151,12 @@
                 <p>Status: <span id="feStatusMessage" aria-live="polite">Idle</span></p>
             </div>
         </div>
-        <!-- End File Explorer Modal -->
 
         <!-- Loader for File Explorer -->
         <div id="feLoader" class="fe-loader-overlay" style="display: none;">
             <div class="spinner"></div>
             <p>Loading Repository Data...</p>
         </div>
-
     </div>
 
     <!-- Libraries -->
@@ -173,6 +172,7 @@
     <!-- Custom Scripts -->
     <script src="js/script.js" defer></script>
     <script src="js/repoexplorer.js" defer></script>
+    <script src="js/newsmodal.js" defer></script>
 </body>
 
 </html>
