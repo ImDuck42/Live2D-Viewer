@@ -1,16 +1,22 @@
 Some Day:
-    - Thanks to 8con and Osaka for helping me (put credits in the footer)
-    - Destroy model with texture: true if last one of its kind
-
-Priority:
-    - Preview content in explorer tile as row, left/right
     - Cutom look for title="" like tool tip
+    - Custom cursor
+    - Status on what part of the model is loading
     - Smoother animations
-    - Maybe buttons glow as long as the motion lasts
+    - Custom drop down menu
 
-Other:
+
+
+Other (No need for now):
     - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 
 
-Known Issues:
+Fixed Issues:
     - general:
         - Model counter just goes up, number of models on canvas is correct but model id just grows
+            - Was actually no issue, they just kept their id instead of going down by one on remove of another
+
+Completed:
+    - Destroy model with texture: true if last one of its kind
+    - Thanks to 8con and Osaka for helping me
+    - Preview content in explorer (tile as row, left/right)
+        - verry different, still good

@@ -167,6 +167,8 @@
     gap: var(--element-gap);
     overflow-y: auto;
     min-height: 0;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
 
 /*=============================================
@@ -318,7 +320,7 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    max-height: 40vh;
+    height: 100%;
 }
 
 .fe-preview-header {
@@ -360,6 +362,7 @@
 .fe-preview-content {
     flex-grow: 1;
     overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 .fe-preview-content img {

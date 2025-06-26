@@ -319,13 +319,41 @@ function deleteSelectedModel() {
 
     // Clean up hit area frames if they were attached to this model
     if (hitAreaFrames && hitAreaFrames.parent === modelToDelete) {
-        modelToDelete.removeChild(hitAreaFrames); // It's a child, so it will be destroyed with the model
+        modelToDelete.removeChild(hitAreaFrames);
+    }
+
+    // Get all textures used by this model
+    const texturesToCheck = [];
+    if (modelToDelete.textures && Array.isArray(modelToDelete.textures)) {
+        texturesToCheck.push(...modelToDelete.textures);
+    } else if (modelToDelete.texture) {
+        texturesToCheck.push(modelToDelete.texture);
+    }
+
+    // Check if any other model uses the same texture(s)
+    let shouldDestroyTexture = false;
+    if (texturesToCheck.length > 0) {
+        shouldDestroyTexture = texturesToCheck.every(tex => {
+            // If no other model uses this texture, we can destroy it
+            return !models.some(otherModel => {
+                if (otherModel === modelToDelete) return false;
+                if (otherModel.textures && Array.isArray(otherModel.textures)) {
+                    return otherModel.textures.includes(tex);
+                } else if (otherModel.texture) {
+                    return otherModel.texture === tex;
+                }
+                return false;
+            });
+        });
     }
 
     // Destroy the model (releases WebGL resources)
-    // Textures and baseTextures are often shared, so set to false to avoid destroying them if other models use them.
-    modelToDelete.destroy({ children: true, texture: false, baseTexture: false });
-    console.log("Destroyed model, preserving shared textures.");
+    modelToDelete.destroy({
+        children: true,
+        texture: shouldDestroyTexture,
+        baseTexture: shouldDestroyTexture
+    });
+    console.log(`Destroyed model, texture/baseTexture: ${shouldDestroyTexture ? "true (last of kind)" : "false (shared)"}`);
 
     // Select the last model in the list, or null if no models are left
     const nextSelected = models.length > 0 ? models[models.length - 1] : null;
@@ -555,8 +583,11 @@ function populateHitAreaControls(model) {
 
     let validHitAreasFound = 0;
     hitAreaDefs.forEach(hitAreaDef => {
+        // Support both lowercase and capitalized property names
+        const name = hitAreaDef.name || hitAreaDef.Name;
+        const id = hitAreaDef.id || hitAreaDef.Id;
         // Use 'name' if available and non-empty, otherwise fallback to 'id'
-        const hitAreaName = (hitAreaDef.name && hitAreaDef.name.trim() !== "") ? hitAreaDef.name : hitAreaDef.id;
+        const hitAreaName = (name && name.trim() !== "") ? name : id;
         if (!hitAreaName) { // Skip if no identifiable name or id
             console.warn("Hit area found with no name or id:", hitAreaDef);
             return;
