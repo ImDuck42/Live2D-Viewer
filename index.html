@@ -99,7 +99,7 @@
 
         <footer class="site-footer">
             <p>Powered by <a href="https://github.com/guansss/pixi-live2d-display" target="_blank" rel="noopener noreferrer">pixi-live2d-display</a></p>
-            <p>Interact with the model: Click/Drag to move, Scroll/Zoom (selected), tap to Select/Interact</p>
+            <p>Model controls: Drag to move, Scroll/Pinch to zoom, Tap to select/interact.</p>
         </footer>
 
         <!-- Placeholder for Changelog Modal -->
@@ -128,21 +128,23 @@
                         <!-- Breadcrumbs will be populated here -->
                     </div>
                 </div>
-                <div class="fe-file-listing-container scrollable" id="feFileListingContainer">
-                    <p class="fe-placeholder-text">Load a repository to see its content.</p>
-                </div>
+                <div class="fe-content-area-body">
+                    <div class="fe-file-listing-container scrollable" id="feFileListingContainer">
+                        <p class="fe-placeholder-text">Load a repository to see its content.</p>
+                    </div>
 
-                <div class="fe-file-preview-container scrollable" id="feFilePreviewContainer" style="display: none;">
-                    <div class="fe-preview-header">
-                        <h4 id="fePreviewFileName"></h4>
-                        <button id="feClosePreviewBtn" class="fe-icon-button fe-close-btn" title="Close preview">
-                            <i class="fas fa-xmark"></i>
-                        </button>
+                    <div class="fe-file-preview-container" id="feFilePreviewContainer" style="display: none;">
+                        <div class="fe-preview-header">
+                            <h4 id="fePreviewFileName"></h4>
+                            <button id="feClosePreviewBtn" class="fe-icon-button fe-close-btn" title="Close preview">
+                                <i class="fas fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div class="fe-preview-content scrollable" id="fePreviewContent">
+                            <!-- File preview content -->
+                        </div>
+                        <div id="fePreviewActions" class="fe-preview-actions"></div>
                     </div>
-                    <div class="fe-preview-content scrollable" id="fePreviewContent">
-                        <!-- File preview content -->
-                    </div>
-                    <div id="fePreviewActions" class="fe-preview-actions"></div>
                 </div>
             </div>
             <div class="file-explorer-footer">

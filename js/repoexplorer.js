@@ -42,8 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
     const GITHUB_API_BASE = 'https://api.github.com/repos';
     const JSDELIVR_CDN_BASE = 'https://cdn.jsdelivr.net/gh';
-    const DEFAULT_BRANCHE = '@master'; // Default branch for jsDelivr links
-    const MODEL_FILE_REGEX = /(.*)(model3?|model)\.json$/i; // Regex to identify model files
+    const DEFAULT_BRANCH = '@master'; // Default branch for jsDelivr links
+    // const MODEL_FILE_REGEX = /(.*)(model3?|model)\.json$/i; // Regex to identify model files
+    const MODEL_FILE_REGEX = /(.*)(model3?|model)(-[^\/\\]+)?\.json$/i; // Regex to identify model files with optional suffix
 
     //==============================================================================
     // EVENT LISTENERS SETUP
@@ -159,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fileListingContainer.innerHTML = '<p class="fe-placeholder-text">Loading items...</p>';
         updateBreadcrumbsFE(path);
         upDirectoryBtn.style.display = path ? 'flex' : 'none'; // Show 'Up' button if not in root
-        closeFilePreview();
+        // Do NOT closeFilePreview(); // Keep preview open until closed manually
 
         const contents = await fetchGitHubContentsWithCacheFE(path);
         if (!contents) return; // Error handled in fetch function
@@ -293,9 +294,11 @@ document.addEventListener('DOMContentLoaded', () => {
         previewContent.innerHTML = '<p class="fe-placeholder-text">Loading preview...</p>';
         previewActions.innerHTML = ''; // Clear previous actions
         filePreviewContainer.style.display = 'flex';
+        filePreviewContainer.classList.add('active');
+        fileListingContainer.classList.add('preview-open');
         showLoaderFE(true);
 
-        const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCHE}/${fileItem.path}`;
+        const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCH}/${fileItem.path}`;
         const rawGitHubUrl = fileItem.download_url; // Fallback or for non-CDN use
         let fileSourceUrl = jsDelivrUrl; // Assume jsDelivr first
 
@@ -387,6 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeFilePreview() {
+        filePreviewContainer.classList.remove('active');
+        fileListingContainer.classList.remove('preview-open');
         filePreviewContainer.style.display = 'none';
         previewFileName.textContent = '';
         previewContent.innerHTML = '';
@@ -443,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //==============================================================================
     function handleImportModel(fileItem, sourceUrlOverride = null) {
         // Prefer override (e.g., from preview), then download_url, then construct jsDelivr URL
-        const modelUrl = sourceUrlOverride || fileItem.download_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCHE}/${fileItem.path}`;
+        const modelUrl = sourceUrlOverride || fileItem.download_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCH}/${fileItem.path}`;
         console.log(`Attempting to import Live2D Model: ${modelUrl}`);
 
         if (window.loadLive2DModel && typeof window.loadLive2DModel === 'function') {

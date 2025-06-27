@@ -171,6 +171,39 @@
     -ms-overflow-style: none; /* IE and Edge */
 }
 
+.fe-content-area-body {
+    display: flex;
+    flex-direction: row;
+    gap: var(--element-gap);
+    flex-grow: 1;
+    min-height: 0;
+    width: 100%;
+}
+
+.fe-file-listing-container {
+    flex: 1 1 0;
+    max-width: 100%;
+    transition: max-width 0.2s;
+}
+
+.fe-file-preview-container {
+    display: none;
+    flex: 1 1 0;
+    max-width: 50%;
+    margin-left: var(--element-gap);
+    flex-direction: column;
+    min-width: 0;
+}
+
+.fe-file-preview-container.active {
+    display: flex !important;
+}
+
+.fe-file-preview-container.active ~ .fe-file-listing-container,
+.fe-file-listing-container.preview-open {
+    max-width: 50%;
+}
+
 /*=============================================
   CONTENT AREA HEADER
 =============================================*/
@@ -575,5 +608,28 @@
     .fe-import-model-btn {
         padding: 0.25rem 0.5rem;
         font-size: 0.75rem;
+    }
+
+    .file-explorer-main-content {
+        flex-direction: column;
+    }
+    .fe-content-area-body {
+        flex-direction: column;
+    }
+    .fe-file-listing-container,
+    .fe-file-preview-container {
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        flex: 1 1 0;
+    }
+    .fe-file-preview-container {
+        margin-top: var(--element-gap);
+    }
+    .fe-file-preview-container.active {
+        display: flex !important;
+        margin-top: var(--element-gap);
+    }
+    .fe-file-listing-container.preview-open {
+        max-width: 100% !important;
     }
 }
