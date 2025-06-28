@@ -1071,22 +1071,9 @@ function triggerMotionForHitArea(model, hitAreaName) {
 //==============================================================================
 // SCRIPT EXECUTION START
 //==============================================================================
-
-function tryAutoLoadModelFromQuery() {
-    const params = new URLSearchParams(window.location.search);
-    const modelURL = params.get('modelURL');
-    if (modelURL && (modelURL.startsWith('http://') || modelURL.startsWith('https://'))) {
-        if (DOMElements.modelUrlInput) DOMElements.modelUrlInput.value = modelURL;
-        loadModel(modelURL);
-    }
-}
-
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        initApp();
-        tryAutoLoadModelFromQuery();
-    });
+    document.addEventListener('DOMContentLoaded', initApp);
 } else {
+    // DOMContentLoaded has already fired
     initApp();
-    tryAutoLoadModelFromQuery();
 }
