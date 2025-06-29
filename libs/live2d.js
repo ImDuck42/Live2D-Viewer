@@ -6,6 +6,7 @@
  * This file corresponds to the "Redistributable Code" in the agreement.
  * https://www.live2d.com/eula/live2d-proprietary-software-license-agreement_en.html
  */
+
 (function () {
     var j = true;
     function aa() {

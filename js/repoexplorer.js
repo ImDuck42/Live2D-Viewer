@@ -39,12 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentRepo = '';
     let currentPath = '';
     let selectedFileItemElement = null;
-    const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+    const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
     const GITHUB_API_BASE = 'https://api.github.com/repos';
     const JSDELIVR_CDN_BASE = 'https://cdn.jsdelivr.net/gh';
-    const DEFAULT_BRANCH = '@master'; // Default branch for jsDelivr links
-    // const MODEL_FILE_REGEX = /(.*)(model3?|model)\.json$/i; // Regex to identify model files
-    const MODEL_FILE_REGEX = /(.*)(model3?|model)(-[^\/\\]+)?\.json$/i; // Regex to identify model files with optional suffix
+    const MODEL_FILE_REGEX = /model3?[-\w]*\.json$/i; // Regex to match Live2D model files (model.json, model3.json, etc.)
 
     //==============================================================================
     // EVENT LISTENERS SETUP
@@ -133,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateStatus(`Using cached data for: ${path || 'root'}`);
                     return data;
                 }
-                sessionStorage.removeItem(cacheKey); // Cache expired
+                sessionStorage.removeItem(cacheKey); // Cache expired to not overload storage
             } catch (e) {
                 console.warn("Failed to parse cached item, removing:", e);
                 sessionStorage.removeItem(cacheKey);
@@ -146,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data }));
             } catch (e) {
                 console.warn("Failed to save to session storage (possibly full):", e);
-                // Potentially implement a more robust cache eviction strategy if this becomes an issue
             }
         }
         return data;
@@ -179,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const ul = document.createElement('ul');
-        ul.style.cssText = 'list-style-type: none; padding: 0; margin: 0;'; // Basic styling
+        ul.style.cssText = 'list-style-type: none; padding: 0; margin: 0;';
         items.forEach(item => ul.appendChild(createListItemElementFE(item)));
         fileListingContainer.appendChild(ul);
     }
@@ -232,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (item.type === 'dir') {
                 fetchAndDisplayContentsFE(item.path);
-                selectedFileItemElement = null; // No selection for directories after navigation
+                selectedFileItemElement = null;
             } else {
                 fetchAndDisplayFilePreviewFE(item);
                 li.classList.add('selected');
@@ -261,12 +258,12 @@ document.addEventListener('DOMContentLoaded', () => {
             mainBreadcrumbs.appendChild(document.createTextNode(' / '));
             currentBuiltPath += (currentBuiltPath ? '/' : '') + segment;
 
-            if (index < segments.length - 1) { // Not the last segment
+            if (index < segments.length - 1) {
                 const link = document.createElement('a');
                 link.href = '#';
                 link.textContent = segment;
                 link.title = `Navigate to ${segment}`;
-                const pathForLink = currentBuiltPath; // Capture path for this link
+                const pathForLink = currentBuiltPath;
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     fetchAndDisplayContentsFE(pathForLink);
@@ -298,9 +295,10 @@ document.addEventListener('DOMContentLoaded', () => {
         fileListingContainer.classList.add('preview-open');
         showLoaderFE(true);
 
-        const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCH}/${fileItem.path}`;
+        const jsDelivrUrlMain = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}@main/${fileItem.path}`;
+        const jsDelivrUrlMaster = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}@master/${fileItem.path}`;
         const rawGitHubUrl = fileItem.download_url; // Fallback or for non-CDN use
-        let fileSourceUrl = jsDelivrUrl; // Assume jsDelivr first
+        let fileSourceUrl = jsDelivrUrlMain; // Assume jsDelivr first
 
         try {
             const extension = fileItem.name.split('.').pop().toLowerCase();
@@ -310,23 +308,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 const img = document.createElement('img');
                 img.alt = `Preview of ${fileItem.name}`;
                 img.src = fileSourceUrl;
-                img.onerror = () => { // Fallback to raw GitHub URL if jsDelivr fails
-                    console.warn(`Image load failed from jsDelivr: ${fileSourceUrl}. Trying raw GitHub URL.`);
-                    img.src = rawGitHubUrl;
-                    fileSourceUrl = rawGitHubUrl; // Update source URL for "Open" button
-                    img.onerror = () => { // Final failure
-                        previewContent.innerHTML = '<p class="fe-placeholder-text fe-error-message">Could not load image.</p>';
+                img.onerror = () => { // Fallback to master branch
+                    console.warn(`Image load failed from jsDelivr @main. Trying @master.`);
+                    img.src = jsDelivrUrlMaster;
+                    fileSourceUrl = jsDelivrUrlMaster;
+                    img.onerror = () => { // Fallback to raw GitHub URL if jsDelivr fails
+                        console.warn(`Image load failed from jsDelivr @master. Trying raw GitHub URL.`);
+                        img.src = rawGitHubUrl;
+                        fileSourceUrl = rawGitHubUrl; // Update source URL for "Open" button
+                        img.onerror = () => { // Final failure
+                            previewContent.innerHTML = '<p class="fe-placeholder-text fe-error-message">Could not load image.</p>';
+                        };
                     };
                 };
                 previewContent.innerHTML = ''; // Clear loading text
                 previewContent.appendChild(img);
-            } else { // For text-based files
+            } else {
                 let response = await fetch(fileSourceUrl);
                 if (!response.ok) {
-                    console.warn(`Fetch failed from jsDelivr (${response.status}). Trying raw GitHub.`);
-                    fileSourceUrl = rawGitHubUrl;
-                    response = await fetch(rawGitHubUrl);
-                    if (!response.ok) throw new Error(`HTTP ${response.status} fetching file.`);
+                    console.warn(`Fetch failed from jsDelivr @main (${response.status}). Trying @master.`);
+                    fileSourceUrl = jsDelivrUrlMaster;
+                    response = await fetch(fileSourceUrl);
+                    if (!response.ok) {
+                        console.warn(`Fetch failed from jsDelivr @master (${response.status}). Trying raw GitHub.`);
+                        fileSourceUrl = rawGitHubUrl;
+                        response = await fetch(rawGitHubUrl);
+                        if (!response.ok) throw new Error(`HTTP ${response.status} fetching file.`);
+                    }
                 }
                 renderTextPreviewFE(await response.text(), extension);
             }
@@ -367,7 +375,6 @@ document.addEventListener('DOMContentLoaded', () => {
             previewActions.appendChild(githubLink);
         } finally {
             showLoaderFE(false);
-            // Scroll preview into view if it's active
             if (filePreviewContainer.style.display === 'flex') {
                 filePreviewContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
@@ -447,8 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // MODEL IMPORT HANDLING
     //==============================================================================
     function handleImportModel(fileItem, sourceUrlOverride = null) {
-        // Prefer override (e.g., from preview), then download_url, then construct jsDelivr URL
-        const modelUrl = sourceUrlOverride || fileItem.download_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}${DEFAULT_BRANCH}/${fileItem.path}`;
+        const modelUrl = sourceUrlOverride || fileItem.download_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}@main/${fileItem.path}`;
         console.log(`Attempting to import Live2D Model: ${modelUrl}`);
 
         if (window.loadLive2DModel && typeof window.loadLive2DModel === 'function') {

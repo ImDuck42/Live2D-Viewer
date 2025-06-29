@@ -1,6 +1,6 @@
 /**
  * PIXI JS Extra JS (Original: https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/extra.min.js)
- * (a) 2025 ImDuck42
+ * (nuuh) 2025 ImDuck42
  * -- These changes have been made solely to fit my version of a Live2d viewer --
  * 
  * Changes made by ImDuck42:
@@ -16,6 +16,7 @@
  *   - Added checks for valid parent model and existing hitAreas.
  * - Added checks in `onPointerMove` and `_render` for parent/model existence to prevent errors.
 */
+
 var __pow = Math.pow;
 !(function (t, e) {
     "object" == typeof exports && "undefined" != typeof module

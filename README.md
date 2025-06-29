@@ -1,154 +1,148 @@
-<!-- in your README.md -->
-<h1>
-  <img src="assets/icon.svg" width="32" height="32" alt="Site Icon" style="vertical-align: middle;">
-  <strong>Live2D Viewer</strong>
-</h1>
+# <img src="assets/icon.svg" width="32" height="32" alt="Site Icon" style="vertical-align: middle;"> Live2D Viewer  
 
-A browser‑based Live2D viewer that lets you load and interact with one or more Live2D models in real time.  
-Built with plain HTML, CSS, and JavaScript, it supports touch gestures, dynamic controls, and a convenient “What’s New” changelog modal.
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![GitHub Pages](https://img.shields.io/github/deployments/ImDuck42/Live2D-Viewer/github-pages?label=Live%20Preview&logo=github)](https://imduck42.github.io/Live2D-Viewer/)
+&nbsp;&nbsp;&nbsp;[![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](index.html)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)](css)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](js)
 
----
+A decently performant, browser-based Live2D viewer designed for interaction with one or more Live2D models. Built with vanilla JavaScript and the PIXI.js rendering engine.  
+This project offers a feature-rich experience without the overhead of heavy frameworks.
 
-## Table of Contents
-
-- [Preview](#demo)  
-- [Features](#features)  
-- [Installation](#installation)  
-- [Usage](#usage)  
-- [Changelog Modal](#changelog-modal)  
-- [Configuration & Assets](#configuration--assets)  
-- [Contributing](#contributing)  
-- [License](#license)
+It includes a dynamic UI, multi-model support, a GitHub repository explorer for discovering new models, and a "What's New" changelog modal, all wrapped in a clean, responsive design.
 
 ---
 
-## Preview
+## Live Preview
 
-Live Preview: [https://imduck42.github.io/Live2D-Viewer](https://imduck42.github.io/Live2D-Viewer)  
+### **[https://imduck42.github.io/Live2D-Viewer](https://imduck42.github.io/Live2D-Viewer)**
+
 <details>
-<summary>Screenshots</summary>
-<img src="assets/screenshots/EmptyPC.png" width="420" height="auto" alt="Empty PC" style="vertical-align: middle;">
-<img src="assets/screenshots/EmptyMobile.png" width="auto" height="203" alt="Empty Mobile" style="vertical-align: middle;">
-  
-<img src="assets/screenshots/PreviewPC.png" width="420" height="auto" alt="Preview PC" style="vertical-align: middle;">
-<img src="assets/screenshots/PreviewMobile.png" width="auto" height="203" alt="Preview Mobile" style="vertical-align: middle;">
-  
-<img src="assets/screenshots/NewsPC.png" width="420" height="auto" alt="News PC" style="vertical-align: middle;">
-<img src="assets/screenshots/NewsMobile.png" width="auto" height="203" alt="News Mobile" style="vertical-align: middle;">
-  
-<img src="assets/screenshots/ExplorerPC.png" width="420" height="auto" alt="Explorer PC" style="vertical-align: middle;">
-<img src="assets/screenshots/ExplorerMobile.png" width="auto" height="203" alt="Explorer Mobile" style="vertical-align: middle;">
+    <summary><strong>Screenshots</strong></summary>
+    <p align="left">
+        <img src="assets/screenshots/PreviewPC.png" width="49%" alt="Preview on Desktop">
+        <img src="assets/screenshots/PreviewMobile.png" height="220px" alt="Preview on Mobile">
+    </p>
+    <p align="left">
+        <img src="assets/screenshots/ExplorerPC.png" width="49%" alt="File Explorer on Desktop">
+        <img src="assets/screenshots/ExplorerMobile.png" height="220px" alt="File Explorer on Mobile">
+    </p>
+    <p align="left">
+        <img src="assets/screenshots/NewsPC.png" width="49%" alt="Changelog on Desktop">
+        <img src="assets/screenshots/NewsMobile.png" height="220px" alt="Changelog on Mobile">
+    </p>
 </details>
 
 ---
 
 ## Features
 
-- **Multi‑Model Support**  
-  * Load and manage multiple Live2D models simultaneously on the canvas.  
+-   **Multi-Model Support**: Load, view, and interact with multiple Live2D models on the same canvas.
+-   **Intuitive Controls**:
+    -   **Drag** to pan models.
+    -   **Pinch** or **Scroll** to zoom.
+    -   **Tap** on hit areas to trigger motions.
+-   **Dynamic UI Panel**: A responsive sidebar provides real-time control over expressions, motions, and hit-area visibility for the selected model.
+-   **GitHub Repository Explorer**: An integrated file explorer to browse GitHub repositories, preview model files, and import them directly using the jsDelivr CDN.
+-   **Changelog Modal**: A sleek, glassmorphism-style modal that holds and displays the latest project updates from `changes.html`.
+-   **Responsive Design**: A fluid layout that adapts seamlessly to both desktop, tablet and mobile devices.
+-   **Framework-Free**: Built with pure, well-organized JavaScript, css and html ensuring a lightweight and transparent codebase.
+---
 
-- **Touch & Mouse Controls**  
-  * Pinch‑to‑zoom, drag, and click on hit areas to trigger motions and expressions.  
+## Technology Stack
 
-- **Dynamic UI Panel**  
-  * Toggle and control model parameters (motions, expressions, hit‑area visualizations) via a responsive sidebar.  
+-   **Rendering**: [PIXI.js](https://pixijs.com/) v6.5.8
+-   **Live2D Integration**: [pixi-live2d-display](https://github.com/guansss/pixi-live2d-display) v0.4.0
+-   **Core SDK**: Live2D Cubism Core
+-   **Icons**: [Font Awesome](https://fontawesome.com/) v6.5.2
+-   **Languages**: HTML5, CSS3, JavaScript (ES6+)
+-   **CDN**: [jsDelivr](https://www.jsdelivr.com/) for fetching repository files.
 
-- **Responsive Design**  
-  * Works on both desktop and mobile devices with adaptive layouts.  
+---
 
-- **Changelog Modal**  
-  * Built‑in “What’s New” modal (glassmorphism style) that dynamically loads your latest updates.
+## File Structure
 
-- **File Explorer**  
-  * Live2D Viewer has an inbuild GH-Repo Explorer to directly look through many hosted Live2d models.
+The project is organized into a clear and maintainable structure:
 
-- **No Frameworks**  
-  * Only uses the official Live2D Cubism libraries plus vanilla JS — no frameworks required.
+```
+.
+├── assets/
+│   ├── icon.svg
+│   ├── changes.html
+│   └── screenshots/
+├── css/
+│   ├── styles.css
+│   ├── repoexplorer.css
+│   └── newsmodal.css
+├── js/
+│   ├── script.js
+│   ├── repoexplorer.js
+│   └── newsmodal.js
+├── libs/
+│   ├── live2d.js
+│   ├── live2dcubismcore.js
+│   └── extra.js
+├── index.html
+├── README.md
+├── LICENSE
+└── zToDo.txt
+```
 
 ---
 
 ## Installation
 
-1. **Clone the repository**  
-   ```bash
-   git clone https://github.com/ImDuck42/Live2D-Viewer.git
-   cd Live2D-Viewer
+To run the viewer locally, follow these steps:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/ImDuck42/Live2D-Viewer.git
+    cd Live2D-Viewer
     ```
 
-2. **Open in browser**
-   Simply open `index.html` in any modern browser (Chrome, Firefox, Edge, Safari).
+2.  **Open in a browser:**
+    You can open `index.html` directly in a modern browser.
 
-3. **(Optional) Serve locally**
-   If you want to serve via HTTP (recommended for model loading):
-   ```bash
-   # Using Python 3.x
-   python3 -m http.server 8000
-   # Then open http://localhost:8000 in your browser
+3.  **(Recommended) Serve locally:**
+    For best results and to avoid potential CORS issues when loading models, run a local web server.
+    ```bash
+    # If you have Python 3 installed:
+    python3 -m http.server
+
+    # Then, open http://localhost:8000 in your browser.
     ```
 
 ---
 
 ## Usage
 
-1. **Load a model**
-   * Enter the url of a `.model(3).json` file or select one of the `default models`.  
-   * Click the `open-folder icon` in the header and look through all the `models` hosted on github.
+1.  **Load a Model**:
+    -   **URL Input**: Paste the URL of a `model.json` or `.model3.json` file and click "Load URL".
+    -   **Default Models**: Choose a pre-configured model from the dropdown and click "Load Selected".
+    -   **File Explorer**: Click the **folder icon** in the header to open the GitHub Repository Explorer. Browse for models and import them with a single click.
 
-2. **Interact**
-   * **Click** on defined hit areas to trigger motions.
-   * **Drag** to move the model around.
-   * **Pinch** (or scroll) to zoom in/out.
+2.  **Interact with the Model**:
+    -   **Select**: Tap a model to select it. The control panel will update accordingly.
+    -   **Move**: Drag the selected model to reposition it.
+    -   **Zoom**: Use the mouse wheel or pinch gestures to zoom in and out.
+    -   **Trigger Motions**: Tap on a model's hit areas (like the head or body) to play associated motions.
 
-3. **UI Controls**
-   * Use the sidebar to toggle hit‑area outlines, switch expressions, and play predefined motions.
-   * Click the trash icon on the right of the toggle to delete the currently selected model.
-   * Click the site title to open the changelog modal.
-   * Select the folder icon to browse models on github.
-
----
-
-## Changelog Modal
-
-A modal that lists the project’s latest commits and updates.
-
-* **Location**: `assets/changes.html` (and embedded directly in `index.html`)
-* **Dynamic Loading**: Fetches `changes.html` on demand so I didn't have to rewrite the main page.
-* **Styling**: Glassmorphism panel with accessible close button (Crazy ik).
-
----
-
-## Configuration & Assets
-
-* **CSS**:
-  * `css/styles.css` — main styling and responsive rules
-  * `css/repoexplorer.css` — styling for the github repository explorer
-
-* **JavaScript**:
-  * `js/script.js` — viewer logic, event handlers, UI initialization
-  * `js/repoexplorer.js` — javascript responsible for the github repository explorer
-
-* **Libraries** (`libs/`):
-  * `live2d.min.js`, `live2dcubismcore.min.js` — the official Live2D runtimes
-  * `js/extra.js` — hit‑area styling, utility functions (modification from the original)
-
-* **Assets**:
-  * `assets/` — site icon and changes.html
-  * `assets/changes.html` — html which holds the changes, embedded in the news modal
-  * `assets/screenshots` — site screenshots used in README.md
+3.  **Use the Control Panel**:
+    -   **Show Hit Areas**: Check the box to visualize the model's interactive hit zones.
+    -   **Expressions & Motions**: Click buttons in the corresponding sections to apply expressions or play animations.
+    -   **Delete Model**: Click the trash icon to remove the currently selected model from the canvas.
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request with:
+Contributions are welcome! If you have ideas for improvements or find a bug, please feel free to:
 
-1. A clear description of the change.
-2. Relevant screenshots or code snippets.
+1.  **Open an Issue**: Describe the issue or feature proposal in detail.
+2.  **Submit a Pull Request**: Fork the repository, make your changes, and submit a PR with a clear description of your work.
 
-Please follow the existing code style conventions.
-
----
+Please adhere to the existing code style and add comments where possible.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute as you see fit.
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.

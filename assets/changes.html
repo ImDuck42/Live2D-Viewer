@@ -1,232 +1,378 @@
-<div id="changelog-modal" class="changelog-modal-container">
-    <button id="changelog-close-button" class="changelog-close-btn" title="Close Changelog" aria-label="Close Changelog">
-        <i class="fas fa-xmark"></i>
-    </button>
-    <div class="changelog-content">
-        <h2>V4.1 -- What's New:</h2>
+<!Doctype html>
+<html lang="en">
 
-    <!-- June 27, 2025 -->
-    <article class="changelog-entry">
-        <h3 class="changelog-version">Commits on June 27, 2025</h3>
-        <p class="changelog-date">June 27, 2025</p>
-        <ul>
-            <li><strong>[4a38c43]</strong><br>
-                changed the file content preview now to left/right row instead of top/bottom column
-                <br>
-                updated model name regex to support model names with a suffix (e.g. model-1.json)
-                <br>
-                corrected spelling mistake of DEFAULT_BRANCHE to DEFAULT_BRANCH
-                <br>
-                changed footer model controls
-            </li>
-        </ul>
-    </article>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Live2D Viewer Changelog">
+    <meta name="theme-color" content="#0f0f1a">
+    <title>changes.html</title>
+    <link rel="icon" type="image/svg+xml" href="icon.svg" sizes="any">
+</head>
 
-    <!-- June 26, 2025 -->
-    <article class="changelog-entry">
-        <h3 class="changelog-version">Commits on June 26, 2025</h3>
-        <p class="changelog-date">June 26, 2025</p>
-        <ul>
-            <li><strong>[ecd41e8]</strong><br>
-                changed the default live2d-model repository to a more up to date one <a href="https://github.com/Eikanya/Live2d-model">https://github.com/Eikanya/Live2d-model</a>
-                <br>
-                added simple credits at the bottom of news modal
-                <br>
-                updated pixi js to 6.5.8 and fontawesome to 6.5.2
-                <br>
-                changed the file content preview in the file explorer
-                <br>
-                now destroy unneeded textures on model removal
-                <br>
-                fixed an issue where ID was requested but only id searched | now lower and upercase working
-            </li>
-        </ul>
-    </article>
+<body>
+    <div id="changelog-modal" class="changelog-modal-container">
+        <button id="changelog-close-button" class="changelog-close-btn" title="Close Changelog"
+            aria-label="Close Changelog">
+            <i class="fas fa-xmark"></i>
+        </button>
+        <div class="changelog-content">
+            <h2>V4.1 -- What's New:</h2>
 
-    <!-- May 19, 2025 -->
-    <article class="changelog-entry">
-        <h3 class="changelog-version">Commits on May 19, 2025</h3>
-        <p class="changelog-date">May 19, 2025</p>
-        <ul>
-            <li><strong>[0d12618]</strong><br>
-                seperate the news modal js and css in its own files
-                <br>
-                reworked all js and css files
-            </li>
-        </ul>
-    </article>
-
-    <!-- May 18, 2025 -->
-    <article class="changelog-entry">
-        <h3 class="changelog-version">Commits on May 18, 2025</h3>
-        <p class="changelog-date">May 18, 2025</p>
-        <ul>
-            <li><strong>[e75d203]</strong> better design for the in explorer import button</li>
-            <li><strong>[HOTFIX]</strong> [4a7f6f5] fixed jsdelivr and github urls failing in 404</li>
-            <li><strong>[1cb81cc] Fck ton of refactoring: 4.0 -> 4.1</strong><br>
-                refactor: script.js, repoexplorer.js, styles.css, repoexplorer.css
-                <br>
-                small modifications: icon.svg, changes.html, ztodo.txt, index.html, extra.js
-                <br>
-                added repoexplorer to README.md 
-            </li>
-            <li><strong>[fc047e8]</strong> new remove model button placement</li>
-            <li><strong>[21f7df4]</strong> small design fixes</li>
-        </ul>
-    </article>
-
-    <!-- May 17, 2025 -->
-    <article class="changelog-entry">
-        <h3 class="changelog-version">Live2D Viewer Version 4.0 Released!</h3>
-        <p class="changelog-date">May 17, 2025</p>
-        <p>We are thrilled to announce the launch of <strong>Live2D Viewer version 4.0</strong>! This major update
-            introduces a new way to discover and load models, alongside internal improvements.</p>
-        <ul>
-            <li>
-                <strong>New Feature: GitHub Repository Explorer!</strong>
+            <!-- June 29, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on June 29, 2025</h3>
+                <p class="changelog-date">June 29, 2025</p>
                 <ul>
-                    You can now directly browse GitHub repositories for Live2D models using the new File Explorer.
-                    <br>
-                    Access it via the <strong>folder icon</strong> located to the left of the model URL input field.
-                    <br>
-                    Enter any GitHub repository owner and name to explore its contents.
-                    A default repository, rich with numerous Live2D models, is pre-filled for convenience.
-                    <br>
-                    (<em>Please note: While this repository offers a wide selection, compatibility with every model is not guaranteed.</em>)
+                    <li><strong>[NONEYET]</strong><br>
+                        refactored some files and reorganized the file structure
+                    </li>
                 </ul>
-            </li>
-            <li>
-                <strong>Core Enhancements:</strong>
+            </article>
+
+            <!-- June 27, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on June 27, 2025</h3>
+                <p class="changelog-date">June 27, 2025</p>
                 <ul>
-                    Introduced new core files: <code>js/repoexplorer.js</code> and <code>css/repoexplorer.css</code> to power the File Explorer functionality.
-                    <br>
-                    Internal file structure has been reorganized for better project management (e.g., some assets moved to an <code>aaMisc</code> directory).
+                    <li><strong>[4a38c43]</strong><br>
+                        changed the file content preview now to left/right row instead of top/bottom column
+                        <br>
+                        updated model name regex to support model names with a suffix (e.g. model-1.json)
+                        <br>
+                        corrected spelling mistake of DEFAULT_BRANCHE to DEFAULT_BRANCH
+                        <br>
+                        changed footer model controls
+                    </li>
                 </ul>
-            </li>
-        </ul>
-    </article>
+            </article>
 
-        <!-- May 16, 2025 -->
-        <article class="changelog-entry">
-            <h3 class="changelog-version">Big Plans for the Website</h3>
-            <p class="changelog-date">May 16, 2025</p>
-            <ul>
-                <li>
-                    <strong>Exciting News: A New Way to Explore Live2D Models is Coming!</strong><br>
-                    <br>
-                    We're working on a fantastic update for you: a built-in File Explorer for our website!
-                    <br>
-                    This new feature will let you navigate through all the files and folders within Live2D model hosting repositories, just like you would on your own computer.
-                    <br>
-                    We believe this will greatly improve how you find and select your favorite models.
-                    <br>
-                    Here's the really cool part: while you're browsing, if you spot a file that looks like a model's main configuration (it will usually have "model" in its name and a ".json" extension),
-                    <br>
-                    you can import it directly with a single click, right from the explorer!
-                </li>
-            </ul>
-        </article>
+            <!-- June 26, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on June 26, 2025</h3>
+                <p class="changelog-date">June 26, 2025</p>
+                <ul>
+                    <li><strong>[ecd41e8]</strong><br>
+                        changed the default live2d-model repository to a more up to date one <a
+                            href="https://github.com/Eikanya/Live2d-model">https://github.com/Eikanya/Live2d-model</a>
+                        <br>
+                        added simple credits at the bottom of news modal
+                        <br>
+                        updated pixi js to 6.5.8 and fontawesome to 6.5.2
+                        <br>
+                        changed the file content preview in the file explorer
+                        <br>
+                        now destroy unneeded textures on model removal
+                        <br>
+                        fixed an issue where ID was requested but only id searched | now lower and upercase working
+                    </li>
+                </ul>
+            </article>
 
-        <!-- May 17, 2025 -->
-        <article class="changelog-entry">
-            <h3 class="changelog-version">Commits on May 17, 2025</h3>
-            <p class="changelog-date">May 17, 2025</p>
-            <ul>
-                <li><strong>[5483bde]</strong> small bug fixes</li>
-                <li><strong>[15cce98]</strong> fixed an issue where the motion/expression etc sections didnt get cleared on model deletion, small css changes</li>
-                <li><strong>[9ac2200]</strong> added more previews in screenshots and added them to the readme</li>
-                <li><strong>[4d9bc09]</strong> added new screenshot in README.md and changed hover styles for header buttons</li>
-                <li><strong>[37d6258]</strong> version 4 release introducing a gh-repo explorer and minor improvements</li>
-                <li><strong>[41118c1]</strong>
-                    fixed a issue on mobile where the hit area labels did stack from old models and did not get removed -> Changes in extra.js
-                    <br>
-                    also only make a tap play a motion if its not the selecting tap
-                    <br>
-                    reformated all files, removing whitespaces empty lines etc
-                </li>
-            </ul>
-        </article>
+            <!-- May 19, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on May 19, 2025</h3>
+                <p class="changelog-date">May 19, 2025</p>
+                <ul>
+                    <li><strong>[0d12618]</strong><br>
+                        seperate the news modal js and css in its own files
+                        <br>
+                        reworked all js and css files
+                    </li>
+                </ul>
+            </article>
 
-        <!-- May 16, 2025 -->
-        <article class="changelog-entry">
-            <h3 class="changelog-version">Commits on May 16, 2025</h3>
-            <p class="changelog-date">May 16, 2025</p>
-            <ul>
-                <li><strong>[File Explorer]</strong> added the blog about our upcomming project</li>
-                <li><strong>[b296964]</strong> add README.md and LICENSE as well as some screenshots in assets/screenshots</li>
-                <li><strong>[4938145]</strong> added changes.html in /assets and a "iframe" by clicking the page title to view them</li>
-                <li><strong>[aaecb7d]</strong> add another back up on current standpoint 5.16.25-5:12pm</li>
-                <li><strong>[b1f32c9]</strong> fix issues with texture unloading, add selected indicator, version in footer, other small changes</li>
-                <li><strong>[3272c3f]</strong> support/manage multiple models on one canvas</li>
-                <li><strong>[73acd1d]</strong> removed old css</li>
-                <li><strong>[17d293e]</strong> fixed header on mobile</li>
-            </ul>
-        </article>
+            <!-- May 18, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on May 18, 2025</h3>
+                <p class="changelog-date">May 18, 2025</p>
+                <ul>
+                    <li><strong>[e75d203]</strong> better design for the in explorer import button</li>
+                    <li><strong>[HOTFIX]</strong> [4a7f6f5] fixed jsdelivr and github urls failing in 404</li>
+                    <li><strong>[1cb81cc] Fck ton of refactoring: 4.0 -> 4.1</strong><br>
+                        refactor: script.js, repoexplorer.js, styles.css, repoexplorer.css
+                        <br>
+                        small modifications: icon.svg, changes.html, ztodo.txt, index.html, extra.js
+                        <br>
+                        added repoexplorer to README.md
+                    </li>
+                    <li><strong>[fc047e8]</strong> new remove model button placement</li>
+                    <li><strong>[21f7df4]</strong> small design fixes</li>
+                </ul>
+            </article>
 
-        <!-- May 15, 2025 -->
-        <article class="changelog-entry">
-            <h3 class="changelog-version">Commits on May 15, 2025</h3>
-            <p class="changelog-date">May 15, 2025</p>
-            <ul>
-                <li><strong>[061cbfb]</strong> refactor css</li>
-            </ul>
-        </article>
+            <!-- May 17, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Live2D Viewer Version 4.0 Released!</h3>
+                <p class="changelog-date">May 17, 2025</p>
+                <p>We are thrilled to announce the launch of <strong>Live2D Viewer version 4.0</strong>! This major
+                    update
+                    introduces a new way to discover and load models, alongside internal improvements.</p>
+                <ul>
+                    <li>
+                        <strong>New Feature: GitHub Repository Explorer!</strong>
+                        <ul>
+                            You can now directly browse GitHub repositories for Live2D models using the new File
+                            Explorer.
+                            <br>
+                            Access it via the <strong>folder icon</strong> located to the left of the model URL input
+                            field.
+                            <br>
+                            Enter any GitHub repository owner and name to explore its contents.
+                            A default repository, rich with numerous Live2D models, is pre-filled for convenience.
+                            <br>
+                            (<em>Please note: While this repository offers a wide selection, compatibility with every
+                                model is not guaranteed.</em>)
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Core Enhancements:</strong>
+                        <ul>
+                            Introduced new core files: <code>js/repoexplorer.js</code> and
+                            <code>css/repoexplorer.css</code> to power the File Explorer functionality.
+                            <br>
+                            Internal file structure has been reorganized for better project management (e.g., some
+                            assets moved to an <code>aaMisc</code> directory).
+                        </ul>
+                    </li>
+                </ul>
+            </article>
 
-        <!-- May 14, 2025 -->
-        <article class="changelog-entry">
-            <h3 class="changelog-version">Commits on May 14, 2025</h3>
-            <p class="changelog-date">May 14, 2025</p>
-            <ul>
-                <li><strong>[76b245f]</strong> center model on x after width change</li>
-                <li><strong>[8fa58c4]</strong> small css changes</li>
-                <li><strong>[f256613]</strong> full name</li>
-                <li><strong>[9109762]</strong> update todo</li>
-                <li><strong>[bfc297c]</strong> .</li>
-                <li><strong>[420c294]</strong> fix estra.js path</li>
-                <li><strong>[9160896]</strong> test for mobile</li>
-                <li><strong>[c0f5c7e]</strong> .</li>
-                <li><strong>[7a592e5]</strong> addded design for checkbox</li>
-                <li><strong>[18a8adf]</strong> added a site icon meta tags and renamed backeups to aabackups so it stayson top</li>
-                <li><strong>[5c99ed5]</strong> credits plan in footer</li>
-                <li><strong>[cedcd6f]</strong> unmin'ed local files (I don't like the look of them), changed styles of hitareas by modifying the extra.js (prev. extra.min.js) file</li>
-            </ul>
-        </article>
+            <!-- May 16, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Big Plans for the Website</h3>
+                <p class="changelog-date">May 16, 2025</p>
+                <ul>
+                    <li>
+                        <strong>Exciting News: A New Way to Explore Live2D Models is Coming!</strong><br>
+                        <br>
+                        We're working on a fantastic update for you: a built-in File Explorer for our website!
+                        <br>
+                        This new feature will let you navigate through all the files and folders within Live2D model
+                        hosting repositories, just like you would on your own computer.
+                        <br>
+                        We believe this will greatly improve how you find and select your favorite models.
+                        <br>
+                        Here's the really cool part: while you're browsing, if you spot a file that looks like a model's
+                        main configuration (it will usually have "model" in its name and a ".json" extension),
+                        <br>
+                        you can import it directly with a single click, right from the explorer!
+                    </li>
+                </ul>
+            </article>
 
-        <!-- May 13, 2025 -->
-        <article class="changelog-entry">
-            <h3 class="changelog-version">Commits on May 13, 2025</h3>
-            <p class="changelog-date">May 13, 2025</p>
-            <ul>
-                <li><strong>[15ae5ca]</strong> removed file uploads for now, fixed the motions not playing on clicking area hitboxes due to wrong coordinates caused by either moving or resizing</li>
-                <li><strong>[2e0f495]</strong> .</li>
-                <li><strong>[5b36fe4]</strong> .</li>
-                <li><strong>[0e64be3]</strong> .</li>
-            </ul>
-        </article>
+            <!-- May 17, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on May 17, 2025</h3>
+                <p class="changelog-date">May 17, 2025</p>
+                <ul>
+                    <li><strong>[5483bde]</strong> small bug fixes</li>
+                    <li><strong>[15cce98]</strong> fixed an issue where the motion/expression etc sections didnt get
+                        cleared on model deletion, small css changes</li>
+                    <li><strong>[9ac2200]</strong> added more previews in screenshots and added them to the readme</li>
+                    <li><strong>[4d9bc09]</strong> added new screenshot in README.md and changed hover styles for header
+                        buttons</li>
+                    <li><strong>[37d6258]</strong> version 4 release introducing a gh-repo explorer and minor
+                        improvements</li>
+                    <li><strong>[41118c1]</strong>
+                        fixed a issue on mobile where the hit area labels did stack from old models and did not get
+                        removed -> Changes in extra.js
+                        <br>
+                        also only make a tap play a motion if its not the selecting tap
+                        <br>
+                        reformated all files, removing whitespaces empty lines etc
+                    </li>
+                </ul>
+            </article>
 
-        <!-- May 12, 2025 -->
-        <article class="changelog-entry">
-            <h3 class="changelog-version">Initial Commit</h3>
-            <p class="changelog-date">May 12, 2025</p>
-            <ul>
-                <li><strong>[9564189]</strong> initial commit</li>
-            </ul>
-        </article>
+            <!-- May 16, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on May 16, 2025</h3>
+                <p class="changelog-date">May 16, 2025</p>
+                <ul>
+                    <li><strong>[File Explorer]</strong> added the blog about our upcomming project</li>
+                    <li><strong>[b296964]</strong> add README.md and LICENSE as well as some screenshots in
+                        assets/screenshots</li>
+                    <li><strong>[4938145]</strong> added changes.html in /assets and a "iframe" by clicking the page
+                        title to view them</li>
+                    <li><strong>[aaecb7d]</strong> add another back up on current standpoint 5.16.25-5:12pm</li>
+                    <li><strong>[b1f32c9]</strong> fix issues with texture unloading, add selected indicator, version in
+                        footer, other small changes</li>
+                    <li><strong>[3272c3f]</strong> support/manage multiple models on one canvas</li>
+                    <li><strong>[73acd1d]</strong> removed old css</li>
+                    <li><strong>[17d293e]</strong> fixed header on mobile</li>
+                </ul>
+            </article>
 
-        <article class="changelog-entry">
-            <h3 class="changelog-version">Thanks to 8con and Osaka for the Help on this project</h3>
-            <p class="changelog-date">June 26, 2025</p>
-        </article>
+            <!-- May 15, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on May 15, 2025</h3>
+                <p class="changelog-date">May 15, 2025</p>
+                <ul>
+                    <li><strong>[061cbfb]</strong> refactor css</li>
+                </ul>
+            </article>
+
+            <!-- May 14, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on May 14, 2025</h3>
+                <p class="changelog-date">May 14, 2025</p>
+                <ul>
+                    <li><strong>[76b245f]</strong> center model on x after width change</li>
+                    <li><strong>[8fa58c4]</strong> small css changes</li>
+                    <li><strong>[f256613]</strong> full name</li>
+                    <li><strong>[9109762]</strong> update todo</li>
+                    <li><strong>[bfc297c]</strong> .</li>
+                    <li><strong>[420c294]</strong> fix estra.js path</li>
+                    <li><strong>[9160896]</strong> test for mobile</li>
+                    <li><strong>[c0f5c7e]</strong> .</li>
+                    <li><strong>[7a592e5]</strong> addded design for checkbox</li>
+                    <li><strong>[18a8adf]</strong> added a site icon meta tags and renamed backeups to aabackups so it
+                        stayson top</li>
+                    <li><strong>[5c99ed5]</strong> credits plan in footer</li>
+                    <li><strong>[cedcd6f]</strong> unmin'ed local files (I don't like the look of them), changed styles
+                        of hitareas by modifying the extra.js (prev. extra.min.js) file</li>
+                </ul>
+            </article>
+
+            <!-- May 13, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on May 13, 2025</h3>
+                <p class="changelog-date">May 13, 2025</p>
+                <ul>
+                    <li><strong>[15ae5ca]</strong> removed file uploads for now, fixed the motions not playing on
+                        clicking area hitboxes due to wrong coordinates caused by either moving or resizing</li>
+                    <li><strong>[2e0f495]</strong> .</li>
+                    <li><strong>[5b36fe4]</strong> .</li>
+                    <li><strong>[0e64be3]</strong> .</li>
+                </ul>
+            </article>
+
+            <!-- May 12, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Initial Commit</h3>
+                <p class="changelog-date">May 12, 2025</p>
+                <ul>
+                    <li><strong>[9564189]</strong> initial commit</li>
+                </ul>
+            </article>
+
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Thanks to 8con and Osaka for the Help on this project</h3>
+                <p class="changelog-date">June 26, 2025</p>
+            </article>
+        </div>
     </div>
-</div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Check if this window is the top-most window (not in an iframe)
-        if (window.self === window.top) {
-            const modal = document.getElementById('changelog-modal');
-            if (modal) {
-                modal.style.display = 'none';
+    <script>
+        // This script improves the user experience when this file is opened directly.
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.self === window.top) {
+                const modal = document.getElementById('changelog-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+
+                // Style the body for a centered layout.
+                document.body.style.backgroundColor = '#0f0f1a';
+                document.body.style.color = '#b8b8d0';
+                document.body.style.display = 'flex';
+                document.body.style.justifyContent = 'center';
+                document.body.style.alignItems = 'center';
+                document.body.style.height = '100vh';
+                document.body.style.margin = '0';
+                document.body.style.fontFamily = 'Poppins, sans-serif';
+                document.body.style.userSelect = 'none';
+
+                // Create a wrapper to position the link relative to the main text.
+                const contentWrapper = document.createElement('div');
+                contentWrapper.style.position = 'relative';
+                contentWrapper.style.display = 'inline-block';
+
+                // Create and style the main message element.
+                const messageDiv = document.createElement('div');
+                messageDiv.textContent = 'CHANGES.HTML';
+                messageDiv.style.fontSize = 'clamp(2rem, 5vw, 4rem)';
+                messageDiv.style.fontWeight = '600';
+                messageDiv.style.opacity = '0.6';
+                messageDiv.style.letterSpacing = '0.1em';
+                messageDiv.style.paddingBottom = '0.25rem';
+
+                // Create and style the "go back" link.
+                const goBackLink = document.createElement('a');
+                goBackLink.href = '../';
+                goBackLink.textContent = 'GO BACK!';
+                goBackLink.style.position = 'absolute';
+                goBackLink.style.fontWeight = '600';
+                goBackLink.style.opacity = '0.6';
+                goBackLink.style.bottom = '0';
+                goBackLink.style.right = '0';
+                goBackLink.style.fontSize = '1rem';
+                goBackLink.style.color = '#b8b8d0';
+                goBackLink.style.textDecoration = 'none';
+                goBackLink.style.transition = 'opacity 0.25s ease-in-out';
+
+                goBackLink.onmouseover = () => {
+                    goBackLink.style.opacity = '1';
+                };
+                goBackLink.onmouseout = () => {
+                    goBackLink.style.opacity = '0.6';
+                };
+
+                // Add the elements to the wrapper, then the wrapper to the page.
+                contentWrapper.appendChild(messageDiv);
+                contentWrapper.appendChild(goBackLink);
+                document.body.appendChild(contentWrapper);
             }
-        }
-    });
-</script>
+
+            // Attempt to hinder use of DevTools (Just for fun, not a real security measure)
+            document.addEventListener('keydown', function (e) {
+                // F12, Ctrl/Cmd+Shift+I/J/K/C/M, Ctrl/Cmd+U, Cmd+Option+I/J/K/M
+                if (
+                    e.key === 'F12' ||
+                    ((e.ctrlKey || e.metaKey) && e.shiftKey && (
+                        e.key.toUpperCase() === 'I' ||
+                        e.key.toUpperCase() === 'J' ||
+                        e.key.toUpperCase() === 'K' ||
+                        e.key.toUpperCase() === 'C' ||
+                        e.key.toUpperCase() === 'M'
+                    )) ||
+                    ((e.ctrlKey || e.metaKey) && e.key.toUpperCase() === 'U') ||
+                    ((e.metaKey && e.altKey) && (
+                        e.key.toUpperCase() === 'I' ||
+                        e.key.toUpperCase() === 'J' ||
+                        e.key.toUpperCase() === 'K' ||
+                        e.key.toUpperCase() === 'M'
+                    ))
+                ) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            });
+
+            // Disable right-click context menu
+            document.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+            });
+
+            // Disable right-click > Inspect on elements
+            document.body.addEventListener('mousedown', function (e) {
+                if (e.button === 2) {
+                    e.preventDefault();
+                }
+            });
+
+            // Attempt to block drag/drop of elements (sometimes used for inspection)
+            document.addEventListener('dragstart', function (e) {
+                e.preventDefault();
+            });
+
+            // Attempt to block selection (for context menu > Inspect)
+            document.addEventListener('selectstart', function (e) {
+                e.preventDefault();
+            });
+        });
+    </script>
+</body>
+
+</html>
