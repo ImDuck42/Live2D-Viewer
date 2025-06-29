@@ -295,10 +295,10 @@ document.addEventListener('DOMContentLoaded', () => {
         fileListingContainer.classList.add('preview-open');
         showLoaderFE(true);
 
-        const jsDelivrUrlMain = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}@main/${fileItem.path}`;
+        // Use jsDelivr as primary CDN
         const jsDelivrUrlMaster = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}@master/${fileItem.path}`;
         const rawGitHubUrl = fileItem.download_url; // Fallback or for non-CDN use
-        let fileSourceUrl = jsDelivrUrlMain; // Assume jsDelivr first
+        let fileSourceUrl = jsDelivrUrlMaster;
 
         try {
             const extension = fileItem.name.split('.').pop().toLowerCase();
@@ -308,17 +308,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const img = document.createElement('img');
                 img.alt = `Preview of ${fileItem.name}`;
                 img.src = fileSourceUrl;
-                img.onerror = () => { // Fallback to master branch
-                    console.warn(`Image load failed from jsDelivr @main. Trying @master.`);
-                    img.src = jsDelivrUrlMaster;
-                    fileSourceUrl = jsDelivrUrlMaster;
-                    img.onerror = () => { // Fallback to raw GitHub URL if jsDelivr fails
-                        console.warn(`Image load failed from jsDelivr @master. Trying raw GitHub URL.`);
-                        img.src = rawGitHubUrl;
-                        fileSourceUrl = rawGitHubUrl; // Update source URL for "Open" button
-                        img.onerror = () => { // Final failure
-                            previewContent.innerHTML = '<p class="fe-placeholder-text fe-error-message">Could not load image.</p>';
-                        };
+                img.onerror = () => { // Fallback to raw GitHub URL if jsDelivr fails
+                    console.warn(`Image load failed from jsDelivr. Trying raw GitHub URL.`);
+                    img.src = rawGitHubUrl;
+                    fileSourceUrl = rawGitHubUrl; // Source URL for "Open" button
+                    img.onerror = () => { // Final failure
+                        previewContent.innerHTML = '<p class="fe-placeholder-text fe-error-message">Could not load image.</p>';
                     };
                 };
                 previewContent.innerHTML = ''; // Clear loading text
@@ -326,15 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 let response = await fetch(fileSourceUrl);
                 if (!response.ok) {
-                    console.warn(`Fetch failed from jsDelivr @main (${response.status}). Trying @master.`);
-                    fileSourceUrl = jsDelivrUrlMaster;
-                    response = await fetch(fileSourceUrl);
-                    if (!response.ok) {
-                        console.warn(`Fetch failed from jsDelivr @master (${response.status}). Trying raw GitHub.`);
-                        fileSourceUrl = rawGitHubUrl;
-                        response = await fetch(rawGitHubUrl);
-                        if (!response.ok) throw new Error(`HTTP ${response.status} fetching file.`);
-                    }
+                    console.warn(`Fetch failed from jsDelivr (${response.status}). Trying raw GitHub.`);
+                    fileSourceUrl = rawGitHubUrl;
+                    response = await fetch(rawGitHubUrl);
+                    if (!response.ok) throw new Error(`HTTP ${response.status} fetching file.`);
                 }
                 renderTextPreviewFE(await response.text(), extension);
             }
@@ -454,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // MODEL IMPORT HANDLING
     //==============================================================================
     function handleImportModel(fileItem, sourceUrlOverride = null) {
-        const modelUrl = sourceUrlOverride || fileItem.download_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}@main/${fileItem.path}`;
+        const modelUrl = sourceUrlOverride || fileItem.download_url || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}@master/${fileItem.path}`;
         console.log(`Attempting to import Live2D Model: ${modelUrl}`);
 
         if (window.loadLive2DModel && typeof window.loadLive2DModel === 'function') {

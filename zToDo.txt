@@ -1,10 +1,17 @@
-Some Day:
+Planned:
     - Cutom look for title="" like tool tip
     - Custom cursor
     - Status on what part of the model is loading
     - Smoother animations
     - Custom drop down menu
 
+Maybe:
+    - Support for "text": atributes
+
 
 Other (No need for now):
-    - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework)
+    - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework), 
+
+
+Done:
+    - Motion change imediatly after press

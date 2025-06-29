@@ -24,9 +24,16 @@
                 <h3 class="changelog-version">Commits on June 29, 2025</h3>
                 <p class="changelog-date">June 29, 2025</p>
                 <ul>
-                    <li><strong>[NONEYET]</strong><br>
-                        refactored some files and reorganized the file structure
+                    <li><strong>[NONEYET]</strong><br> 
+                        changed hover opacity of go back button
+                        <br>
+                        now selected motions play immediately after clicking
+                        <br>
+                        changed V2 to V3 in Archives
+                        <br>
+                        now uses JsDelivers @master branch by default
                     </li>
+                    <li><strong>[b295cbf]</strong><br> refactored some files and reorganized the file structure</li>
                 </ul>
             </article>
 
@@ -312,7 +319,7 @@
                 goBackLink.style.transition = 'opacity 0.25s ease-in-out';
 
                 goBackLink.onmouseover = () => {
-                    goBackLink.style.opacity = '1';
+                    goBackLink.style.opacity = '0.75';
                 };
                 goBackLink.onmouseout = () => {
                     goBackLink.style.opacity = '0.6';

@@ -540,6 +540,8 @@ function populateMotionControls(model) {
 
             const btn = createControlButton(motionName, `Play Motion: ${motionName}`, () => {
                 try {
+                    // Stop all motions before playing the next one
+                    model.internalModel?.motionManager?.stopAllMotions?.();
                     model.motion(group, index); // Play the motion
                     setActiveButton(container, btn, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION); // Highlight button briefly
                     console.log(
@@ -1089,6 +1091,9 @@ function triggerMotionForHitArea(model, hitAreaName) {
         );
         return;
     }
+
+    // Stop all motions before playing the next one
+    motionManager.stopAllMotions?.();
 
     const definedGroupNames = Object.keys(motionManager.definitions);
     let motionPlayed = false;
