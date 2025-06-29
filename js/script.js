@@ -851,78 +851,78 @@ function handlePointerMove(event) {
 
 function handlePointerRelease(event) {
     const releasedPointerId = event.data.pointerId;
-    if (activePointers[releasedPointerId]) delete activePointers[releasedPointerId]; // Remove released pointer
+    if (activePointers[releasedPointerId]) delete activePointers[releasedPointerId];
     const numActivePointers = Object.keys(activePointers).length;
 
     if (isPinching) {
         isPinching = false;
-        if (activePinchTarget) activePinchTarget.cursor = 'grab'; // Reset cursor
-        activePinchTarget = null;
-        initialModelScaleOnPinchStart = 1; // Reset
-    }
-    
-    if (isDragging) {
-        isDragging = false;
-        if (activeDragTarget) activeDragTarget.cursor = 'grab'; // Reset cursor
-        activeDragTarget = null;
-    }
-
-    // If transitioning from pinch (2 pointers) to drag (1 pointer)
-    if (numActivePointers === 1 && !isDragging) { // Check !isDragging to ensure not already dragging
-        const remainingPointerGlobalPos = Object.values(activePointers)[0];
-        // Check if the remaining pointer is over a model to start dragging it
-        let hitModel = null;
-        for (let i = app.stage.children.length - 1; i >= 0; i--) {
-            const child = app.stage.children[i];
-            if (child instanceof PIXI.live2d.Live2DModel && models.includes(child) && app.renderer.plugins.interaction.hitTest(remainingPointerGlobalPos, child)) {
-                hitModel = child;
-                break;
-            }
-        }
-
-        if (hitModel) {
-            if (selectedModel !== hitModel) {
-                setSelectedModel(hitModel);
-                modelSelectionJustHappenedInPointerDown = false;
-            }
-            isDragging = true;
-            activeDragTarget = hitModel;
-            activeDragTarget.cursor = 'grabbing';
-            const pointerInModelParent = activeDragTarget.parent.toLocal(remainingPointerGlobalPos, null, undefined, true);
-            dragStartOffset.x = pointerInModelParent.x - activeDragTarget.x;
-            dragStartOffset.y = pointerInModelParent.y - activeDragTarget.y;
-        } else {
-             // Remaining pointer is not over a model
-             isDragging = false;
-             activeDragTarget = null;
-        }
-    } else if (numActivePointers === 0) { // All pointers released
-        isDragging = false;
-        isPinching = false;
-        if (activeDragTarget) activeDragTarget.cursor = 'grab';
-        activeDragTarget = null;
         if (activePinchTarget) activePinchTarget.cursor = 'grab';
         activePinchTarget = null;
+        initialModelScaleOnPinchStart = 1;
+
+        if (numActivePointers === 1) { 
+            const remainingPointerGlobalPos = Object.values(activePointers)[0];
+            let hitModel = null;
+            for (let i = app.stage.children.length - 1; i >= 0; i--) {
+                 const child = app.stage.children[i];
+                 if (child instanceof PIXI.live2d.Live2DModel && models.includes(child) && app.renderer.plugins.interaction.hitTest(remainingPointerGlobalPos, child)) {
+                    hitModel = child; break;
+                }
+            }
+            if (hitModel) {
+                // If a finger remains and is on a model, re-initiate drag for that model.
+                // Also select it if it wasn't already selected.
+                if (selectedModel !== hitModel) {
+                    setSelectedModel(hitModel);
+                }
+                isDragging = true; activeDragTarget = hitModel; // hitModel is now selectedModel
+                const pointerInModelParent = activeDragTarget.parent.toLocal(remainingPointerGlobalPos, null, undefined, true);
+                dragStartOffset.x = pointerInModelParent.x - activeDragTarget.x;
+                dragStartOffset.y = pointerInModelParent.y - activeDragTarget.y;
+                activeDragTarget.cursor = 'grabbing';
+            } else { isDragging = false; activeDragTarget = null; }
+        } else { 
+            isDragging = false; if (activeDragTarget) activeDragTarget.cursor = 'grab'; activeDragTarget = null;
+        }
+    } else if (isDragging) { 
+        isDragging = false; if (activeDragTarget) activeDragTarget.cursor = 'grab'; activeDragTarget = null;
+    }
+
+    if (numActivePointers === 0) { 
+        isDragging = false; isPinching = false;
+        if (activeDragTarget) activeDragTarget.cursor = 'grab'; activeDragTarget = null;
+        if (activePinchTarget) activePinchTarget.cursor = 'grab'; activePinchTarget = null;
     }
 }
 
-function handleModelZoom(event) { 
+function handleModelZoom(event) {
     if (!selectedModel || !app?.renderer) return;
-    event.preventDefault();
-    const delta = event.deltaY;
-    const zoomDirection = delta < 0 ? 1 : -1;
-    const zoomIncrement = Math.exp(zoomDirection * CONFIG.ZOOM_SENSITIVITY);
-    const currentScale = selectedModel.scale.x;
-    let newScale = currentScale * zoomIncrement;
-    newScale = Math.max(CONFIG.MIN_ZOOM, Math.min(newScale, CONFIG.MAX_ZOOM));
-    if (newScale === currentScale) return;
+    event.preventDefault(); // Prevent page scroll
 
-    const pointer = new PIXI.Point(); 
-    app.renderer.plugins.interaction.mapPositionToPoint(pointer, event.clientX, event.clientY);
-    const stagePointerPos = app.stage.toLocal(pointer, undefined, undefined, true); 
+    const delta = event.deltaY;
+    const zoomDirection = delta < 0 ? 1 : -1; // -1 for zoom out, 1 for zoom in
+    const zoomIncrement = Math.exp(zoomDirection * CONFIG.ZOOM_SENSITIVITY);
+
+    const currentScale = selectedModel.scale.x; // Assume uniform scale
+    let newScale = currentScale * zoomIncrement;
+    newScale = Math.max(CONFIG.MIN_ZOOM, Math.min(newScale, CONFIG.MAX_ZOOM)); // Clamp scale
+
+    if (newScale === currentScale) return; // No change in scale
+
+    // Zoom relative to pointer position
+    const pointer = new PIXI.Point();
+    app.renderer.plugins.interaction.mapPositionToPoint(pointer, event.clientX, event.clientY); // Get pointer in global canvas space
+    const stagePointerPos = app.stage.toLocal(pointer, undefined, undefined, true); // Pointer in stage coordinates
+
+    // Convert pointer position to model's local space BEFORE scaling
     const modelLocalPointerPos = selectedModel.toLocal(stagePointerPos, undefined, undefined, true);
-    selectedModel.scale.set(newScale);
+
+    selectedModel.scale.set(newScale); // Apply new scale
+
+    // Get new global position of that local point AFTER scaling
     const newGlobalPointerPosFromModel = selectedModel.toGlobal(modelLocalPointerPos, undefined, true);
+
+    // Adjust model position to keep the point under the cursor stationary
     selectedModel.x -= (newGlobalPointerPosFromModel.x - stagePointerPos.x);
     selectedModel.y -= (newGlobalPointerPosFromModel.y - stagePointerPos.y);
 }
