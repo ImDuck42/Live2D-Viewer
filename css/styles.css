@@ -43,11 +43,11 @@
 
     --header-height: 4.5rem; /* Approx 72px */
     --footer-height: 4rem; /* Approx 64px */
-    --main-padding: 1.5rem; /* Consistent padding for major containers */
+    --main-padding: 1rem; /* Consistent padding for major containers */
     --element-gap: 1rem; /* Gap between elements within a section */
     --section-gap: 1.5rem; /* Gap between larger sections */
 
-    --changelog-margin: 1.5rem; /* Margin for the changelog modal */
+    --changelog-margin: 1rem; /* Margin for the changelog modal */
 }
 
 /*=============================================
