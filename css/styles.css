@@ -630,7 +630,16 @@ body.no-scroll {
 
     .model-loader-group {
         width: 100%;
-        flex-direction: column;
+        flex-direction: row;
+    }
+
+    #open-file-explorer-btn {
+        max-width: 10%;
+    }
+    
+    #load-selected-button,
+    #load-url-button {
+        max-width: 25%;
     }
 
     .site-header select,
@@ -638,6 +647,16 @@ body.no-scroll {
     .site-header button {
         width: 100%;
         min-width: auto;
+    }
+
+    .site-footer p:last-child {
+        visibility: hidden;
+        font-size: 0px;
+    }
+    .site-footer p:last-child::after {
+        content: "Drag to move, Scroll/Pinch to zoom, Tap to select/interact.";
+        visibility: visible;
+        font-size: 0.85rem;
     }
 }
 
@@ -694,5 +713,9 @@ body.no-scroll {
 
     .site-footer p {
         font-size: 0.8rem;
+    }
+
+    .site-footer p:last-child::after {
+        content: "Drag, Scroll/Pinch, Tap to interact.";
     }
 }

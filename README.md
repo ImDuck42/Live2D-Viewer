@@ -1,10 +1,12 @@
 # <img src="assets/icon.svg" width="32" height="32" alt="Site Icon" style="vertical-align: middle;"> Live2D Viewer  
 
-[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
 [![GitHub Pages](https://img.shields.io/github/deployments/ImDuck42/Live2D-Viewer/github-pages?label=Live%20Preview&logo=github)](https://imduck42.github.io/Live2D-Viewer/)
-&nbsp;&nbsp;&nbsp;[![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](index.html)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)](css)
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](js)
+[![GitHub stars](https://img.shields.io/github/stars/ImDuck42/Live2D-Viewer?style=flat&color=purple&logo=github&logoColor=white)](https://github.com/ImDuck42/Live2D-Viewer)
+&nbsp;&nbsp;&nbsp;
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](index.html)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css&logoColor=white)](css)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](js)  
 
 A decently performant, browser-based Live2D viewer designed for interaction with one or more Live2D models. Built with vanilla JavaScript and the PIXI.js rendering engine.  
 This project offers a feature-rich experience without the overhead of heavy frameworks.
@@ -18,7 +20,7 @@ It includes a dynamic UI, multi-model support, a GitHub repository explorer for 
 ### **[https://imduck42.github.io/Live2D-Viewer](https://imduck42.github.io/Live2D-Viewer)**
 
 <details>
-    <summary><strong>Screenshots</strong></summary>
+    <summary><strong>Screenshots (kinda not new)</strong></summary>
     <p align="left">
         <img src="assets/screenshots/PreviewPC.png" width="49%" alt="Preview on Desktop">
         <img src="assets/screenshots/PreviewMobile.png" height="220px" alt="Preview on Mobile">
@@ -39,7 +41,7 @@ It includes a dynamic UI, multi-model support, a GitHub repository explorer for 
 
 -   **Multi-Model Support**: Load, view, and interact with multiple Live2D models on the same canvas.
 -   **Intuitive Controls**:
-    -   **Drag** to pan models.
+    -   **Drag** to move models.
     -   **Pinch** or **Scroll** to zoom.
     -   **Tap** on hit areas to trigger motions.
 -   **Dynamic UI Panel**: A responsive sidebar provides real-time control over expressions, motions, and hit-area visibility for the selected model.
