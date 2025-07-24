@@ -7,10 +7,10 @@
 =============================================*/
 .changelog-modal-container {
     position: fixed;
-    top: var(--changelog-margin);
-    left: var(--changelog-margin);
-    right: var(--changelog-margin);
-    bottom: var(--changelog-margin);
+    top: var(--main-padding);
+    left: var(--main-padding);
+    right: var(--main-padding);
+    bottom: var(--main-padding);
     background-color: rgba(var(--bg-secondary-rgb), 0.65);
     backdrop-filter: blur(12px) saturate(160%);
     -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -31,8 +31,8 @@
 
 .changelog-close-btn {
     position: absolute;
-    top: var(--element-gap);
-    right: var(--element-gap);
+    top: var(--main-padding);
+    right: var(--main-padding);
     background: rgba(var(--bg-element), 0.7);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
@@ -60,7 +60,7 @@
 .changelog-content {
     flex-grow: 1;
     overflow-y: auto;
-    padding-top: var(--element-gap);
+    padding-top: var(--main-padding);
     padding-right: 1rem;
 }
 
@@ -71,8 +71,8 @@
 .changelog-content::-webkit-scrollbar-track {
     background: rgba(var(--bg-element), 0.3);
     border-radius: var(--border-radius-small);
-    margin-top: calc(var(--element-gap) + 1.5rem);
-    margin-bottom: var(--element-gap);
+    margin-top: calc(var(--main-padding) + 1.5rem);
+    margin-bottom: var(--main-padding);
 }
 
 .changelog-content::-webkit-scrollbar-thumb {
@@ -93,7 +93,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: var(--section-gap);
-    padding-bottom: var(--element-gap);
+    padding-bottom: var(--main-padding);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -121,7 +121,7 @@
 .changelog-entry .changelog-date {
     font-size: 0.8rem;
     color: var(--text-secondary);
-    margin-bottom: var(--element-gap);
+    margin-bottom: var(--main-padding);
     font-style: italic;
     opacity: 0.8;
 }
@@ -174,7 +174,7 @@
 
 @media (max-width: 768px) {
     .changelog-modal-container {
-        padding: var(--element-gap);
+        padding: var(--main-padding);
     }
 
     .changelog-close-btn {
@@ -190,7 +190,7 @@
     }
 
     .changelog-entry {
-        padding: var(--element-gap);
+        padding: var(--main-padding);
     }
 
     .changelog-entry h3.changelog-version {

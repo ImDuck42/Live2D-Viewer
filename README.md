@@ -148,3 +148,6 @@ Please adhere to the existing code style and add comments where possible.
 ## License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+> **Disclaimer:**  
+> Since Pixi Live2D Display only works up to Pixi.js 6.5.10, this won't be updatable. If anyone has a version that works with Pixi.js 8.x, it'd be appreciated!

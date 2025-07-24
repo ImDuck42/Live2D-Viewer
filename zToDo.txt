@@ -4,6 +4,7 @@ Planned:
     - Status on what part of the model is loading
     - Smoother animations
     - Custom drop down menu
+    - In the bottom right of the canvas show the filename of the selected model
 
 Maybe:
     - Support for "text": atributes

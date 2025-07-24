@@ -18,7 +18,6 @@ const CONFIG = {
     SELECTION_OUTLINE_THICKNESS: 2,
     SELECTION_OUTLINE_ALPHA: 0.1, // Note: This alpha is for the line, PIXI might blend it further
     SELECTION_OUTLINE_CORNER_RADIUS: 10,
-    CHANGES_HTML_URL: 'assets/changes.html', // Used by newsmodal.js
 };
 
 let app = null; // PIXI Application instance
