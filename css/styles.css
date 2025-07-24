@@ -583,11 +583,15 @@ body.no-scroll {
 }
 
 /*=============================================
-  RESPONSIVE STYLES
+  RESPONSIVE STYLES (COMBINED)
 =============================================*/
-@media (max-width: 1050px) {
+@media (max-width: 1080px) {
     :root {
-        --changelog-margin: 1rem;
+        --main-padding: 1rem;
+        --element-gap: 0.75rem;
+        --section-gap: 1rem;
+        --base-font-size: 15px;
+        --changelog-margin: 0.75rem;
     }
 
     .main-content {
@@ -600,13 +604,13 @@ body.no-scroll {
         width: 100%;
         max-width: none;
         min-width: auto;
-        max-height: 45vh;
+        max-height: 50vh; /* Kept from 768px block */
         flex: 0 0 auto;
+        padding: var(--element-gap); /* Kept from 768px block */
     }
 
     .canvas-area {
-        min-height: 40vh;
-        max-height: 60vh;
+        height: 40vh; /* Kept from 768px block */
         flex: 1 1 auto;
     }
 
@@ -620,6 +624,7 @@ body.no-scroll {
     .site-header h1 {
         text-align: center;
         margin-bottom: var(--element-gap);
+        font-size: 1.5rem; /* Kept from 768px block */
     }
 
     .model-imports {
@@ -649,46 +654,12 @@ body.no-scroll {
         min-width: auto;
     }
 
-    .site-footer p:last-child {
-        visibility: hidden;
-        font-size: 0px;
-    }
-    .site-footer p:last-child::after {
-        content: "Drag to move, Scroll/Pinch to zoom, Tap to select/interact.";
-        visibility: visible;
-        font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 768px) {
-    :root {
-        --main-padding: 1rem;
-        --element-gap: 0.75rem;
-        --section-gap: 1rem;
-        --base-font-size: 15px;
-        --changelog-margin: 0.75rem;
-    }
-
-    .site-header h1 {
-        font-size: 1.5rem;
-    }
-
-    .control-panel {
-        max-height: 50vh;
-        padding: var(--element-gap);
-    }
-
     .panel-section {
         padding: var(--element-gap);
     }
 
     .panel-section h3 {
         font-size: 1rem;
-    }
-
-    .canvas-area {
-        min-height: 35vh;
-        max-height: 50vh;
     }
 
     .canvas-message {
@@ -714,8 +685,15 @@ body.no-scroll {
     .site-footer p {
         font-size: 0.8rem;
     }
+    
+    .site-footer p:last-child {
+        visibility: hidden;
+        font-size: 0px;
+    }
 
     .site-footer p:last-child::after {
-        content: "Drag, Scroll/Pinch, Tap to interact.";
+        content: "Drag, Scroll/Pinch, Tap to interact."; /* Kept from 768px block for smaller screens */
+        visibility: visible;
+        font-size: 0.8rem; /* Aligned with the general .site-footer p font-size */
     }
 }
