@@ -343,10 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const importBtnPreview = document.createElement('button');
                 importBtnPreview.className = 'fe-import-model-btn-preview';
                 importBtnPreview.title = `Import ${fileItem.name} to Live2D Viewer`;
-                const importIconPreview = document.createElement('i');
-                importIconPreview.className = 'fas fa-file-import';
-                importIconPreview.setAttribute('aria-hidden', 'true');
-                importBtnPreview.appendChild(importIconPreview);
                 importBtnPreview.appendChild(document.createTextNode('Import Model'));
                 importBtnPreview.addEventListener('click', () => handleImportModel(fileItem, fileSourceUrl));
                 previewActions.appendChild(importBtnPreview);

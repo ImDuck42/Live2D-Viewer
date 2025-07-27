@@ -141,7 +141,7 @@
 
 .changelog-entry ul li::before {
     content: '\f005';
-    font-family: "Font Awesome 6 Free";
+    font-family: "Font Awesome 7 Free";
     font-weight: 900;
     position: absolute;
     left: 0;
@@ -155,10 +155,18 @@
     font-weight: 500;
 }
 
+.article[href] {
+    color: var(--accent-primary);
+}
+
+.article[href]:hover {
+    color: var(--accent-secondary);
+}
+
 /*=============================================
   RESPONSIVE STYLES FOR NEWS MODAL
 =============================================*/
-@media (max-width: 1050px) {
+@media (max-width: 1080px) {
     .changelog-modal-container {
         padding: var(--main-padding);
     }

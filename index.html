@@ -11,13 +11,13 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/repoexplorer.css">
     <link rel="stylesheet" href="css/newsmodal.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
 </head>
 
 <body>
     <div class="app-container">
         <header class="site-header">
-            <h1 id="site-title-button">Live2D Viewer</h1>
+            <h1 id="site-title-button" title="Live2D Viewer">Live2D Viewer</h1>
             <div class="model-imports">
                 <div class="model-loader-group">
                     <!-- File Explorer Trigger -->
@@ -25,25 +25,27 @@
                         <i class="fas fa-folder-open"></i>
                     </button>
                     <label for="model-url-input" class="sr-only">Model URL</label>
-                    <input type="text" id="model-url-input" placeholder="Enter model (.json/.model3.json) URL...">
-                    <button id="load-url-button" title="Load model from the entered URL">Load URL</button>
+                    <input type="text" id="model-url-input" placeholder="Enter model (.json/.model3.json) URL..." title="Enter URL of a Live2D model">
+                    <button id="load-url-button" title="Load model from URL">Load URL</button>
                 </div>
 
                 <div class="model-loader-group">
-                    <label for="model-select" class="sr-only">Select Default Model</label>
-                    <select id="model-select">
-                        <option value="" disabled selected>Default Models</option>
-                        <option
-                            value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json">
-                            Shizuku (Cubism 2.1)</option>
-                        <option
-                            value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json">
-                            Haru (Cubism 4)</option>
-                        <option
-                            value="https://raw.githubusercontent.com/Eikanya/Live2d-model/refs/heads/master/崩坏学园2/bronya/model.json">
-                            Bronya (Cubism 2.1)</option>
-                    </select>
-                    <button id="load-selected-button" title="Load the selected default model">Load Selected</button>
+                    <div class="custom-dropdown" id="model-select-dropdown" tabindex="0" aria-haspopup="listbox" aria-expanded="false" title="Select a default model">
+                        <span class="custom-dropdown-selected" id="model-select-dropdown-selected">Default Models</span>
+                        <ul class="custom-dropdown-list" id="model-select-dropdown-list" role="listbox" title="List of default models">
+                            <li class="custom-dropdown-option" data-value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json" role="option">
+                                Shizuku (Cubism 2.1)
+                            </li>
+                            <li class="custom-dropdown-option" data-value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json" role="option">
+                                Haru (Cubism 4)
+                            </li>
+                            <li class="custom-dropdown-option" data-value="https://raw.githubusercontent.com/Eikanya/Live2d-model/refs/heads/master/崩坏学园2/bronya/model.json" role="option">
+                                Bronya (Cubism 2.1)
+                            </li>
+                        </ul>
+                        <input type="hidden" id="model-select" value="">
+                    </div>
+                    <button id="load-selected-button" title="Load default model">Load Selected</button>
                 </div>
             </div>
         </header>
@@ -59,14 +61,15 @@
                     <i class="fas fa-circle-user" aria-hidden="true"></i>
                     <p>Select or enter a model URL to display</p>
                 </div>
+                <div id="model-filename" class="model-filename"></div>
             </div>
 
             <aside class="control-panel" aria-labelledby="control-panel-heading">
                 <h2 id="control-panel-heading" class="sr-only">Model Controls</h2>
                 <div class="control-item">
                     <input type="checkbox" id="show-hit-areas-checkbox" disabled />
-                    <label for="show-hit-areas-checkbox">Show Hit Areas</label>
-                    <button id="delete-selected-model-button" title="Delete the currently selected model" disabled>
+                    <label for="show-hit-areas-checkbox" title="Show Hit Areas">Show Hit Areas</label>
+                    <button id="delete-selected-model-button" title="Delete selected model" disabled>
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -110,10 +113,10 @@
             <div class="file-explorer-header">
                 <h2>GitHub Repository Explorer</h2>
                 <div class="fe-repo-input-container">
-                    <input type="text" id="feOwnerInput" placeholder="GitHub Owner" value="Eikanya">
+                    <input type="text" id="feOwnerInput" placeholder="GitHub Owner" value="Eikanya" title="Enter GitHub user">
                     <span>/</span>
-                    <input type="text" id="feRepoInput" placeholder="Repository Name" value="Live2d-model">
-                    <button id="feLoadRepoBtn">Load Repository</button>
+                    <input type="text" id="feRepoInput" placeholder="Repository Name" value="Live2d-model" title="Enter GitHub repository">
+                    <button id="feLoadRepoBtn" title="Load GitHub repository">Load Repository</button>
                 </div>
             </div>
             <div class="file-explorer-main-content">
@@ -156,6 +159,9 @@
         </div>
     </div>
 
+    <!-- Console exclusion patterns (Needs to load first)-->
+    <script src="js/exclusions.js"></script>
+
     <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.10/dist/browser/pixi.min.js"></script>
     <script src="libs/live2d.js"></script>
@@ -163,7 +169,7 @@
     <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/index.min.js"></script>
 
     <!-- <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/extra.min.js"></script> -->
-    <!-- Using local modified version for HitAreaFrames styling -->
+    <!-- Using local modified version for HitAreaFrames styling and more -->
     <script src="libs/extra.js"></script>
 
     <!-- Custom Scripts -->

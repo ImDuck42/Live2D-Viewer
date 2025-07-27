@@ -2,12 +2,13 @@
  * PIXI JS Extra JS (Original: https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/extra.min.js)
  * (nc) 2025 ImDuck42
  * -- These changes have been made solely to fit my version of a Live2d viewer --
+ * -- This file is heavily modified and will probably not work with other Live2d software --
  * 
  * Changes made by ImDuck42:
  * - Added `this.cornerRadius` property to the HitAreaFrames class (aliased as `r`).
  * - Modified the `_render` method in HitAreaFrames to use `this.drawRoundedRect` 
  *   instead of `this.drawRect` to display hitboxes with rounded corners.
- * - Changed this.normaColor/activeColor to 9199359(#8c5eff) and 16738263(#ff67d7) respectively
+ * - Changed this.normalColor/activeColor to 9199359(#8c5eff) and 16738263(#ff67d7) respectively
  * - Changed TextStyle fill color to #ff67d7
  * - Modified the `init` method in HitAreaFrames to:
  *   - Properly clear and destroy previously created text objects (PIXI.Text instances)

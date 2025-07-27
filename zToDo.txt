@@ -1,18 +1,22 @@
 Planned:
-    - Cutom look for title="" like tool tip
-    - Custom cursor
-    - Status on what part of the model is loading
-    - Smoother animations
-    - Custom drop down menu
-    - In the bottom right of the canvas show the filename of the selected model
+    - Support opening models from .zip files
+
 
 Maybe:
     - Support for "text": atributes
+    - Status on what part of the model is loading
+    - Cutom look for title="" like tool tip
+    - Custom cursor
+    - Smoother animations
 
 
 Other (No need for now):
     - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework), 
 
 
+
 Done:
     - Motion change imediatly after press
+    - In the bottom right of the canvas show the filename of the selected model
+        - Click to copy name
+    - Custom drop down menu

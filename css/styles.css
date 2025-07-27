@@ -9,7 +9,6 @@
     --bg-secondary: #1a1a2e;
     --bg-element: #262639;
     --bg-interactive: #3a3a50;
-    --bg-interactive-rgb: 58, 58, 80;
     --accent-primary: #8c5eff;
     --accent-secondary: #ff67d7;
     --text-primary: #ffffff;
@@ -21,6 +20,7 @@
     /* --- RGB Components for rgba() usage --- */
     --bg-primary-rgb: 15, 15, 26;
     --bg-secondary-rgb: 26, 26, 46;
+    --bg-interactive-rgb: 58, 58, 80;
     --accent-primary-rgb: 140, 94, 255;
     --accent-secondary-rgb: 255, 103, 215;
     --text-primary-rgb: 255, 255, 255;
@@ -218,6 +218,105 @@ body.no-scroll {
 }
 
 /*=============================================
+  Custom Dropdown
+=============================================*/
+.custom-dropdown {
+    position: relative;
+    min-width: 15rem;
+    font-size: 0.875rem;
+    background-color: var(--bg-element);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+    transition: var(--transition-main);
+    height: 36px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    outline: none;
+}
+
+.custom-dropdown.open,
+.custom-dropdown:focus-within,
+.custom-dropdown:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.2);
+}
+
+.custom-dropdown-selected {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.custom-dropdown::after {
+    content: '';
+    display: inline-block;
+    margin-left: 0.75em;
+    border: solid var(--text-secondary);
+    border-width: 0 2px 2px 0;
+    padding: 4px;
+    transform: rotate(45deg);
+    transition: border-color var(--transition-duration) var(--transition-timing);
+}
+.custom-dropdown.open::after {
+    transform: rotate(-135deg);
+    margin-top: 4px;
+}
+
+.custom-dropdown-list {
+    display: none;
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background: var(--bg-element);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    box-shadow: var(--shadow-soft);
+    z-index: 10;
+    margin-top: 2px;
+    padding: 0;
+    list-style: none;
+    max-height: 12em;
+    overflow-y: auto;
+}
+
+.custom-dropdown.open .custom-dropdown-list,
+.custom-dropdown[aria-expanded="true"]
+.custom-dropdown-list {
+    display: block;
+}
+
+.custom-dropdown-option {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    font-size: 0.95em;
+    transition: background var(--transition-duration), color var(--transition-duration);
+}
+
+.custom-dropdown-option:hover,
+.custom-dropdown-option:focus {
+    background: var(--bg-interactive);
+    color: var(--text-primary);
+}
+
+.custom-dropdown-option[aria-selected="true"] {
+    background: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+.custom-dropdown input[type="hidden"] {
+    display: none;
+}
+
+/*=============================================
   MAIN CONTENT LAYOUT (2-COLUMN)
 =============================================*/
 .main-content {
@@ -312,6 +411,36 @@ body.no-scroll {
 
 .canvas-message p {
     max-width: 80%;
+}
+
+.model-filename {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background-color: rgba(var(--bg-primary-rgb), 0.75);
+    color: var(--text-secondary);
+    border: var(--border-color) solid 1px;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 0.9em;
+    display: none;
+    max-width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    z-index: 1;
+    user-select: none;
+}
+
+.model-filename:hover {
+    cursor: pointer;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.model-filename:active {
+    background-color: rgba(var(--accent-primary-rgb), 0.5);
+    color: var(--text-primary);
 }
 
 /*=============================================
@@ -458,7 +587,7 @@ body.no-scroll {
 }
 
 .panel-section h3::before {
-    font-family: "Font Awesome 6 Free";
+    font-family: "Font Awesome 7 Free";
     font-weight: 900;
     margin-right: 0.5em;
     color: var(--accent-secondary);
@@ -582,7 +711,12 @@ body.no-scroll {
 /*=============================================
   RESPONSIVE STYLES
 =============================================*/
-@media (max-width: 1050px) {
+@media (max-width: 1080px) {
+    :root {
+        --section-gap: 1rem;
+        --base-font-size: 15px;
+    }
+
     .main-content {
         flex-direction: column;
         height: auto;
@@ -636,7 +770,7 @@ body.no-scroll {
 
     .site-header select,
     .site-header input[type="text"],
-    .site-header button {
+    .custom-dropdown {
         width: 100%;
         min-width: auto;
     }
@@ -654,11 +788,9 @@ body.no-scroll {
 
 @media (max-width: 768px) {
     :root {
-        --main-padding: 1rem;
         --main-padding: 0.75rem;
         --section-gap: 1rem;
         --base-font-size: 15px;
-        --main-padding: 0.75rem;
     }
 
     .site-header h1 {

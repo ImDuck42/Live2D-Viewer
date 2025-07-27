@@ -14,7 +14,7 @@ const CONFIG = {
     MAX_ZOOM: 10.0,
     HIT_AREA_BUTTON_HIGHLIGHT_DURATION: 500, // ms
     FILE_URL_REVOKE_TIMEOUT: 60000, // ms, for ObjectURLs
-    SELECTION_OUTLINE_COLOR: 0x8c5eff,
+    SELECTION_OUTLINE_COLOR: 0x8c5eff, // #8c5eff # -> 0x
     SELECTION_OUTLINE_THICKNESS: 2,
     SELECTION_OUTLINE_ALPHA: 0.1, // Note: This alpha is for the line, PIXI might blend it further
     SELECTION_OUTLINE_CORNER_RADIUS: 10,
@@ -46,26 +46,6 @@ let modelSelectionJustHappenedInPointerDown = false; // Flag to prevent immediat
 let previousCanvasWidth = 0; // For resize handling
 
 //==============================================================================
-// Blocked console.warn patterns and override
-//==============================================================================
-const blockedPatterns = [
-    /\[soundmanager\]/i,
-    /\[motionmanager\(\)\] failed to play audio/i
-];
-
-// Save the original console.warn
-const originalWarn = console.warn;
-
-console.warn = function(...args) {
-    const message = args.join(' ');
-    const shouldBlock = blockedPatterns.some(pattern => pattern.test(message));
-    
-    if (!shouldBlock) {
-        originalWarn.apply(console, args);
-    }
-};
-
-//==============================================================================
 // DOM ELEMENT CACHE
 //==============================================================================
 const DOMElements = {
@@ -81,7 +61,56 @@ const DOMElements = {
     motionsContainer: document.getElementById('motions-container'),
     hitAreasContainer: document.getElementById('hit-areas-container'),
     deleteSelectedButton: document.getElementById('delete-selected-model-button'),
+    modelFilename: document.getElementById('model-filename'),
 };
+
+//==============================================================================
+// CUSTOM DROPDOWN INITIALIZATION
+//==============================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdown = document.getElementById('model-select-dropdown');
+    const selected = document.getElementById('model-select-dropdown-selected');
+    const list = document.getElementById('model-select-dropdown-list');
+    const options = list ? list.querySelectorAll('.custom-dropdown-option') : [];
+    const hiddenInput = document.getElementById('model-select');
+
+    if (!dropdown || !selected || !list || !hiddenInput) return;
+
+    function toggleDropdown(open) {
+        const expanded = open !== undefined ? open : dropdown.getAttribute('aria-expanded') !== 'true';
+        dropdown.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        list.style.display = expanded ? 'block' : 'none';
+        if (expanded) dropdown.classList.add('open');
+        else dropdown.classList.remove('open');
+    }
+
+    dropdown.addEventListener('click', function(e) {
+        toggleDropdown();
+    });
+
+    dropdown.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            toggleDropdown(false);
+        }
+    });
+
+    options.forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.stopPropagation();
+            selected.textContent = option.textContent;
+            hiddenInput.value = option.getAttribute('data-value');
+            toggleDropdown(false);
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!dropdown.contains(e.target)) {
+            toggleDropdown(false);
+        }
+    });
+
+    toggleDropdown(false);
+});
 
 //==============================================================================
 // APPLICATION INITIALIZATION
@@ -132,9 +161,9 @@ function initApp() {
             }
         });
         console.log(
-            "%cLive2D Viewer%c initialized.",
-            "color: white; background: #6c5ce7; font-weight: bold; padding:2px 4px; border-radius:2px;",
-            "color: #6c5ce7; font-weight: bold;"
+            "%cLive2D Viewer%c Initialized.",
+            "color: white; background: #6c5ce7; font-weight: bold; padding:2px 4px; border-radius:2px 0px 0px 2px;",
+            "color: #6c5ce7; background: black; font-weight: bold; padding:2px 4px; border-radius:0px 2px 2px 0px;"
         );
     } catch (error) {
         console.error(
@@ -352,15 +381,12 @@ function setSelectedModel(modelToSelect) {
         }
         if (selectionOutline) {
             selectionOutline.visible = false;
-        }
-        console.log(
-            "%cNo model selected.",
-            "color: #636e72; font-style: italic;"
-        );
+        };
     }
 
     updateControlPanelForSelectedModel();
     updateDeleteButtonState();
+    updateModelFilename();
 }
 
 function deleteSelectedModel() {
@@ -511,7 +537,27 @@ function clearIndividualControlPanels() {
 }
 
 function clearAllControlPanelsAndState() {
-    setSelectedModel(null); // This will trigger clearing individual panels
+    setSelectedModel(null); // Trigger clearing individual panels
+}
+
+function updateModelFilename() {
+    const name = DOMElements.modelFilename;
+    if (!name) return;
+
+    if (selectedModel) {
+        const settings = selectedModel.internalModel?.settings;
+        let filename =
+            settings?.url?.split('/').pop() ||
+            settings?.model?.split('/').pop();
+
+        name.textContent = `File: ${filename}`;
+        name.style.display = 'block';
+        name.addEventListener('click', () => {
+            navigator.clipboard.writeText(filename);
+        });
+    } else {
+        name.style.display = 'none';
+    }
 }
 
 //==============================================================================
@@ -572,37 +618,67 @@ function populateMotionControls(model) {
         return;
     }
 
-    let motionButtonsCreated = 0;
+    // First pass: collect all motion names and count duplicates
+    const motionNameCounts = {};
+    const motionData = [];
+
     Object.keys(definitions).sort().forEach(group => { // Sort motion groups alphabetically
         definitions[group]?.forEach((motionDef, index) => {
             // Try to derive a user-friendly name
             const pathName = motionDef?.File?.split(/[/\\]/).pop()?.replace(/\.(motion3\.json|mtn)$/i, '');
-            const motionName = motionDef?.Name || pathName || `${group} ${index + 1}`;
-
-            const btn = createControlButton(motionName, `Play Motion: ${motionName}`, () => {
-                try {
-                    // Stop all motions before playing the next one
-                    model.internalModel?.motionManager?.stopAllMotions?.();
-                    model.motion(group, index); // Play the motion
-                    setActiveButton(container, btn, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION); // Highlight button briefly
-                    console.log(
-                        `%cMotion%c on model ${model.appModelId}: ${group}[${index}] ('${motionName}')`,
-                        "color: white; background: #00b894; font-weight: bold; padding:2px 4px; border-radius:2px;",
-                        "color: #00b894; font-weight: bold;"
-                    );
-                } catch (e) {
-                    console.error(
-                        `%cError%c playing motion on model ${model.appModelId}:`,
-                        "color: white; background: #e17055; font-weight: bold; padding:2px 4px; border-radius:2px;",
-                        "color: #e17055; font-weight: bold;",
-                        e
-                    );
-                    alert(`Motion error: ${e.message}`);
-                }
-            }, 'feature-btn', 'motion-btn');
-            container.appendChild(btn);
-            motionButtonsCreated++;
+            const baseName = motionDef?.Name || pathName || `${group}`;
+            
+            // Count occurrences of this base name
+            motionNameCounts[baseName] = (motionNameCounts[baseName] || 0) + 1;
+            
+            motionData.push({
+                group,
+                index,
+                baseName,
+                motionDef
+            });
         });
+    });
+
+    // Second pass: create buttons with appropriate names
+    let motionButtonsCreated = 0;
+    const nameCounters = {}; // Track how many of each name have been seen
+
+    motionData.forEach(({ group, index, baseName, motionDef }) => {
+        let displayName;
+        
+        if (motionNameCounts[baseName] > 1) {
+            // Multiple motions with same name - add index
+            nameCounters[baseName] = (nameCounters[baseName] || 0) + 1;
+            displayName = `${baseName} ${nameCounters[baseName]}`;
+        } else {
+            // Only one motion with this name - no index needed
+            displayName = baseName;
+        }
+
+        const btn = createControlButton(displayName, `Play Motion: ${displayName}`, () => {
+            try {
+                // Stop all motions before playing the next one
+                model.internalModel?.motionManager?.stopAllMotions?.();
+                model.motion(group, index); // Play the motion
+                setActiveButton(container, btn, CONFIG.HIT_AREA_BUTTON_HIGHLIGHT_DURATION); // Highlight button briefly
+                console.log(
+                    `%cMotion%c on model ${model.appModelId}: ${group}[${index}] ('${displayName}')`,
+                    "color: white; background: #00b894; font-weight: bold; padding:2px 4px; border-radius:2px;",
+                    "color: #00b894; font-weight: bold;"
+                );
+            } catch (e) {
+                console.error(
+                    `%cError%c playing motion on model ${model.appModelId}:`,
+                    "color: white; background: #e17055; font-weight: bold; padding:2px 4px; border-radius:2px;",
+                    "color: #e17055; font-weight: bold;",
+                    e
+                );
+                alert(`Motion error: ${e.message}`);
+            }
+        }, 'feature-btn', 'motion-btn');
+        container.appendChild(btn);
+        motionButtonsCreated++;
     });
 
     if (motionButtonsCreated === 0) setNoContentMessage(container, 'motions');
@@ -799,8 +875,8 @@ function handlePointerDown(event) {
     for (let i = app.stage.children.length - 1; i >= 0; i--) {
         const child = app.stage.children[i];
         if (child instanceof PIXI.live2d.Live2DModel && models.includes(child)) {
-            // Use PIXI's hitTest for accurate detection
-            if (app.renderer.plugins.interaction.hitTest(event.data.global, child)) {
+            // Use the object's containsPoint for hit detection
+            if (child.containsPoint(event.data.global)) {
                 downOnModel = child;
                 break;
             }

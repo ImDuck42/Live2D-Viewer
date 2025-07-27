@@ -452,9 +452,6 @@
 .fe-preview-actions .fe-import-model-btn-preview {
     background-color: var(--accent-secondary);
 }
-.fe-preview-actions .fe-import-model-btn-preview i {
-    margin-right: 0.4em;
-}
 
 .fe-preview-actions .fe-import-model-btn-preview:hover {
     background-color: color-mix(in srgb, var(--accent-secondary) 85%, white);
@@ -587,11 +584,16 @@
         min-width: 120px;
     }
 
+    .fe-repo-input-container button:not(.fe-icon-button) {
+        width: 100%;
+    }
+
     .fe-repo-input-container button,
     .fe-icon-button {
         font-size: 0.85rem;
         padding: 0.5rem 0.8rem;
     }
+
     .fe-icon-button {
         padding: 0.5rem;
     }
@@ -613,22 +615,27 @@
     .file-explorer-main-content {
         flex-direction: column;
     }
+
     .fe-content-area-body {
         flex-direction: column;
     }
+
     .fe-file-listing-container,
     .fe-file-preview-container {
         max-width: 100% !important;
         margin-left: 0 !important;
         flex: 1 1 0;
     }
+
     .fe-file-preview-container {
         margin-top: var(--main-padding);
     }
+
     .fe-file-preview-container.active {
         display: flex !important;
         margin-top: var(--main-padding);
     }
+
     .fe-file-listing-container.preview-open {
         max-width: 100% !important;
     }
