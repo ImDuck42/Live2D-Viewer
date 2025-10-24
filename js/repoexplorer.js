@@ -45,9 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // INITIALIZATION
     //==============================================================================
 
-    /**
-     * Validates that all essential DOM elements are present and sets up event listeners.
-     */
+    // Validates that all essential DOM elements are present and sets up event listeners.
     function initializeExplorer() {
         const essentialElements = Object.values(DOM);
         if (essentialElements.some(el => !el)) {

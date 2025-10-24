@@ -45,9 +45,7 @@ const ALL_EXCLUSION_PATTERNS = Object.values(CONSOLE_EXCLUSION_PATTERNS).flat();
 // Allow debugging by setting this flag in the console
 window.consoleDebug = false;
 
-/**
- * Creates a wrapped version of a console method (log, warn, error) that filters messages.
- */
+// Creates a wrapped version of a console method (log, warn, error) that filters messages.
 function createFilteredConsoleMethod(originalMethod) {
     return function(...args) {
         // If debug mode is on, bypass filtering and show a stack trace for easier debugging

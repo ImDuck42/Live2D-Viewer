@@ -27,9 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // INITIALIZATION
     //==============================================================================
 
-    /**
-     * Fetches and injects the changelog HTML, then sets up interactions.
-     */
+    // Fetches and injects the changelog HTML, then sets up interactions.
     async function initializeChangelog() {
         if (!DOM.changelogPlaceholder || !DOM.siteTitleButton) {
             console.warn("News Modal: Required DOM elements not found. Feature disabled.");
@@ -63,9 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // CORE FUNCTIONALITY
     //==============================================================================
 
-    /**
-     * Opens the changelog modal and prevents background scrolling.
-     */
+    // Opens the changelog modal and prevents background scrolling.
     const openModal = () => {
         if (changelogModal) {
             changelogModal.classList.add('active');
@@ -73,9 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    /**
-     * Closes the changelog modal and restores background scrolling.
-     */
+    // Closes the changelog modal and restores background scrolling.
     const closeModal = () => {
         if (changelogModal) {
             changelogModal.classList.remove('active');
@@ -87,9 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // EVENT HANDLERS & LISTENERS
     //==============================================================================
 
-    /**
-     * Sets up all event listeners for modal interactions.
-     */
+    // Sets up all event listeners for modal interactions.
     function setupModalEventListeners() {
         DOM.siteTitleButton.addEventListener('click', openModal);
         changelogCloseButton.addEventListener('click', closeModal);

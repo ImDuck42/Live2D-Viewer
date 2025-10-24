@@ -112,9 +112,7 @@ const DOM = {
 // APPLICATION INITIALIZATION
 //==============================================================================
 
-/**
- * Initializes the PIXI application, sets up the stage, and attaches event listeners.
- */
+// Initializes the PIXI application, sets up the stage, and attaches event listeners.
 function initializeApplication() {
     if (!DOM.canvas) {
         log('ERROR', "Fatal Error: Canvas element not found. Application cannot start.");
@@ -152,18 +150,14 @@ function initializeApplication() {
     updateDeleteButtonState();
 }
 
-/**
- * Creates and adds the selection outline graphics to the stage.
- */
+// Creates and adds the selection outline graphics to the stage.
 function initializeSelectionOutline() {
     selectionOutline = new PIXI.Graphics();
     selectionOutline.visible = false;
     app.stage.addChild(selectionOutline);
 }
 
-/**
- * Main update loop for continuous rendering tasks.
- */
+// Main update loop for continuous rendering tasks.
 function onTick() {
     if (selectedModel && selectionOutline.visible) {
         updateSelectionOutline(selectedModel);
@@ -172,9 +166,7 @@ function onTick() {
     }
 }
 
-/**
- * Checks for a 'model' URL parameter and loads it if present.
- */
+// Checks for a 'model' URL parameter and loads it if present.
 function handleURLParameters() {
     const urlParams = new URLSearchParams(window.location.search);
     const modelURL = urlParams.get('model');
@@ -192,9 +184,7 @@ function handleURLParameters() {
 // MODEL LOADING & MANAGEMENT
 //==============================================================================
 
-/**
- * Main function to load a Live2D model from a source URL.
- */
+// Main function to load a Live2D model from a source URL.
 async function loadModel(source) {
     if (!app?.stage) {
         log('ERROR', "PIXI Application not ready for model loading.");
@@ -250,9 +240,7 @@ async function loadModel(source) {
 }
 window.loadLive2DModel = loadModel; // Expose for repoexplorer.js
 
-/**
- * Sets the currently selected model and updates the UI accordingly.
- */
+// Sets the currently selected model and updates the UI accordingly.
 function setSelectedModel(model) {
     if (hitAreaFrames?.parent) {
         hitAreaFrames.parent.removeChild(hitAreaFrames);
@@ -292,9 +280,7 @@ function setSelectedModel(model) {
     DOM.showHitAreasCheckbox.disabled = !selectedModel;
 }
 
-/**
- * Deletes the currently selected model from the stage and memory.
- */
+// Deletes the currently selected model from the stage and memory.
 function deleteSelectedModel() {
     if (!selectedModel) return;
 
@@ -327,9 +313,7 @@ function deleteSelectedModel() {
     updateUIVisibility();
 }
 
-/**
- * Scales and positions a new model to fit nicely in the canvas view.
- */
+// Scales and positions a new model to fit nicely in the canvas view.
 function fitAndPositionNewModel(model) {
     if (!model || !app?.renderer) return;
 
@@ -359,24 +343,18 @@ function fitAndPositionNewModel(model) {
 // UI UPDATES & CONTROL PANEL
 //==============================================================================
 
-/**
- * Updates the visibility of the loading overlay and initial message.
- */
+// Updates the visibility of the loading overlay and initial message.
 function updateUIVisibility(isLoading = false) {
     DOM.loadingOverlay.style.display = isLoading ? 'flex' : 'none';
     DOM.noModelMessage.style.display = models.length === 0 && !isLoading ? 'flex' : 'none';
 }
 
-/**
- * Enables or disables the delete button based on model selection.
- */
+// Enables or disables the delete button based on model selection.
 function updateDeleteButtonState() {
     DOM.deleteSelectedButton.disabled = !selectedModel;
 }
 
-/**
- * Updates the entire control panel based on the selected model.
- */
+// Updates the entire control panel based on the selected model.
 function updateControlPanel() {
     log('UI', "Updating control panel for selected model.");
     if (selectedModel) {
@@ -388,18 +366,14 @@ function updateControlPanel() {
     }
 }
 
-/**
- * Clears all sections of the control panel.
- */
+// Clears all sections of the control panel.
 function clearControlPanel() {
     setNoContentMessage(DOM.expressionsContainer, 'expressions');
     setNoContentMessage(DOM.motionsContainer, 'motions');
     setNoContentMessage(DOM.hitAreasContainer, 'hit areas');
 }
 
-/**
- * Populates a section of the control panel with buttons.
- */
+// Populates a section of the control panel with buttons.
 function populateControls(type, data) {
     const container = DOM[`${type}Container`];
     if (!container) return;
@@ -482,9 +456,7 @@ function populateControls(type, data) {
 }
 
 
-/**
- * Creates a button for the control panel.
- */
+// Creates a button for the control panel.
 function createControlButton(text, type, onClick) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -498,9 +470,7 @@ function createControlButton(text, type, onClick) {
     return button;
 }
 
-/**
- * Briefly highlights a button in the control panel.
- */
+// Briefly highlights a button in the control panel.
 function highlightButton(button, container) {
     if (!container) return;
     container.querySelectorAll('.active').forEach(btn => btn.classList.remove('active'));
@@ -508,18 +478,14 @@ function highlightButton(button, container) {
     setTimeout(() => button.classList.remove('active'), CONFIG.HIT_AREA_HIGHLIGHT_DURATION);
 }
 
-/**
- * Displays a "no content" message in a container.
- */
+// Displays a "no content" message in a container.
 function setNoContentMessage(container, contentType) {
     if (container) {
         container.innerHTML = `<p class="no-content-message">No ${contentType} available</p>`;
     }
 }
 
-/**
- * Updates the model filename display in the corner of the canvas.
- */
+// Updates the model filename display in the corner of the canvas.
 function updateModelFilenameDisplay() {
     if (!selectedModel) {
         DOM.modelFilename.style.display = 'none';
@@ -531,9 +497,7 @@ function updateModelFilenameDisplay() {
     DOM.modelFilename.style.display = 'block';
 }
 
-/**
- * Draws the selection outline around the given model.
- */
+// Draws the selection outline around the given model.
 function updateSelectionOutline(model) {
     if (!selectionOutline || !model?.getBounds) return;
 
@@ -560,9 +524,7 @@ function updateSelectionOutline(model) {
 // EVENT LISTENERS SETUP
 //==============================================================================
 
-/**
- * Sets up event listeners for all UI elements.
- */
+// Sets up event listeners for all UI elements.
 function setupUIEventListeners() {
     DOM.loadSelectedButton.addEventListener('click', () => loadModel(DOM.dropdownHiddenInput.value));
     DOM.loadUrlButton.addEventListener('click', () => loadModel(DOM.modelUrlInput.value.trim()));
@@ -580,9 +542,7 @@ function setupUIEventListeners() {
     }
 }
 
-/**
- * Sets up interaction listeners on the PIXI stage.
- */
+// Sets up interaction listeners on the PIXI stage.
 function setupStageInteractions() {
     app.stage.interactive = true;
     app.stage.hitArea = app.screen;
@@ -596,9 +556,7 @@ function setupStageInteractions() {
     DOM.canvas.addEventListener('wheel', handleCanvasZoom, { passive: false });
 }
 
-/**
- * Sets up the custom dropdown functionality.
- */
+// Sets up the custom dropdown functionality.
 function initializeCustomDropdown() {
     const { dropdown, dropdownSelected, dropdownList, dropdownHiddenInput } = DOM;
     if (!dropdown) return;
@@ -764,9 +722,7 @@ function bringModelToFront(model) {
             app.stage.setChildIndex(selectionOutline, app.stage.children.length - 1);
         }
 
-        // Also reorder the models[] array so hit-testing (which iterates models)
-        // sees this model as the topmost. This prevents immediate drags from
-        // hitting the model that was visually underneath.
+        // Reorder the models[] array so hit-testing (which iterates models)
         const idx = models.indexOf(model);
         if (idx > -1 && idx !== models.length - 1) {
             models.splice(idx, 1);
@@ -782,7 +738,6 @@ function bringModelToFront(model) {
 // Change selected model when user scrolls over the filename element
 function handleModelFilenameScroll(event) {
     if (!models || models.length === 0) return;
-    // Prevent page from scrolling
     event.preventDefault();
 
     // Sort models by appModelId (ascending)
@@ -791,7 +746,6 @@ function handleModelFilenameScroll(event) {
     // Find current index in sorted list
     let currentIndex = sorted.findIndex(m => m === selectedModel);
     if (currentIndex === -1) {
-        // If nothing is selected, start from first if scrolling down, or last if scrolling up
         currentIndex = (event.deltaY > 0) ? 0 : sorted.length - 1;
     }
 
