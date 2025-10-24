@@ -2,50 +2,63 @@
 <html lang="en">
 
 <head>
+    <!-- Meta Tags -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A Live2D model viewer using pixi-live2d-display">
+    <meta name="description" content="A feature-rich, browser-based Live2D model viewer using pixi-live2d-display.">
     <meta name="theme-color" content="#8c5eff">
     <title>Live2D Viewer</title>
     <link rel="icon" type="image/svg+xml" href="assets/icon.svg" sizes="any">
+
+    <!-- Stylesheets and Font Awesome -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/repoexplorer.css">
     <link rel="stylesheet" href="css/newsmodal.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 </head>
 
 <body>
+    <!-- Main Application Container -->
     <div class="app-container">
         <header class="site-header">
-            <h1 id="site-title-button" title="Live2D Viewer">Live2D Viewer</h1>
+            <h1 id="site-title-button" title="View Project News">Live2D Viewer</h1>
             <div class="model-imports">
                 <div class="model-loader-group">
-                    <!-- File Explorer Trigger -->
-                    <button id="open-file-explorer-btn" class="header-icon-button" title="Open GitHub File Explorer" aria-controls="file-explorer-modal" aria-expanded="false">
-                        <i class="fas fa-folder-open"></i>
+                    <button id="open-file-explorer-btn" class="header-icon-button" title="Open GitHub File Explorer"
+                        aria-controls="file-explorer-modal" aria-expanded="false">
+                        <i class="fas fa-folder-open" aria-hidden="true"></i>
                     </button>
                     <label for="model-url-input" class="sr-only">Model URL</label>
-                    <input type="text" id="model-url-input" placeholder="Enter model (.json/.model3.json) URL..." title="Enter URL of a Live2D model">
-                    <button id="load-url-button" title="Load model from URL">Load URL</button>
+                    <input type="text" id="model-url-input" placeholder="Enter model (.json/.model3.json) URL..."
+                        title="Enter the URL of a Live2D model file">
+                    <button id="load-url-button" title="Load model from the specified URL">Load URL</button>
                 </div>
 
                 <div class="model-loader-group">
-                    <div class="custom-dropdown" id="model-select-dropdown" tabindex="0" aria-haspopup="listbox" aria-expanded="false" title="Select a default model">
+                    <div class="custom-dropdown" id="model-select-dropdown" tabindex="0" aria-haspopup="listbox"
+                        aria-expanded="false" title="Select a default model to load">
                         <span class="custom-dropdown-selected" id="model-select-dropdown-selected">Default Models</span>
-                        <ul class="custom-dropdown-list" id="model-select-dropdown-list" role="listbox" title="List of default models">
-                            <li class="custom-dropdown-option" data-value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json" role="option">
+                        <ul class="custom-dropdown-list" id="model-select-dropdown-list" role="listbox"
+                            aria-label="List of default models">
+                            <li class="custom-dropdown-option"
+                                data-value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json"
+                                role="option">
                                 Shizuku (Cubism 2.1)
                             </li>
-                            <li class="custom-dropdown-option" data-value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json" role="option">
+                            <li class="custom-dropdown-option"
+                                data-value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json"
+                                role="option">
                                 Haru (Cubism 4)
                             </li>
-                            <li class="custom-dropdown-option" data-value="https://raw.githubusercontent.com/Eikanya/Live2d-model/refs/heads/master/崩坏学园2/bronya/model.json" role="option">
+                            <li class="custom-dropdown-option"
+                                data-value="https://raw.githubusercontent.com/Eikanya/Live2d-model/refs/heads/master/崩坏学园2/bronya/model.json"
+                                role="option">
                                 Bronya (Cubism 2.1)
                             </li>
                         </ul>
                         <input type="hidden" id="model-select" value="">
                     </div>
-                    <button id="load-selected-button" title="Load default model">Load Selected</button>
+                    <button id="load-selected-button" title="Load the selected default model">Load Selected</button>
                 </div>
             </div>
         </header>
@@ -53,24 +66,27 @@
         <main class="main-content">
             <div class="canvas-area">
                 <canvas id="live2d-canvas" aria-label="Live2D Model Display Area"></canvas>
-                <div class="loading-overlay" id="loading-overlay" role="status" aria-live="polite">
+                <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite"
+                    style="display: none;">
                     <div class="spinner" aria-hidden="true"></div>
-                    <div class="loading-text">Loading model...</div>
+                    <p class="loading-text">Loading model...</p>
                 </div>
                 <div id="no-model-message" class="canvas-message">
                     <i class="fas fa-circle-user" aria-hidden="true"></i>
                     <p>Select or enter a model URL to display</p>
                 </div>
-                <div id="model-filename" class="model-filename"></div>
+                <div id="model-filename" class="model-filename" title="Click to copy filename"></div>
             </div>
 
             <aside class="control-panel" aria-labelledby="control-panel-heading">
                 <h2 id="control-panel-heading" class="sr-only">Model Controls</h2>
                 <div class="control-item">
                     <input type="checkbox" id="show-hit-areas-checkbox" disabled />
-                    <label for="show-hit-areas-checkbox" title="Show Hit Areas">Show Hit Areas</label>
-                    <button id="delete-selected-model-button" title="Delete selected model" disabled>
-                        <i class="fas fa-trash"></i>
+                    <label for="show-hit-areas-checkbox"
+                        title="Toggle visibility of interactive hit areas on the model">Show Hit Areas</label>
+                    <button id="delete-selected-model-button" title="Delete the currently selected model" disabled>
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                        <span class="sr-only">Delete Selected Model</span>
                     </button>
                 </div>
 
@@ -97,69 +113,75 @@
             </aside>
         </main>
 
+        <!-- Footer -->
         <footer class="site-footer">
-            <p>Powered by <a href="https://github.com/guansss/pixi-live2d-display" target="_blank" rel="noopener noreferrer">pixi-live2d-display</a></p>
-            <p>Model controls: Drag to move, Scroll/Pinch to zoom, Tap to select/interact.</p>
+            <p>Powered by <a href="https://github.com/guansss/pixi-live2d-display" target="_blank"
+                    rel="noopener noreferrer">pixi-live2d-display</a></p>
+            <p>Model controls: Drag to move, Scroll/Pinch to zoom, Tap to interact.</p>
         </footer>
 
         <!-- Placeholder for Changelog Modal -->
         <div id="changelog-placeholder"></div>
 
         <!-- File Explorer Modal -->
-        <div id="file-explorer-modal" class="file-explorer-modal-container">
-            <button id="file-explorer-close-btn" class="file-explorer-close-btn" title="Close File Explorer">
-                <i class="fas fa-xmark"></i>
+        <div id="file-explorer-modal" class="file-explorer-modal-container" role="dialog" aria-modal="true"
+            aria-labelledby="file-explorer-heading">
+            <button id="file-explorer-close-btn" class="file-explorer-close-btn" title="Close File Explorer"
+                aria-label="Close File Explorer">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
             </button>
             <div class="file-explorer-header">
-                <h2>GitHub Repository Explorer</h2>
+                <h2 id="file-explorer-heading">GitHub Repository Explorer</h2>
                 <div class="fe-repo-input-container">
-                    <input type="text" id="feOwnerInput" placeholder="GitHub Owner" value="Eikanya" title="Enter GitHub user">
+                    <label for="fe-owner-input" class="sr-only">GitHub Owner</label>
+                    <input type="text" id="fe-owner-input" placeholder="GitHub Owner" value="Eikanya"
+                        title="Enter GitHub username or organization">
                     <span>/</span>
-                    <input type="text" id="feRepoInput" placeholder="Repository Name" value="Live2d-model" title="Enter GitHub repository">
-                    <button id="feLoadRepoBtn" title="Load GitHub repository">Load Repository</button>
+                    <label for="fe-repo-input" class="sr-only">Repository Name</label>
+                    <input type="text" id="fe-repo-input" placeholder="Repository Name" value="Live2d-model"
+                        title="Enter GitHub repository name">
+                    <button id="fe-load-repo-btn" title="Load repository content">Load Repository</button>
                 </div>
             </div>
             <div class="file-explorer-main-content">
                 <div class="fe-content-area-header">
-                    <button id="feUpDirectoryBtn" class="fe-icon-button" title="Up one level" style="display: none;">
-                        <i class="fas fa-arrow-up"></i>
+                    <button id="fe-up-directory-btn" class="fe-icon-button" title="Navigate to parent directory"
+                        style="display: none;">
+                        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                        <span class="sr-only">Up one level</span>
                     </button>
-                    <div class="fe-breadcrumbs" id="feMainBreadcrumbs">
-                        <!-- Breadcrumbs will be populated here -->
-                    </div>
+                    <div id="fe-breadcrumbs" class="fe-breadcrumbs"></div>
                 </div>
                 <div class="fe-content-area-body">
-                    <div class="fe-file-listing-container scrollable" id="feFileListingContainer">
+                    <div id="fe-file-listing-container" class="fe-file-listing-container scrollable">
                         <p class="fe-placeholder-text">Load a repository to see its content.</p>
                     </div>
 
-                    <div class="fe-file-preview-container" id="feFilePreviewContainer" style="display: none;">
+                    <div id="fe-file-preview-container" class="fe-file-preview-container" style="display: none;">
                         <div class="fe-preview-header">
-                            <h4 id="fePreviewFileName"></h4>
-                            <button id="feClosePreviewBtn" class="fe-icon-button fe-close-btn" title="Close preview">
-                                <i class="fas fa-xmark"></i>
+                            <h4 id="fe-preview-filename"></h4>
+                            <button id="fe-close-preview-btn" class="fe-icon-button fe-close-btn"
+                                title="Close file preview" aria-label="Close file preview">
+                                <i class="fas fa-xmark" aria-hidden="true"></i>
                             </button>
                         </div>
-                        <div class="fe-preview-content scrollable" id="fePreviewContent">
-                            <!-- File preview content -->
-                        </div>
-                        <div id="fePreviewActions" class="fe-preview-actions"></div>
+                        <div id="fe-preview-content" class="fe-preview-content scrollable"></div>
+                        <div id="fe-preview-actions" class="fe-preview-actions"></div>
                     </div>
                 </div>
             </div>
-            <div class="file-explorer-footer">
-                <p>Status: <span id="feStatusMessage" aria-live="polite">Idle</span></p>
-            </div>
+            <footer class="file-explorer-footer">
+                <p>Status: <span id="fe-status-message" aria-live="polite">Idle</span></p>
+            </footer>
         </div>
 
-        <!-- Loader for File Explorer -->
-        <div id="feLoader" class="fe-loader-overlay" style="display: none;">
+        <div id="fe-loader" class="fe-loader-overlay" style="display: none;" role="status" aria-live="assertive">
             <div class="spinner"></div>
             <p>Loading Repository Data...</p>
         </div>
     </div>
 
-    <!-- Console exclusion patterns (Needs to load first)-->
+    <!-- Console exclusion patterns -->
     <script src="js/exclusions.js"></script>
 
     <!-- Libraries -->

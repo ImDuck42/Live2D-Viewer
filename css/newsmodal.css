@@ -11,17 +11,17 @@
     left: var(--main-padding);
     right: var(--main-padding);
     bottom: var(--main-padding);
-    background-color: rgba(var(--bg-secondary-rgb), 0.65);
-    backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(var(--text-primary-rgb), 0.12);
     z-index: 1000;
     display: none;
     flex-direction: column;
     padding: calc(var(--main-padding) * 1.2);
-    box-shadow: 0 8px 32px 0 rgba(var(--bg-primary-rgb), 0.4);
     color: var(--text-primary);
+    background-color: rgba(var(--bg-secondary-rgb), 0.65);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid rgba(var(--text-primary-rgb), 0.12);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px rgba(var(--bg-primary-rgb), 0.4);
     overflow: hidden;
 }
 
@@ -33,46 +33,62 @@
     position: absolute;
     top: var(--main-padding);
     right: var(--main-padding);
-    background: rgba(var(--bg-element), 0.7);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 50%;
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1.2rem;
-    cursor: pointer;
+    z-index: 1001;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: var(--transition-main);
-    z-index: 1001;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.2rem;
     line-height: 1;
+    color: var(--text-secondary);
+    background: rgba(var(--bg-element), 0.7);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transition-main);
 }
 
 .changelog-close-btn:hover,
 .changelog-close-btn:focus-visible {
-    background: var(--accent-primary);
     color: var(--text-primary);
-    transform: scale(1.1) rotate(90deg);
+    background: var(--accent-primary);
     box-shadow: var(--shadow-glow-accent);
+    transform: scale(1.1) rotate(90deg);
 }
 
 .changelog-content {
     flex-grow: 1;
-    overflow-y: auto;
     padding-top: var(--main-padding);
     padding-right: 1rem;
+    overflow-y: auto;
 }
 
+.changelog-content h2 {
+    margin-bottom: var(--section-gap);
+    padding-bottom: var(--main-padding);
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: center;
+    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/*=============================================
+  SCROLLBAR
+=============================================*/
 .changelog-content::-webkit-scrollbar {
     width: 10px;
 }
 
 .changelog-content::-webkit-scrollbar-track {
-    background: rgba(var(--bg-element), 0.3);
-    border-radius: var(--border-radius-small);
     margin-top: calc(var(--main-padding) + 1.5rem);
     margin-bottom: var(--main-padding);
+    background: rgba(var(--bg-element), 0.3);
+    border-radius: var(--border-radius-small);
 }
 
 .changelog-content::-webkit-scrollbar-thumb {
@@ -84,27 +100,17 @@
     background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 85%, white), color-mix(in srgb, var(--accent-secondary) 85%, white));
 }
 
-.changelog-content h2 {
-    text-align: center;
-    font-size: 1.8rem;
-    font-weight: 700;
-    background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: var(--section-gap);
-    padding-bottom: var(--main-padding);
-    border-bottom: 1px solid var(--border-color);
-}
-
+/*=============================================
+  CHANGELOG ENTRY
+=============================================*/
 .changelog-entry {
-    background-color: rgba(var(--bg-primary-rgb), 0.5);
-    border-radius: var(--border-radius-small);
     padding: var(--main-padding);
     margin-bottom: var(--section-gap);
+    background-color: rgba(var(--bg-primary-rgb), 0.5);
     border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
     box-shadow: 0 2px 4px rgba(var(--bg-primary-rgb), 0.3);
-    transition: border-color var(--transition-duration) var(--transition-timing);
+    transition: border-color var(--transition-duration);
 }
 
 .changelog-entry:hover {
@@ -112,59 +118,60 @@
 }
 
 .changelog-entry h3.changelog-version {
-    font-size: 1.4rem;
-    color: var(--accent-primary);
     margin-bottom: 0.35rem;
+    font-size: 1.4rem;
     font-weight: 600;
+    color: var(--accent-primary);
 }
 
 .changelog-entry .changelog-date {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
     margin-bottom: var(--main-padding);
+    font-size: 0.8rem;
     font-style: italic;
+    color: var(--text-secondary);
     opacity: 0.8;
 }
 
 .changelog-entry ul {
-    list-style-type: none;
     padding-left: 0.5rem;
+    list-style-type: none;
 }
 
 .changelog-entry ul li {
-    margin-bottom: 0.6rem;
-    line-height: 1.6;
-    padding-left: 1.5em;
     position: relative;
+    margin-bottom: 0.6rem;
+    padding-left: 1.5em;
+    line-height: 1.6;
     color: var(--text-secondary);
 }
 
 .changelog-entry ul li::before {
     content: '\f005';
-    font-family: "Font Awesome 7 Free";
-    font-weight: 900;
     position: absolute;
     left: 0;
     top: 0.1em;
-    color: var(--accent-secondary);
+    font-family: "Font Awesome 7 Free";
+    font-weight: 900;
     font-size: 0.9em;
+    color: var(--accent-secondary);
 }
 
 .changelog-entry ul li strong {
-    color: var(--text-primary);
     font-weight: 500;
+    color: var(--text-primary);
 }
 
-.article[href] {
+.changelog-entry ul li a {
     color: var(--accent-primary);
+    transition: color var(--transition-duration);
 }
 
-.article[href]:hover {
+.changelog-entry ul li a:hover {
     color: var(--accent-secondary);
 }
 
 /*=============================================
-  RESPONSIVE STYLES FOR NEWS MODAL
+  RESPONSIVE STYLES
 =============================================*/
 @media (max-width: 1080px) {
     .changelog-modal-container {
@@ -181,10 +188,6 @@
 }
 
 @media (max-width: 768px) {
-    .changelog-modal-container {
-        padding: var(--main-padding);
-    }
-
     .changelog-close-btn {
         top: 0.5rem;
         right: 0.5rem;

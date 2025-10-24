@@ -1,55 +1,75 @@
-const exclusionPatterns = [
-    // Matches: Live2D 2.1.00_1, Live2D SDK 3.4.02, etc.
-    /^Live2D(?:\s+(?:SDK\s+)?\d+\.\d+(?:\.\d+)?(?:_\d+)?)?/i,
-    // Matches: profile : Desktop, profile: Mobile, profile :Web
-    /^profile\s*:\s*\w+\s*$/i,
-    // Matches: [CSM][I], [CSM][W], [CSM][E] - any log level
-    /\[CSM\]\[[IWEDF]\]/i,
-    // Matches: various SoundManager error formats
-    /^\[SoundManager\]\s+(?:Error\s+occurred\s+on|Failed\s+to|Unable\s+to|Cannot)/i,
-    // Matches: MotionManager errors with or without parentheses
-    /^\[MotionManager(?:\(.*?\))?\]\s+(?:failed\s+to\s+play\s+audio|error|unable\s+to)/i,
-    // Matches: profile assignments with flexible spacing and values
-    /^\s*\[PROFILE_NAME\]\s*=\s*[\w-]+\s*$/i,
-    // Matches: boolean configs with flexible spacing and case
-    /^\s*\[USE_ADJUST_TRANSLATION\]\s*=\s*(?:true|false|TRUE|FALSE|0|1)\s*$/i,
-    // Matches: boolean configs with flexible spacing and case
-    /^\s*\[USE_CACHED_POLYGON_IMAGE\]\s*=\s*(?:true|false|TRUE|FALSE|0|1)\s*$/i,
-    // Matches: numeric configs with negative numbers and decimals
-    /^\s*\[EXPAND_W\]\s*=\s*-?\d+(?:\.\d+)?\s*$/i,
+//==============================================================================
+// CONFIGURATION
+//==============================================================================
 
-    // Matches: $li : call *$Ri.update() before _$Ri.draw() - Dunno why it shows but everything works fine
-    /^_\$li : call _\$Ri\.update\(\) before _\$Ri\.draw\(\)/i,
-];
+const CONSOLE_EXCLUSION_PATTERNS = {
+    // General Live2D SDK startup and profile messages
+    SDK_INFO: [
+        /^Live2D(?:\s+(?:SDK\s+)?\d+\.\d+(?:\.\d+)?(?:_\d+)?)?/i, // e.g., "Live2D 2.1.00_1"
+        /^profile\s*:\s*\w+\s*$/i,                                // e.g., "profile : Desktop"
+    ],
 
-// Save the original console methods
-const originalError = console.error;
-const originalWarn = console.warn;
-const originalLog = console.log;
+    // Cubism Core internal logging prefixes
+    CUBISM_CORE: [
+        /\[CSM\]\[[IWEDF]\]/i, // e.g., "[CSM][I]"
+    ],
 
-var consoleDebug = false; // set to true to enable trace
+    // Audio and motion-related warnings that are often non-critical
+    AUDIO_MOTION: [
+        /^\[SoundManager\]\s+(?:Error\s+occurred\s+on|Failed\s+to|Unable\s+to|Cannot)/i,
+        /^\[MotionManager(?:\(.*?\))?\]\s+(?:failed\s+to\s+play\s+audio|error|unable\s+to)/i,
+        /\[MotionManager\(\)\] Failed to load motion: .*/i,
+    ],
 
+    // Obscure or internal configuration logs
+    INTERNAL_CONFIG: [
+        /^\s*\[PROFILE_NAME\]\s*=\s*[\w-]+\s*$/i,
+        /^\s*\[USE_ADJUST_TRANSLATION\]\s*=\s*(?:true|false|TRUE|FALSE|0|1)\s*$/i,
+        /^\s*\[USE_CACHED_POLYGON_IMAGE\]\s*=\s*(?:true|false|TRUE|FALSE|0|1)\s*$/i,
+        /^\s*\[EXPAND_W\]\s*=\s*-?\d+(?:\.\d+)?\s*$/i,
+    ],
+
+    // Specific, known non-critical warnings
+    MISC: [
+        /^_\$li : call _\$Ri\.update\(\) before _\$Ri\.draw\(\)/i, // A frequent, benign warning
+    ],
+};
+
+// Combine all patterns into a single array for efficient matching
+const ALL_EXCLUSION_PATTERNS = Object.values(CONSOLE_EXCLUSION_PATTERNS).flat();
+
+//==============================================================================
+// CONSOLE METHOD OVERRIDE
+//==============================================================================
+
+// Allow debugging by setting this flag in the console
+window.consoleDebug = false;
+
+/**
+ * Creates a wrapped version of a console method (log, warn, error) that filters messages.
+ */
 function createFilteredConsoleMethod(originalMethod) {
     return function(...args) {
-        const message = args.join(' ');
-        
-        // If debug is enabled, don't apply blocking and add trace
-        if (consoleDebug) {
-            const trace = new Error().stack?.split('\n')[2]?.trim();
-            args.push(`\n↳ ${trace}`);
-            originalMethod.apply(console, args);
+        // If debug mode is on, bypass filtering and show a stack trace for easier debugging
+        if (window.consoleDebug) {
+            const trace = new Error().stack?.split('\n')[2]?.trim() || 'Trace not available';
+            originalMethod.apply(console, [...args, `\n↳ ${trace}`]);
             return;
         }
-        
-        // Only apply filtering when debug is disabled
-        const shouldBlock = exclusionPatterns.some(pattern => pattern.test(message));
+
+        // Join arguments to form a single string for pattern matching
+        const message = args.map(arg => String(arg)).join(' ');
+
+        // Check if the message matches any exclusion pattern
+        const shouldBlock = ALL_EXCLUSION_PATTERNS.some(pattern => pattern.test(message));
+
         if (!shouldBlock) {
             originalMethod.apply(console, args);
         }
     };
 }
 
-// Apply the filtered method to both console.log/warn/error
-console.log = createFilteredConsoleMethod(originalLog);
-console.warn = createFilteredConsoleMethod(originalWarn);
-console.error = createFilteredConsoleMethod(originalError);
+// Override the native console methods with the filtered versions
+console.log = createFilteredConsoleMethod(console.log);
+console.warn = createFilteredConsoleMethod(console.warn);
+console.error = createFilteredConsoleMethod(console.error);

@@ -11,12 +11,4 @@ Maybe:
 
 
 Other (No need for now):
-    - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework), 
-
-
-
-Done:
-    - Motion change imediatly after press
-    - In the bottom right of the canvas show the filename of the selected model
-        - Click to copy name
-    - Custom drop down menu
+    - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework), 9th (major refactor), 
