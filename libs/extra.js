@@ -13,7 +13,7 @@
  *   before creating new ones, preventing text stacking on model change.
  * - Added safety checks for parent/model existence in `onPointerMove` and `_render`.
  * - Refactored the entire file for improved readability and maintainability.
- */
+*/
 
 (function(global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@pixi/graphics'), require('@pixi/text'), require('@pixi/math')) :

@@ -4,7 +4,7 @@ Planned:
 
 Maybe:
     - Support for "text": atributes
-    - Status on what part of the model is loading
+    - Status on what part of the model is loading (idk how guanss did it but idk if its possible in my version)
     - Cutom look for title="" like tool tip
     - Custom cursor
     - Smoother animations
@@ -12,3 +12,11 @@ Maybe:
 
 Other (No need for now):
     - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework), 9th (major refactor), 
+
+
+ISSUES:
+    - Zooming on mobile devices wors once then on zoom just jumps all over the screen
+    - const mm = selectedModel.internalModel?.motionManager; \n mm?.stopAllMotions?.(); breaks the motion button audio, tho the hit area and its button dosnt work without it
+
+    DO THIS:
+        - If the file fails to load for any reason, color the canvas border red for ten seconds

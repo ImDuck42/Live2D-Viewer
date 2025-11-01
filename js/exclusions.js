@@ -3,10 +3,11 @@
 //==============================================================================
 
 const CONSOLE_EXCLUSION_PATTERNS = {
-    // General Live2D SDK startup and profile messages
+    // General Live2D SDK, PixiJS startup and profile messages
     SDK_INFO: [
         /^Live2D(?:\s+(?:SDK\s+)?\d+\.\d+(?:\.\d+)?(?:_\d+)?)?/i, // e.g., "Live2D 2.1.00_1"
         /^profile\s*:\s*\w+\s*$/i,                                // e.g., "profile : Desktop"
+        /http:\/\/www\.pixijs\.com/i,                             // PixiJS info Banner
     ],
 
     // Cubism Core internal logging prefixes

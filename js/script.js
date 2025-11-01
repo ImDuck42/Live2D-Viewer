@@ -30,7 +30,7 @@ const LOG_STYLES = {
     },
     'WARN': {
         tag: 'background: #f1c40f; color: black; font-weight: bold; border-radius: 4px 10px 10px 4px; padding: 2px 8px 2px 4px;',
-        text: 'background: #8a7e4d; color: #f1c40f; border-radius: 0 4px 4px 0; padding: 2px 4px 2px 2px; margin-left: -5px;'
+        text: 'background: #8a7e4d; color: black; border-radius: 0 4px 4px 0; padding: 2px 4px 2px 2px; margin-left: -5px;'
     },
 };
 
@@ -53,7 +53,7 @@ const CONFIG = {
     HIT_AREA_HIGHLIGHT_DURATION: 500, // ms
     SELECTION_OUTLINE_COLOR: 0x8c5eff,
     SELECTION_OUTLINE_THICKNESS: 2,
-    SELECTION_OUTLINE_ALPHA: 0.25,
+    SELECTION_OUTLINE_ALPHA: 0.1,
     SELECTION_OUTLINE_CORNER_RADIUS: 10,
 };
 
@@ -409,6 +409,8 @@ function populateControls(type, data) {
                         group,
                         name,
                         action: () => {
+                            const mm = selectedModel.internalModel?.motionManager;
+                            mm?.stopAllMotions?.();
                             log('UI', `Triggering motion: Group=${group}, Index=${index}`);
                             selectedModel.motion(group, index);
                         }
@@ -796,24 +798,39 @@ function triggerMotionForHitArea(model, hitAreaName) {
     motionManager.stopAllMotions?.();
 
     const motionGroups = motionManager.definitions;
-    const tapBodyMotions = Object.keys(motionGroups).filter(group => group.toLowerCase().includes('tapbody'));
     let motionPlayed = false;
 
     if (hitAreaName) {
-        const groupName = `Tap${hitAreaName}`;
-        if (motionGroups[groupName]) {
-            const index = Math.floor(Math.random() * motionGroups[groupName].length);
-            log('MODEL', `Playing motion for hit area "${hitAreaName}": Group=${groupName}, Index=${index}`);
-            model.motion(groupName, index);
-            motionPlayed = true;
+        const lowerHitArea = hitAreaName.toLowerCase();
+        // Find all groups that contain the hit area name
+        const matchingGroups = Object.keys(motionGroups).filter(group =>
+            group.toLowerCase().includes(lowerHitArea)
+        );
+        if (matchingGroups.length > 0) {
+            // Pick a random group among matches
+            const groupName = matchingGroups[Math.floor(Math.random() * matchingGroups.length)];
+            const motions = motionGroups[groupName];
+            if (motions && motions.length > 0) {
+                const index = Math.floor(Math.random() * motions.length);
+                log('MODEL', `Playing motion for hit area "${hitAreaName}": Group=${groupName}, Index=${index}`);
+                model.motion(groupName, index);
+                motionPlayed = true;
+            }
         }
     }
 
-    if (!motionPlayed && tapBodyMotions.length > 0) {
-        const randomGroup = tapBodyMotions[Math.floor(Math.random() * tapBodyMotions.length)];
-        const index = Math.floor(Math.random() * motionGroups[randomGroup].length);
-        log('MODEL', `Playing fallback TapBody motion: Group=${randomGroup}, Index=${index}`);
-        model.motion(randomGroup, index);
+    // If no motion matched the hit area, play any available motion at random
+    if (!motionPlayed) {
+        const availableGroups = Object.keys(motionGroups).filter(g => Array.isArray(motionGroups[g]) && motionGroups[g].length > 0);
+        if (availableGroups.length > 0) {
+            const randomGroup = availableGroups[Math.floor(Math.random() * availableGroups.length)];
+            const motions = motionGroups[randomGroup];
+            const index = Math.floor(Math.random() * motions.length);
+            log('WARN', `No matching motion for hit area "${hitAreaName}". Playing random motion instead.`);
+            log('MODEL', `Playing random motion: Group=${randomGroup}, Index=${index}`);
+            model.motion(randomGroup, index);
+            motionPlayed = true;
+        }
     }
 }
 
@@ -831,6 +848,28 @@ function getDistance(p1, p2) {
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApplication);
+    // Sneaky ASCII art console log
+    (()=>{const ascii=`            
+             ☆・゜・。。・゜゜・。。・゜★
+★·.·´¯\`·.·★ L I V E 2 D   V I E W E R ★·.·´¯\`·.·★
+              ★・。。・゜゜・。。・゜・☆
+
+            ⭐ GH: github.com/ImDuck42
+            📨 Mail: imduck420@gmail.com
+            💬 DC: @hu7ao
+
+★·.·´¯\`·.·★ ══════ Version 4.7 ══════ ★·.·´¯\`·.·★
+`
+    const asciiStyle=`
+        font-family:Courier New,monospace;
+        font-size:12px;
+        line-height:1.4;
+        font-weight:bold;
+        background:linear-gradient(135deg,#8c5eff,#ff67d7);
+        -webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;
+    `;
+    console.log('%c'+ascii, asciiStyle)})();
 } else {
     initializeApplication();
 }

@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeExplorer() {
         const essentialElements = Object.values(DOM);
         if (essentialElements.some(el => !el)) {
-            console.error("File Explorer: One or more DOM elements are missing. Feature disabled.");
+            log('ERROR', "File Explorer: One or more DOM elements are missing. Feature disabled.");
             return;
         }
 
@@ -109,13 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleImportModel(fileItem, sourceUrlOverride = null) {
         const modelUrl = sourceUrlOverride || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}@master/${fileItem.path}`;
-        console.log(`Attempting to import Live2D Model: ${modelUrl}`);
+        log('MODEL', `Attempting to import Live2D Model: ${modelUrl}`);
 
         if (typeof window.loadLive2DModel === 'function') {
             window.loadLive2DModel(modelUrl);
             updateStatus(`Sent ${fileItem.name} to viewer.`, false, true);
         } else {
-            console.error('Live2D import function (window.loadLive2DModel) not found.');
+            log('ERROR', 'Live2D import function (window.loadLive2DModel) not found.');
             updateStatus('Error: Live2D import function not available.', true);
         }
     }
@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderItems(contents);
             }
         } catch (error) {
-            console.error('GitHub API Fetch error:', error);
+            log('ERROR', 'GitHub API Fetch error:', error);
             setPlaceholder(DOM.fileListingContainer, `Error: ${error.message}`, true);
             updateStatus(`Error: ${error.message}`, true);
         }
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 sessionStorage.removeItem(cacheKey);
             } catch (e) {
-                console.warn("Failed to parse cached item, removing:", e);
+                log('WARN', "Failed to parse cached item, removing:", e);
                 sessionStorage.removeItem(cacheKey);
             }
         }
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     data
                 }));
             } catch (e) {
-                console.warn("Failed to save to session storage (possibly full):", e);
+                log('WARN', "Failed to save to session storage (possibly full):", e);
             }
         }
         return data;
@@ -331,12 +331,14 @@ document.addEventListener('DOMContentLoaded', () => {
             DOM.breadcrumbs.appendChild(document.createTextNode(' / '));
             currentBuiltPath += (currentBuiltPath ? '/' : '') + segment;
 
+            const segmentPath = currentBuiltPath;
+
             if (index < segments.length - 1) {
                 const link = document.createElement('a');
                 link.href = '#';
                 link.textContent = segment;
                 link.title = `Navigate to ${segment}`;
-                link.addEventListener('click', (e) => handleBreadcrumbClick(e, currentBuiltPath));
+                link.addEventListener('click', (e) => handleBreadcrumbClick(e, segmentPath));
                 DOM.breadcrumbs.appendChild(link);
             } else {
                 const span = document.createElement('span');
@@ -373,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             renderPreviewActions(fileItem, jsDelivrUrl);
         } catch (error) {
-            console.error('File preview error:', error);
+            log('ERROR', 'File preview error:', error);
             setPlaceholder(DOM.previewContent, `Error loading preview: ${error.message}`, true);
             renderPreviewActions(fileItem, fileItem.html_url, true); // Fallback to GitHub URL
         } finally {
@@ -431,8 +433,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function closeFilePreview() {
+        // Remove visual state
         DOM.filePreviewContainer.classList.remove('active');
         DOM.fileListingContainer.classList.remove('preview-open');
+
+        // Fully hide the preview container (matches display set when opened)
+        DOM.filePreviewContainer.style.display = 'none';
+
+        // Clear preview content and actions so reopening starts fresh
+        DOM.previewContent.innerHTML = '';
+        DOM.previewActions.innerHTML = '';
+        DOM.previewFileName.textContent = '';
+
+        // Clear selected item highlight if any
         if (selectedFileItemElement) {
             selectedFileItemElement.classList.remove('selected');
             selectedFileItemElement = null;
