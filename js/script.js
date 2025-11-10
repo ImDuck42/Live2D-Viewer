@@ -640,18 +640,14 @@ function handlePointerMove(event) {
     wasDragging = true;
 
     if (isPinching && activePinchTarget && Object.keys(activePointers).length === 2) {
-        const scaleFactor = currentDistance / initialPinchDistance;
-        let newScale = initialModelScaleOnPinchStart * scaleFactor;
-        newScale = Math.max(CONFIG.MIN_ZOOM, Math.min(newScale, CONFIG.MAX_ZOOM));
-        // Get the point on the model that was under the initial pinch midpoint
-        const localPos = activePinchTarget.toLocal(initialPinchMidpoint);
-        // Apply the new scale
-        activePinchTarget.scale.set(newScale);
-        // Find the new global position of that same point
-        const newGlobalPos = activePinchTarget.toGlobal(localPos);
-        // Adjust the model's position to move the point back under the initial midpoint
-        activePinchTarget.x -= newGlobalPos.x - initialPinchMidpoint.x;
-        activePinchTarget.y -= newGlobalPos.y - initialPinchMidpoint.y;
+        const pointers = Object.values(activePointers);
+        const currentDistance = getDistance(pointers[0], pointers[1]);
+        if (initialPinchDistance > 0) {
+            const scaleFactor = currentDistance / initialPinchDistance;
+            let newScale = initialModelScaleOnPinchStart * scaleFactor;
+            newScale = Math.max(CONFIG.MIN_ZOOM, Math.min(newScale, CONFIG.MAX_ZOOM));
+            activePinchTarget.scale.set(newScale);
+        }
     } else if (isDragging && activeDragTarget) {
         const newPos = activeDragTarget.parent.toLocal(event.data.global);
         activeDragTarget.position.set(newPos.x - dragStartOffset.x, newPos.y - dragStartOffset.y);
