@@ -411,8 +411,10 @@ function populateControls(type, data) {
                         action: () => {
                             const mm = selectedModel.internalModel?.motionManager;
                             mm?.stopAllMotions?.();
-                            log('UI', `Triggering motion: Group=${group}, Index=${index}`);
-                            selectedModel.motion(group, index);
+                            setTimeout(() => {
+                                log('UI', `Triggering motion: Group=${group}, Index=${index}`);
+                                selectedModel.motion(group, index);
+                            }, 0);
                         }
                     };
                 })
@@ -798,7 +800,9 @@ function triggerMotionForHitArea(model, hitAreaName) {
     motionManager.stopAllMotions?.();
 
     const motionGroups = motionManager.definitions;
-    let motionPlayed = false;
+    let groupToPlay = null;
+    let indexToPlay = -1;
+    let wasRandom = false;
 
     if (hitAreaName) {
         const lowerHitArea = hitAreaName.toLowerCase();
@@ -808,29 +812,35 @@ function triggerMotionForHitArea(model, hitAreaName) {
         );
         if (matchingGroups.length > 0) {
             // Pick a random group among matches
-            const groupName = matchingGroups[Math.floor(Math.random() * matchingGroups.length)];
-            const motions = motionGroups[groupName];
+            groupToPlay = matchingGroups[Math.floor(Math.random() * matchingGroups.length)];
+            const motions = motionGroups[groupToPlay];
             if (motions && motions.length > 0) {
-                const index = Math.floor(Math.random() * motions.length);
-                log('MODEL', `Playing motion for hit area "${hitAreaName}": Group=${groupName}, Index=${index}`);
-                model.motion(groupName, index);
-                motionPlayed = true;
+                indexToPlay = Math.floor(Math.random() * motions.length);
             }
         }
     }
 
     // If no motion matched the hit area, play any available motion at random
-    if (!motionPlayed) {
+    if (!groupToPlay || indexToPlay === -1) {
         const availableGroups = Object.keys(motionGroups).filter(g => Array.isArray(motionGroups[g]) && motionGroups[g].length > 0);
         if (availableGroups.length > 0) {
-            const randomGroup = availableGroups[Math.floor(Math.random() * availableGroups.length)];
-            const motions = motionGroups[randomGroup];
-            const index = Math.floor(Math.random() * motions.length);
-            log('WARN', `No matching motion for hit area "${hitAreaName}". Playing random motion instead.`);
-            log('MODEL', `Playing random motion: Group=${randomGroup}, Index=${index}`);
-            model.motion(randomGroup, index);
-            motionPlayed = true;
+            groupToPlay = availableGroups[Math.floor(Math.random() * availableGroups.length)];
+            const motions = motionGroups[groupToPlay];
+            indexToPlay = Math.floor(Math.random() * motions.length);
+            wasRandom = true;
         }
+    }
+
+    if (groupToPlay && indexToPlay > -1) {
+        setTimeout(() => {
+            if (wasRandom) {
+                log('WARN', `No matching motion for hit area "${hitAreaName}". Playing random motion instead.`);
+                log('MODEL', `Playing random motion: Group=${groupToPlay}, Index=${indexToPlay}`);
+            } else {
+                log('MODEL', `Playing motion for hit area "${hitAreaName}": Group=${groupToPlay}, Index=${indexToPlay}`);
+            }
+            model.motion(groupToPlay, indexToPlay);
+        }, 0);
     }
 }
 
