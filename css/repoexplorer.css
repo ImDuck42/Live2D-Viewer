@@ -1,40 +1,34 @@
-/*
-   styles.css's :root variables are accessible.
-*/
-
 /*=============================================
-  MODAL CONTAINER & LAYOUT
+    MODAL CONTAINER & LAYOUT
 =============================================*/
 .file-explorer-modal-container {
     position: fixed;
-    top: var(--main-padding);
-    left: var(--main-padding);
-    right: var(--main-padding);
-    bottom: var(--main-padding);
+    inset: var(--main-padding);
     z-index: 2000;
     display: none;
     flex-direction: column;
     color: var(--text-primary);
     background-color: rgba(var(--bg-secondary-rgb), 0.75);
-    backdrop-filter: blur(10px) saturate(150%);
-    -webkit-backdrop-filter: blur(10px) saturate(150%);
     border: 1px solid rgba(var(--text-primary-rgb), 0.1);
     border-radius: var(--border-radius);
     box-shadow: 0 10px 40px rgba(var(--bg-primary-rgb), 0.5);
     overflow: hidden;
+    backdrop-filter: blur(10px) saturate(150%);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
 }
 
 .file-explorer-modal-container.active {
     display: flex;
 }
 
+
 /*=============================================
-  HEADER & INPUTS
+    HEADER & INPUTS
 =============================================*/
 .file-explorer-header {
+    flex-shrink: 0;
     padding: var(--main-padding);
     border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
 }
 
 .file-explorer-header h2 {
@@ -43,8 +37,8 @@
     font-weight: 600;
     text-align: center;
     background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
-    -webkit-background-clip: text;
     background-clip: text;
+    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -65,8 +59,8 @@
     background-color: rgba(var(--bg-element), 0.9);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-small);
-    transition: var(--transition-main);
     cursor: text;
+    transition: var(--transition-main);
 }
 
 .fe-repo-input-container input[type="text"]::placeholder {
@@ -75,17 +69,18 @@
 }
 
 .fe-repo-input-container input[type="text"]:focus {
+    outline: none;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.3), var(--shadow-glow-accent);
-    outline: none;
 }
 
 .fe-repo-input-container span {
     color: var(--text-secondary);
 }
 
+
 /*=============================================
-  BUTTONS
+    BUTTONS (MODAL-SPECIFIC & SHARED)
 =============================================*/
 .file-explorer-close-btn {
     position: absolute;
@@ -93,8 +88,8 @@
     right: var(--main-padding);
     z-index: 2001;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     width: 2.5rem;
     height: 2.5rem;
     font-size: 1.2rem;
@@ -114,8 +109,7 @@
     transform: scale(1.1) rotate(90deg);
 }
 
-.fe-repo-input-container button,
-.fe-icon-button {
+.fe-repo-input-container button {
     padding: 0.6rem 1rem;
     font-size: 0.9rem;
     font-weight: 500;
@@ -128,47 +122,70 @@
     transition: var(--transition-main);
 }
 
-.fe-repo-input-container button:hover,
-.fe-icon-button:hover {
+.fe-repo-input-container button:hover {
     background-color: color-mix(in srgb, var(--accent-primary) 85%, white);
     box-shadow: var(--shadow-glow-accent);
 }
 
+.header-icon-button,
 .fe-icon-button {
     display: flex;
-    justify-content: center;
     align-items: center;
-    min-width: 36px;
+    justify-content: center;
+    width: 36px;
     height: 36px;
     padding: 0.5rem;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--text-primary);
+    background-color: var(--bg-element);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    transition: var(--transition-main);
+}
+
+.header-icon-button:hover,
+.fe-icon-button:hover {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-glow-accent);
+}
+
+.header-icon-button:focus-visible,
+.fe-icon-button:focus-visible {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.4);
+}
+
+.fe-icon-button {
+    min-width: 36px;
     background-color: var(--bg-interactive);
 }
 
-.fe-icon-button i {
-    font-size: 1em;
-}
 
 /*=============================================
-  MAIN CONTENT AREA
+    MAIN CONTENT AREA
 =============================================*/
 .file-explorer-main-content {
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
     gap: var(--main-padding);
-    padding: var(--main-padding);
     min-height: 0;
+    padding: var(--main-padding);
     overflow-y: auto;
 }
 
 .fe-content-area-header {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     padding: 0.5rem;
     background-color: rgba(var(--bg-primary-rgb), 0.3);
-    border-bottom: 1px solid rgba(var(--border-color), 0.5);
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-small);
-    flex-shrink: 0;
 }
 
 .fe-breadcrumbs {
@@ -177,8 +194,8 @@
     font-size: 0.9rem;
     color: var(--text-secondary);
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .fe-breadcrumbs a {
@@ -200,14 +217,14 @@
 .fe-content-area-body {
     display: flex;
     flex-direction: row;
-    gap: var(--main-padding);
     flex-grow: 1;
     width: 100%;
     min-height: 0;
 }
 
+
 /*=============================================
-  FILE LISTING & PREVIEW CONTAINERS
+    FILE LISTING & PREVIEW CONTAINERS
 =============================================*/
 .fe-file-listing-container {
     flex: 1 1 0;
@@ -230,7 +247,7 @@
     height: 100%;
     padding: var(--main-padding);
     margin-left: var(--main-padding);
-    background-color: rgba(var(--bg-element), 0.8);
+    background-color: rgba(var(--bg-primary-rgb), 0.3);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-small);
 }
@@ -245,45 +262,48 @@
 
 .fe-placeholder-text {
     padding: 2rem 1rem;
-    color: var(--text-secondary);
     font-style: italic;
+    color: var(--text-secondary);
     text-align: center;
 }
 
+
 /*=============================================
-  FILE/FOLDER LIST ITEM
+    FILE/FOLDER LIST ITEM
 =============================================*/
 .fe-list-item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.6rem 0.8rem;
     margin-bottom: 0.3rem;
+    padding: 0.6rem 0.8rem;
     background-color: rgba(var(--bg-element), 0.5);
     border: 1px solid transparent;
+    border-left: 3px solid transparent;
     border-radius: var(--border-radius-small);
     cursor: pointer;
-    transition: background-color var(--transition-duration), border-color var(--transition-duration);
+    transition: background-color 0.2s, border-color 0.2s, border-left-color 0.2s;
 }
 
 .fe-list-item:hover {
     background-color: rgba(var(--bg-interactive-rgb), 0.5);
-    border-color: var(--accent-primary);
+    border-left-color: var(--accent-primary);
 }
 
 .fe-list-item.selected {
     font-weight: 500;
-    color: var(--accent-primary);
-    background-color: rgba(var(--accent-primary-rgb), 0.3);
-    border-color: var(--accent-primary);
+    color: var(--text-primary);
+    background-color: rgba(var(--accent-primary-rgb), 0.2);
+    border-left-color: var(--accent-primary);
 }
 
 .fe-item-icon {
+    flex-shrink: 0;
     width: 20px;
     font-size: 1.1em;
     color: var(--text-secondary);
     text-align: center;
-    flex-shrink: 0;
 }
 
 .fe-item-icon.folder-icon {
@@ -293,8 +313,8 @@
 .fe-list-item-name {
     flex-grow: 1;
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .fe-import-model-btn {
@@ -320,28 +340,29 @@
     box-shadow: var(--shadow-glow-accent-secondary);
 }
 
+
 /*=============================================
-  FILE PREVIEW
+    FILE PREVIEW
 =============================================*/
 .fe-preview-header {
     display: flex;
-    justify-content: space-between;
+    flex-shrink: 0;
     align-items: center;
+    justify-content: space-between;
     margin-bottom: 0.75rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
 }
 
 #fe-preview-filename {
+    flex-grow: 1;
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--accent-primary);
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
-    flex-grow: 1;
+    overflow: hidden;
 }
 
 .fe-close-btn {
@@ -352,6 +373,7 @@
     background-color: transparent;
     border: none;
     cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
 }
 
 .fe-close-btn:hover {
@@ -361,6 +383,9 @@
 
 .fe-preview-content {
     flex-grow: 1;
+    background-color: rgba(var(--bg-primary-rgb), 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -372,8 +397,6 @@
     margin: 0 auto;
     padding: 0.5rem;
     background-color: rgba(var(--bg-primary-rgb), 0.5);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-small);
 }
 
 .fe-preview-content pre {
@@ -381,19 +404,16 @@
     font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
     font-size: 0.85em;
     color: var(--text-secondary);
-    background-color: rgba(var(--bg-primary-rgb), 0.9);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-small);
     white-space: pre-wrap;
     word-break: break-all;
 }
 
 .fe-preview-actions {
     display: flex;
+    flex-shrink: 0;
     flex-wrap: wrap;
     gap: 0.5rem;
     margin-top: var(--main-padding);
-    flex-shrink: 0;
 }
 
 .fe-preview-actions .fe-open-link,
@@ -401,11 +421,11 @@
     padding: 0.5rem 0.8rem;
     font-size: 0.9em;
     color: var(--text-primary);
+    text-align: center;
+    text-decoration: none;
     background-color: var(--accent-primary);
     border: none;
     border-radius: var(--border-radius-small);
-    text-align: center;
-    text-decoration: none;
     cursor: pointer;
     transition: var(--transition-main);
 }
@@ -425,30 +445,32 @@
     box-shadow: var(--shadow-glow-accent-secondary);
 }
 
+
 /*=============================================
-  FOOTER & STATUS
+    FOOTER & STATUS
 =============================================*/
 .file-explorer-footer {
+    flex-shrink: 0;
     padding: calc(var(--main-padding) / 2) var(--main-padding);
     font-size: 0.85rem;
     color: var(--text-secondary);
     text-align: center;
     border-top: 1px solid var(--border-color);
-    flex-shrink: 0;
 }
 
 #fe-status-message.fe-status-error {
-    color: var(--error-color);
     font-weight: 500;
+    color: var(--error-color);
 }
 
 #fe-status-message.fe-status-success {
-    color: var(--success-color);
     font-weight: 500;
+    color: var(--success-color);
 }
 
+
 /*=============================================
-  SCROLLBAR
+    SCROLLBAR
 =============================================*/
 .scrollable::-webkit-scrollbar {
     width: 8px;
@@ -469,15 +491,13 @@
     background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 85%, white), color-mix(in srgb, var(--accent-secondary) 85%, white));
 }
 
+
 /*=============================================
-  LOADER & MESSAGES
+    LOADER & MESSAGES
 =============================================*/
 .fe-loader-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     z-index: 9999;
     display: flex;
     flex-direction: column;
@@ -485,9 +505,9 @@
     justify-content: center;
     color: var(--text-primary);
     background-color: rgba(var(--bg-secondary-rgb), 0.85);
+    border-radius: var(--border-radius);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    border-radius: var(--border-radius);
 }
 
 .fe-error-message {
@@ -499,47 +519,13 @@
     border-radius: var(--border-radius-small);
 }
 
-/*=============================================
-  SHARED HEADER ICON BUTTON
-=============================================*/
-.header-icon-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 36px;
-    height: 36px;
-    padding: 0.5rem;
-    font-size: 1rem;
-    line-height: 1;
-    color: var(--text-primary);
-    background-color: var(--bg-element);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-small);
-    cursor: pointer;
-    transition: var(--transition-main);
-}
-
-.header-icon-button:hover {
-    background-color: var(--accent-primary);
-    border-color: var(--accent-primary);
-    box-shadow: var(--shadow-glow-accent);
-}
-
-.header-icon-button:focus-visible {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.4);
-}
 
 /*=============================================
-  RESPONSIVE STYLES
+    RESPONSIVE STYLES
 =============================================*/
 @media (max-width: 768px) {
     .file-explorer-modal-container {
-        top: 0.5rem;
-        left: 0.5rem;
-        right: 0.5rem;
-        bottom: 0.5rem;
+        inset: 0.5rem;
     }
 
     .file-explorer-header h2 {
@@ -547,7 +533,7 @@
     }
 
     .fe-repo-input-container input[type="text"] {
-        min-width: 120px;
+        max-width: calc(50% - 0.75rem);
         padding: 0.5rem 0.7rem;
         font-size: 0.85rem;
     }

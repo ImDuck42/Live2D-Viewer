@@ -2,13 +2,13 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     //==============================================================================
-    // CONSTANTS
+    // CONSTANTS & CONFIGURATION
     //==============================================================================
     const GITHUB_API_BASE = 'https://api.github.com/repos';
     const JSDELIVR_CDN_BASE = 'https://cdn.jsdelivr.net/gh';
-    const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
     const MODEL_FILE_REGEX = /model3?[-\w]*\.json$/i;
     const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
+
 
     //==============================================================================
     // DOM ELEMENT CACHE
@@ -33,34 +33,31 @@ document.addEventListener('DOMContentLoaded', () => {
         body: document.body,
     };
 
-    //==============================================================================
-    // STATE VARIABLES
-    //==============================================================================
-    let currentOwner = '';
-    let currentRepo = '';
-    let currentPath = '';
-    let selectedFileItemElement = null;
 
     //==============================================================================
-    // INITIALIZATION
+    // STATE
     //==============================================================================
+    const state = {
+        owner: '',
+        repo: '',
+        path: '',
+        selectedFileItemElement: null,
+    };
 
-    // Validates that all essential DOM elements are present and sets up event listeners.
-    function initializeExplorer() {
-        const essentialElements = Object.values(DOM);
-        if (essentialElements.some(el => !el)) {
-            log('ERROR', "File Explorer: One or more DOM elements are missing. Feature disabled.");
+
+    //==============================================================================
+    // INITIALIZATION & EVENT LISTENERS
+    //==============================================================================
+    function initialize() {
+        if (Object.values(DOM).some(el => !el)) {
+            console.error("File Explorer: One or more DOM elements are missing. Feature disabled.");
             return;
         }
-
         setupEventListeners();
         updateStatus('Enter GitHub Owner and Repository to begin.');
     }
 
-    //==============================================================================
-    // EVENT HANDLERS & LISTENERS
-    //==============================================================================
-
+    // Set up all event listeners
     function setupEventListeners() {
         DOM.openExplorerBtn.addEventListener('click', openExplorer);
         DOM.closeExplorerBtn.addEventListener('click', closeExplorer);
@@ -72,58 +69,53 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM.closePreviewBtn.addEventListener('click', closeFilePreview);
     }
 
-    function handleGlobalKeyDown(event) {
-        if (event.key === 'Escape' && DOM.explorerModal.classList.contains('active')) {
-            closeExplorer();
-        }
-    }
 
-    function handleInputKeyPress(event) {
-        if (event.key === 'Enter') {
-            handleLoadRepository();
-        }
-    }
+    //==============================================================================
+    // EVENT HANDLERS
+    //==============================================================================
+
+    // Global keydown handler for Escape and Enter keys
+    const handleGlobalKeyDown = e => e.key === 'Escape' && DOM.explorerModal.classList.contains('active') && closeExplorer();
+    const handleInputKeyPress = e => e.key === 'Enter' && handleLoadRepository();
 
     function handleListItemClick(item) {
-        if (selectedFileItemElement) {
-            selectedFileItemElement.classList.remove('selected');
-        }
+        state.selectedFileItemElement?.classList.remove('selected');
 
         if (item.type === 'dir') {
             fetchAndDisplayContents(item.path);
-            selectedFileItemElement = null;
+            state.selectedFileItemElement = null;
         } else {
             const listItemElement = document.querySelector(`[data-path="${item.path}"]`);
-            if (listItemElement) {
-                listItemElement.classList.add('selected');
-                selectedFileItemElement = listItemElement;
-            }
+            listItemElement?.classList.add('selected');
+            state.selectedFileItemElement = listItemElement;
             displayFilePreview(item);
         }
     }
 
+    // Handle breadcrumb navigation click
     function handleBreadcrumbClick(event, path) {
         event.preventDefault();
         fetchAndDisplayContents(path);
     }
 
+    // Handle importing a Live2D model
     function handleImportModel(fileItem, sourceUrlOverride = null) {
-        const modelUrl = sourceUrlOverride || `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}@master/${fileItem.path}`;
-        log('MODEL', `Attempting to import Live2D Model: ${modelUrl}`);
+        const modelUrl = sourceUrlOverride || `${JSDELIVR_CDN_BASE}/${state.owner}/${state.repo}/${fileItem.path}`;
+        console.log(`[REPO EXPLORER] Attempting to import Live2D Model: ${modelUrl}`);
 
         if (typeof window.loadLive2DModel === 'function') {
             window.loadLive2DModel(modelUrl);
             updateStatus(`Sent ${fileItem.name} to viewer.`, false, true);
         } else {
-            log('ERROR', 'Live2D import function (window.loadLive2DModel) not found.');
+            console.error('[REPO EXPLORER] Live2D import function (window.loadLive2DModel) not found.');
             updateStatus('Error: Live2D import function not available.', true);
         }
     }
 
-    //==============================================================================
-    // MODAL AND UI CONTROL
-    //==============================================================================
 
+    //==============================================================================
+    // UI CONTROL
+    //==============================================================================
     function openExplorer() {
         DOM.explorerModal.classList.add('active');
         DOM.openExplorerBtn.setAttribute('aria-expanded', 'true');
@@ -136,10 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM.body.classList.remove('no-scroll');
     }
 
-    function showLoader(show) {
-        DOM.loader.style.display = show ? 'flex' : 'none';
-    }
+    // Show or hide the loading spinner
+    const showLoader = show => DOM.loader.style.display = show ? 'flex' : 'none';
 
+    // Update the status message displayed to the user
     function updateStatus(message, isError = false, isSuccess = false) {
         DOM.statusMessage.textContent = message;
         DOM.statusMessage.className = '';
@@ -152,63 +144,50 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = `<p class="${className}">${text}</p>`;
     }
 
-    //==============================================================================
-    // REPOSITORY LOADING
-    //==============================================================================
 
+    //==============================================================================
+    // REPOSITORY LOADING & DATA FETCHING
+    //==============================================================================
     function handleLoadRepository() {
-        currentOwner = DOM.ownerInput.value.trim();
-        currentRepo = DOM.repoInput.value.trim();
+        state.owner = DOM.ownerInput.value.trim();
+        state.repo = DOM.repoInput.value.trim();
 
-        if (!currentOwner || !currentRepo) {
+        if (!state.owner || !state.repo) {
             updateStatus('Error: Owner and Repository name are required.', true);
             return;
         }
-
         setPlaceholder(DOM.fileListingContainer, 'Loading content...');
         DOM.breadcrumbs.innerHTML = '';
         closeFilePreview();
-        currentPath = '';
         fetchAndDisplayContents('');
     }
 
+    // Fetch and display contents for a given path
     async function fetchAndDisplayContents(path) {
-        currentPath = path;
+        state.path = path;
         setPlaceholder(DOM.fileListingContainer, 'Loading items...');
         updateBreadcrumbs(path);
         DOM.upDirectoryBtn.style.display = path ? 'flex' : 'none';
 
         try {
             const contents = await fetchGitHubContentsWithCache(path);
-            if (contents) {
-                renderItems(contents);
-            }
+            renderItems(contents || []);
         } catch (error) {
-            log('ERROR', 'GitHub API Fetch error:', error);
+            console.error('[REPO EXPLORER] GitHub API Fetch error:', error);
             setPlaceholder(DOM.fileListingContainer, `Error: ${error.message}`, true);
             updateStatus(`Error: ${error.message}`, true);
         }
     }
 
-    //==============================================================================
-    // GITHUB API & CACHING
-    //==============================================================================
-
+    // Fetch contents from GitHub API for a given Owner plus Repo
     async function fetchGitHubContents(path) {
-        const url = `${GITHUB_API_BASE}/${currentOwner}/${currentRepo}/contents/${path}`;
+        const url = `${GITHUB_API_BASE}/${state.owner}/${state.repo}/contents/${path}`;
         updateStatus(`Fetching from API: ${path || 'root'}`);
         showLoader(true);
-
         try {
-            const response = await fetch(url, {
-                headers: {
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
+            const response = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({
-                    message: response.statusText
-                }));
+                const errorData = await response.json().catch(() => ({ message: response.statusText }));
                 throw new Error(`GitHub API Error (${response.status}): ${errorData.message}`);
             }
             const data = await response.json();
@@ -219,45 +198,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Fetch contents with session storage caching
     async function fetchGitHubContentsWithCache(path) {
-        const cacheKey = `fe_github_${currentOwner}_${currentRepo}_${path || 'ROOT'}`;
+        const cacheKey = `fe_github_${state.owner}_${state.repo}_${path || 'ROOT'}`;
         const cachedItem = sessionStorage.getItem(cacheKey);
-
         if (cachedItem) {
             try {
-                const {
-                    timestamp,
-                    data
-                } = JSON.parse(cachedItem);
-                if (Date.now() - timestamp < CACHE_DURATION_MS) {
-                    updateStatus(`Using cached data for: ${path || 'root'}`);
-                    return data;
-                }
-                sessionStorage.removeItem(cacheKey);
+                const { data } = JSON.parse(cachedItem);
+                updateStatus(`Using cached data for: ${path || 'root'}`);
+                return data;
             } catch (e) {
-                log('WARN', "Failed to parse cached item, removing:", e);
+                console.warn("[REPO EXPLORER] Failed to parse cached item, removing:", e);
                 sessionStorage.removeItem(cacheKey);
             }
         }
-
         const data = await fetchGitHubContents(path);
         if (data) {
             try {
-                sessionStorage.setItem(cacheKey, JSON.stringify({
-                    timestamp: Date.now(),
-                    data
-                }));
+                sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data }));
             } catch (e) {
-                log('WARN', "Failed to save to session storage (possibly full):", e);
+                console.warn("[REPO EXPLORER] Failed to save to session storage (possibly full):", e);
             }
         }
         return data;
     }
 
-    //==============================================================================
-    // CONTENT RENDERING
-    //==============================================================================
 
+    //==============================================================================
+    // CONTENT & PREVIEW RENDERING
+    //==============================================================================
+    // Render list of items in the file listing container
     function renderItems(items) {
         DOM.fileListingContainer.innerHTML = '';
         if (items.length === 0) {
@@ -266,19 +236,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         items.sort((a, b) => {
-            if (a.type === b.type) return a.name.localeCompare(b.name, undefined, {
-                numeric: true,
-                sensitivity: 'base'
-            });
+            if (a.type === b.type) return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
             return a.type === 'dir' ? -1 : 1;
         });
 
-        const list = document.createElement('ul');
-        list.style.listStyleType = 'none';
+        const list = document.createDocumentFragment();
         items.forEach(item => list.appendChild(createListItemElement(item)));
         DOM.fileListingContainer.appendChild(list);
     }
 
+    // Create a list item element for a given file or directory item
     function createListItemElement(item) {
         const li = document.createElement('li');
         li.className = 'fe-list-item';
@@ -289,9 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const iconClass = item.type === 'dir' ? 'fa-folder' : getFileIcon(item.name);
         li.innerHTML = `
-            <span class="fe-item-icon ${item.type === 'dir' ? 'folder-icon' : ''}">
-                <i class="fas ${iconClass}" aria-hidden="true"></i>
-            </span>
+            <span class="fe-item-icon ${item.type === 'dir' ? 'folder-icon' : ''}"><i class="fas ${iconClass}" aria-hidden="true"></i></span>
             <span class="fe-list-item-name">${item.name}</span>
         `;
 
@@ -300,46 +265,28 @@ document.addEventListener('DOMContentLoaded', () => {
             importBtn.className = 'fe-import-model-btn';
             importBtn.title = `Import ${item.name}`;
             importBtn.innerHTML = `<i class="fas fa-file-import" aria-hidden="true"></i> Import Model`;
-            importBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                handleImportModel(item);
-            });
+            importBtn.addEventListener('click', e => { e.stopPropagation(); handleImportModel(item); });
             li.appendChild(importBtn);
         }
 
         li.addEventListener('click', () => handleListItemClick(item));
-        li.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') handleListItemClick(item);
-        });
-
+        li.addEventListener('keypress', e => (e.key === 'Enter' || e.key === ' ') && handleListItemClick(item));
         return li;
     }
 
+    // Update the breadcrumb navigation based on the current path
     function updateBreadcrumbs(path) {
         DOM.breadcrumbs.innerHTML = '';
         const segments = path.split('/').filter(Boolean);
-
-        const rootLink = document.createElement('a');
-        rootLink.href = '#';
-        rootLink.textContent = 'Root';
-        rootLink.title = `Navigate to root of ${currentOwner}/${currentRepo}`;
-        rootLink.addEventListener('click', (e) => handleBreadcrumbClick(e, ''));
+        const rootLink = createBreadcrumbLink('Root', `Navigate to root of ${state.owner}/${state.repo}`, '');
         DOM.breadcrumbs.appendChild(rootLink);
 
         let currentBuiltPath = '';
         segments.forEach((segment, index) => {
             DOM.breadcrumbs.appendChild(document.createTextNode(' / '));
             currentBuiltPath += (currentBuiltPath ? '/' : '') + segment;
-
-            const segmentPath = currentBuiltPath;
-
             if (index < segments.length - 1) {
-                const link = document.createElement('a');
-                link.href = '#';
-                link.textContent = segment;
-                link.title = `Navigate to ${segment}`;
-                link.addEventListener('click', (e) => handleBreadcrumbClick(e, segmentPath));
-                DOM.breadcrumbs.appendChild(link);
+                DOM.breadcrumbs.appendChild(createBreadcrumbLink(segment, `Navigate to ${segment}`, currentBuiltPath));
             } else {
                 const span = document.createElement('span');
                 span.textContent = segment;
@@ -348,10 +295,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    //==============================================================================
-    // FILE PREVIEW
-    //==============================================================================
+    // Create a breadcrumb link element
+    function createBreadcrumbLink(text, title, path) {
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = text;
+        link.title = title;
+        link.addEventListener('click', e => handleBreadcrumbClick(e, path));
+        return link;
+    }
 
+    // Preview caching helpers (store small previews in sessionStorage)
+    function getPreviewCacheKey(path) {
+        return `fe_preview_${state.owner}_${state.repo}_${path}`;
+    }
+
+    function getPreviewFromCache(path) {
+        const key = getPreviewCacheKey(path);
+        const raw = sessionStorage.getItem(key);
+        if (!raw) return null;
+        try {
+            return JSON.parse(raw);
+        } catch (e) {
+            console.warn('[REPO EXPLORER] Invalid preview cache, removing:', e);
+            sessionStorage.removeItem(key);
+            return null;
+        }
+    }
+
+    function savePreviewToCache(path, type, content) {
+        const key = getPreviewCacheKey(path);
+        try {
+            sessionStorage.setItem(key, JSON.stringify({ type, content, timestamp: Date.now() }));
+        } catch (e) {
+            console.warn('[REPO EXPLORER] Failed to save preview to sessionStorage (possibly full):', e);
+        }
+    }
+
+    function blobToDataURL(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    // Display file preview for a given file item
     async function displayFilePreview(fileItem) {
         DOM.previewFileName.textContent = fileItem.name;
         setPlaceholder(DOM.previewContent, 'Loading preview...');
@@ -359,62 +349,75 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM.filePreviewContainer.style.display = 'flex';
         DOM.filePreviewContainer.classList.add('active');
         DOM.fileListingContainer.classList.add('preview-open');
+
+        const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${state.owner}/${state.repo}/${fileItem.path}`;
+        const extension = fileItem.name.split('.').pop().toLowerCase();
+
+        // If we have a cached preview, render it synchronously and skip the loader
+        const cached = getPreviewFromCache(fileItem.path);
+        if (cached) {
+            try {
+                DOM.previewContent.innerHTML = '';
+                if (cached.type === 'image') {
+                    const img = document.createElement('img');
+                    img.alt = `Preview of ${fileItem.name}`;
+                    img.src = cached.content; // data URL
+                    await img.decode();
+                    DOM.previewContent.appendChild(img);
+                } else { // text/json
+                    const pre = document.createElement('pre');
+                    pre.textContent = cached.content;
+                    DOM.previewContent.appendChild(pre);
+                }
+                renderPreviewActions(fileItem, jsDelivrUrl);
+            } catch (err) {
+                console.warn('[REPO EXPLORER] Cached preview render failed, falling back to fetch:', err);
+                // fall through to fetch path
+            }
+            return;
+        }
+
+        // Not cached: show loader and fetch, then save to cache
         showLoader(true);
-
-        const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${currentOwner}/${currentRepo}@master/${fileItem.path}`;
-
         try {
-            const extension = fileItem.name.split('.').pop().toLowerCase();
-
             if (IMAGE_EXTENSIONS.includes(extension)) {
-                await renderImagePreview(jsDelivrUrl, fileItem.name);
+                const response = await fetch(jsDelivrUrl);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const blob = await response.blob();
+                const dataUrl = await blobToDataURL(blob);
+                const img = document.createElement('img');
+                img.alt = `Preview of ${fileItem.name}`;
+                img.src = dataUrl;
+                await img.decode();
+                DOM.previewContent.innerHTML = '';
+                DOM.previewContent.appendChild(img);
+                // save image as data URL to cache
+                savePreviewToCache(fileItem.path, 'image', dataUrl);
             } else {
                 const response = await fetch(jsDelivrUrl);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                renderTextPreview(await response.text(), extension);
+                const text = await response.text();
+                const content = extension === 'json' ? JSON.stringify(JSON.parse(text), null, 2) : text;
+                const pre = document.createElement('pre');
+                pre.textContent = content;
+                DOM.previewContent.innerHTML = '';
+                DOM.previewContent.appendChild(pre);
+                // save text to cache
+                savePreviewToCache(fileItem.path, 'text', content);
             }
             renderPreviewActions(fileItem, jsDelivrUrl);
         } catch (error) {
-            log('ERROR', 'File preview error:', error);
+            console.error('[REPO EXPLORER] File preview error:', error);
             setPlaceholder(DOM.previewContent, `Error loading preview: ${error.message}`, true);
-            renderPreviewActions(fileItem, fileItem.html_url, true); // Fallback to GitHub URL
+            renderPreviewActions(fileItem, fileItem.html_url, true); // Fallback
         } finally {
             showLoader(false);
         }
     }
 
-    function renderImagePreview(url, altText) {
-        return new Promise((resolve, reject) => {
-            const img = document.createElement('img');
-            img.alt = `Preview of ${altText}`;
-            img.onload = () => {
-                DOM.previewContent.innerHTML = '';
-                DOM.previewContent.appendChild(img);
-                resolve();
-            };
-            img.onerror = () => reject(new Error('Could not load image.'));
-            img.src = url;
-        });
-    }
-
-    function renderTextPreview(text, extension) {
-        const pre = document.createElement('pre');
-        let content = text;
-        if (extension === 'json') {
-            try {
-                content = JSON.stringify(JSON.parse(text), null, 2);
-            } catch {
-                // Not a valid JSON, show raw text
-            }
-        }
-        pre.textContent = content;
-        DOM.previewContent.innerHTML = '';
-        DOM.previewContent.appendChild(pre);
-    }
-
+    // Render action buttons for the file preview
     function renderPreviewActions(fileItem, url, isFallback = false) {
         DOM.previewActions.innerHTML = '';
-
         const openBtn = document.createElement('a');
         openBtn.href = url;
         openBtn.textContent = isFallback ? 'View on GitHub' : `Open ${fileItem.name}`;
@@ -432,36 +435,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Close the file preview panel
     function closeFilePreview() {
-        // Remove visual state
         DOM.filePreviewContainer.classList.remove('active');
         DOM.fileListingContainer.classList.remove('preview-open');
-
-        // Fully hide the preview container (matches display set when opened)
         DOM.filePreviewContainer.style.display = 'none';
-
-        // Clear preview content and actions so reopening starts fresh
         DOM.previewContent.innerHTML = '';
         DOM.previewActions.innerHTML = '';
         DOM.previewFileName.textContent = '';
 
-        // Clear selected item highlight if any
-        if (selectedFileItemElement) {
-            selectedFileItemElement.classList.remove('selected');
-            selectedFileItemElement = null;
+        if (state.selectedFileItemElement) {
+            state.selectedFileItemElement.classList.remove('selected');
+            state.selectedFileItemElement = null;
         }
     }
 
-    function navigateUp() {
-        if (!currentPath) return;
-        const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-        fetchAndDisplayContents(parentPath);
-    }
+    // Navigate up one directory level
+    const navigateUp = () => state.path && fetchAndDisplayContents(state.path.substring(0, state.path.lastIndexOf('/')));
+
 
     //==============================================================================
-    // UTILITY FUNCTIONS
+    // UTILITIES & START
     //==============================================================================
-
+    // Get appropriate icon class for a given file extension
     function getFileIcon(filename) {
         const ext = filename.split('.').pop().toLowerCase();
         const iconMap = {
@@ -472,13 +468,11 @@ document.addEventListener('DOMContentLoaded', () => {
             'gif': 'fa-image',
             'md': 'fa-file-lines',
             'txt': 'fa-file-alt',
-            'zip': 'fa-file-archive',
+            'zip': 'fa-file-archive'
         };
         return iconMap[ext] || 'fa-file';
     }
 
-    //==============================================================================
-    // SCRIPT EXECUTION START
-    //==============================================================================
-    initializeExplorer();
+    // Initialize the repository explorer
+    initialize();
 });

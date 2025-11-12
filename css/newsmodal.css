@@ -1,28 +1,21 @@
-/*
-   styles.css's :root variables are accessible.
-*/
-
 /*=============================================
-  CHANGELOG MODAL (NEWS MODAL)
+    CHANGELOG MODAL (NEWS MODAL)
 =============================================*/
 .changelog-modal-container {
     position: fixed;
-    top: var(--main-padding);
-    left: var(--main-padding);
-    right: var(--main-padding);
-    bottom: var(--main-padding);
+    inset: var(--main-padding);
     z-index: 1000;
     display: none;
     flex-direction: column;
     padding: calc(var(--main-padding) * 1.2);
     color: var(--text-primary);
     background-color: rgba(var(--bg-secondary-rgb), 0.65);
-    backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
     border: 1px solid rgba(var(--text-primary-rgb), 0.12);
     border-radius: var(--border-radius);
     box-shadow: 0 8px 32px rgba(var(--bg-primary-rgb), 0.4);
     overflow: hidden;
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
 }
 
 .changelog-modal-container.active {
@@ -35,8 +28,8 @@
     right: var(--main-padding);
     z-index: 1001;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     width: 2.5rem;
     height: 2.5rem;
     font-size: 1.2rem;
@@ -71,14 +64,15 @@
     font-weight: 700;
     text-align: center;
     background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
-    -webkit-background-clip: text;
     background-clip: text;
+    -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     border-bottom: 1px solid var(--border-color);
 }
 
+
 /*=============================================
-  SCROLLBAR
+    SCROLLBAR
 =============================================*/
 .changelog-content::-webkit-scrollbar {
     width: 10px;
@@ -100,8 +94,9 @@
     background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 85%, white), color-mix(in srgb, var(--accent-secondary) 85%, white));
 }
 
+
 /*=============================================
-  CHANGELOG ENTRY
+    CHANGELOG ENTRY
 =============================================*/
 .changelog-entry {
     padding: var(--main-padding);
@@ -170,8 +165,9 @@
     color: var(--accent-secondary);
 }
 
+
 /*=============================================
-  RESPONSIVE STYLES
+    RESPONSIVE STYLES
 =============================================*/
 @media (max-width: 1080px) {
     .changelog-modal-container {

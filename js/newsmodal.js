@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
+            // Injects the entire modal structure from an external file.
             DOM.changelogPlaceholder.innerHTML = await response.text();
 
             // Cache modal elements now that they exist in the DOM

@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 </head>
 
-<body>
+<body oncontextmenu="return false;">
     <!-- Main Application Container -->
     <div class="app-container">
         <header class="site-header">
@@ -29,11 +29,12 @@
                         <i class="fas fa-folder-open" aria-hidden="true"></i>
                     </button>
                     <label for="model-url-input" class="sr-only">Model URL</label>
-                    <input type="text" id="model-url-input" placeholder="Enter model (.json/.model3.json) URL..."
+                    <input type="text" id="model-url-input" placeholder="Enter L2D model URL..."
                         title="Enter the URL of a Live2D model file">
                     <button id="load-url-button" title="Load model from the specified URL">Load URL</button>
                 </div>
 
+                <!-- Default Model Selector -->
                 <div class="model-loader-group">
                     <div class="custom-dropdown" id="model-select-dropdown" tabindex="0" aria-haspopup="listbox"
                         aria-expanded="false" title="Select a default model to load">
@@ -63,6 +64,7 @@
             </div>
         </header>
 
+        <!-- Main Content Area -->
         <main class="main-content">
             <div class="canvas-area">
                 <canvas id="live2d-canvas" aria-label="Live2D Model Display Area"></canvas>
@@ -78,6 +80,7 @@
                 <div id="model-filename" class="model-filename" title="Click to copy filename"></div>
             </div>
 
+            <!-- Control Panel -->
             <aside class="control-panel" aria-labelledby="control-panel-heading">
                 <h2 id="control-panel-heading" class="sr-only">Model Controls</h2>
                 <div class="control-item">
@@ -113,7 +116,7 @@
             </aside>
         </main>
 
-        <!-- Footer -->
+        <!-- Website Footer -->
         <footer class="site-footer">
             <p>Powered by <a href="https://github.com/guansss/pixi-live2d-display" target="_blank"
                     rel="noopener noreferrer">pixi-live2d-display</a></p>
@@ -130,6 +133,8 @@
                 aria-label="Close File Explorer">
                 <i class="fas fa-xmark" aria-hidden="true"></i>
             </button>
+
+            <!-- File Explorer Header -->
             <div class="file-explorer-header">
                 <h2 id="file-explorer-heading">GitHub Repository Explorer</h2>
                 <div class="fe-repo-input-container">
@@ -143,6 +148,8 @@
                     <button id="fe-load-repo-btn" title="Load repository content">Load Repository</button>
                 </div>
             </div>
+
+            <!-- File Explorer Main Content -->
             <div class="file-explorer-main-content">
                 <div class="fe-content-area-header">
                     <button id="fe-up-directory-btn" class="fe-icon-button" title="Navigate to parent directory"
@@ -156,7 +163,6 @@
                     <div id="fe-file-listing-container" class="fe-file-listing-container scrollable">
                         <p class="fe-placeholder-text">Load a repository to see its content.</p>
                     </div>
-
                     <div id="fe-file-preview-container" class="fe-file-preview-container" style="display: none;">
                         <div class="fe-preview-header">
                             <h4 id="fe-preview-filename"></h4>
@@ -170,18 +176,21 @@
                     </div>
                 </div>
             </div>
+
+            <!-- File Explorer Footer -->
             <footer class="file-explorer-footer">
                 <p>Status: <span id="fe-status-message" aria-live="polite">Idle</span></p>
             </footer>
         </div>
 
+        <!-- Loader Overlay -->
         <div id="fe-loader" class="fe-loader-overlay" style="display: none;" role="status" aria-live="assertive">
             <div class="spinner"></div>
             <p>Loading Repository Data...</p>
         </div>
     </div>
 
-    <!-- Console exclusion patterns -->
+    <!-- Console Exclusion Patterns -->
     <script src="js/exclusions.js"></script>
 
     <!-- Libraries -->
@@ -189,9 +198,6 @@
     <script src="libs/live2d.js"></script>
     <script src="libs/live2dcubismcore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/index.min.js"></script>
-
-    <!-- <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/extra.min.js"></script> -->
-    <!-- Using local modified version for HitAreaFrames styling and more -->
     <script src="libs/extra.js"></script>
 
     <!-- Custom Scripts -->

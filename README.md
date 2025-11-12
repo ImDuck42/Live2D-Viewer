@@ -1,8 +1,8 @@
-# <img src="assets/icon.svg" width="32" height="32" alt="Site Icon" style="vertical-align: text-bottom;"> Live2D Viewer <sub style="font-size: small;"><span style="color: #8c5eff;">v</span>4.7</sub>  
+# <img src="assets/icon.svg" width="32" height="32" alt="Site Icon" style="vertical-align: text-bottom;"> Live2D Viewer <sub style="font-size: small;"><span style="color: #8c5eff;">v</span>4.8</sub>  
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
-[![GitHub Pages](https://img.shields.io/github/deployments/ImDuck42/Live2D-Viewer/github-pages?label=Live%20Preview&logo=github)](https://imduck42.github.io/Live2D-Viewer/)
-[![GitHub stars](https://img.shields.io/github/stars/ImDuck42/Live2D-Viewer?style=flat&color=purple&logo=github&logoColor=white)](https://github.com/ImDuck42/Live2D-Viewer)
+[![GitHub Pages](https://img.shields.io/github/deployments/ImDuck42/Live2D-Viewer/github-pages?label=Live%20Preview&logo=github)](https://imduck42.github.io/Live2D-Viewer)
+[![GitHub stars](https://img.shields.io/github/stars/ImDuck42/Live2D-Viewer?style=flat&color=purple&logo=github&logoColor=white)](https://github.com/ImDuck42/Live2D-Viewer/stargazers)
 &nbsp;&nbsp;&nbsp;
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](index.html)
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css&logoColor=white)](css)

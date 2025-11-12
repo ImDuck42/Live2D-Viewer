@@ -2,6 +2,7 @@ Planned:
     - Support opening models from .zip files
     - Local file editing
     - If the file fails to load for any reason, color the canvas border red for ten seconds or sumtin
+    - On entering a directory ,scroll all the way up or implement a remembering function
 
 
 Maybe:
@@ -10,4 +11,4 @@ Maybe:
 
 
 Other (No need for now):
-    - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework), 9th (major refactor), 
+    - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework), 9th (major refactor), 10, 

@@ -17,7 +17,26 @@
             <i class="fas fa-xmark"></i>
         </button>
         <div class="changelog-content">
-            <h2>V4.7 -- What's New:</h2>
+            <h2>V4.8 — What's New:</h2>
+
+            <!-- November 12, 2025 -->
+            <article class="changelog-entry">
+                <h3 class="changelog-version">Commits on November 12, 2025</h3>
+                <p class="changelog-date">November 12, 2025</p>
+                <ul>
+                    <li><strong>[NONEYET]</strong><br>
+                        better layout for tablet sized devices
+                        <br>
+                        button animations for sidebar buttons
+                        <br>
+                        smaller margins for all devices for a more compact design
+                        <br>
+                        file caching to not load files on every load and faster previews
+                        <br>
+                        some other small changes
+                    </li>
+                </ul>
+            </article>
 
             <!-- November 10, 2025 -->
             <article class="changelog-entry">
@@ -541,57 +560,6 @@
                 container.appendChild(backLink);
                 document.body.appendChild(container);
             }
-
-            // Prevent the use of developer tool (Just for fun, not a real security measure)
-            document.addEventListener("keydown", (event) => {
-                const key = event.key.toUpperCase();
-                const isCtrlOrCmd = event.ctrlKey || event.metaKey;
-                const isShift = event.shiftKey;
-                const isAlt = event.altKey;
-
-                // Block various developer tool shortcuts
-                const blockedShortcuts = [
-                    event.key === "F12", // F12 (dev tools)
-                    isCtrlOrCmd && isShift && key === "I", // Ctrl+Shift+I (inspect)
-                    isCtrlOrCmd && isShift && key === "J", // Ctrl+Shift+J (console)
-                    isCtrlOrCmd && isShift && key === "K", // Ctrl+Shift+K (console Firefox)
-                    isCtrlOrCmd && isShift && key === "C", // Ctrl+Shift+C (inspect element)
-                    isCtrlOrCmd && isShift && key === "M", // Ctrl+Shift+M (responsive design)
-                    isCtrlOrCmd && key === "U", // Ctrl+U (view source)
-                    event.metaKey && isAlt && key === "I", // Cmd+Option+I (Mac)
-                    event.metaKey && isAlt && key === "J", // Cmd+Option+J (Mac)
-                    event.metaKey && isAlt && key === "K", // Cmd+Option+K (Mac)
-                    event.metaKey && isAlt && key === "M"  // Cmd+Option+M (Mac)
-                ];
-
-                if (blockedShortcuts.some(shortcut => shortcut)) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return false;
-                }
-            });
-
-            // Disable right-click context menu
-            document.addEventListener("contextmenu", (event) => {
-                event.preventDefault();
-            });
-
-            // Disable middle mouse button
-            document.body.addEventListener("mousedown", (event) => {
-                if (event.button === 2) { // Right mouse button
-                    event.preventDefault();
-                }
-            });
-
-            // Disable drag and drop
-            document.addEventListener("dragstart", (event) => {
-                event.preventDefault();
-            });
-
-            // Disable text selection
-            document.addEventListener("selectstart", (event) => {
-                event.preventDefault();
-            });
         });
     </script>
 </body>
