@@ -77,24 +77,26 @@ document.addEventListener('DOMContentLoaded', () => {
     //==============================================================================
     // Parses the URL on load and populates the file explorer state
     async function handleInitialUrl() {
-        // Check if redirected from 404.html
-        const redirectPath = sessionStorage.getItem('redirectPath');
-        if (redirectPath) {
-            sessionStorage.removeItem('redirectPath');
-
-            // Update the URL bar back to the correct virtual path without reloading the page.
-            history.replaceState(null, '', redirectPath);
+        const redirectUrl = sessionStorage.getItem('redirect');
+        if (redirectUrl) {
+            sessionStorage.removeItem('redirect');
+            history.replaceState(null, '', redirectUrl);
         }
 
-        // Now, proceed with the (potentially updated) path from the URL bar
+        // Proceed with the path from the URL bar
         const path = window.location.pathname;
         const params = new URLSearchParams(window.location.search);
         const previewFile = params.get('preview');
 
-        const match = path.match(/\/fe\/([^/]+)\/([^/]+)\/?(.*)/);
+        // This regex needs to account for potential repository names in the path on GitHub Pages
+        const pathSegments = path.split('/').filter(Boolean);
+        const feIndex = pathSegments.indexOf('fe');
 
-        if (match) {
-            const [, owner, repo, filePath] = match;
+        if (feIndex > -1 && pathSegments.length >= feIndex + 3) {
+            const owner = pathSegments[feIndex + 1];
+            const repo = pathSegments[feIndex + 2];
+            const filePath = pathSegments.slice(feIndex + 3).join('/');
+
             DOM.ownerInput.value = owner;
             DOM.repoInput.value = repo;
             state.owner = owner;
@@ -107,10 +109,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (previewFile) {
                 // Find the file in the current listing and open its preview
-                const fileItemElement = DOM.fileListingContainer.querySelector(`[data-path="${filePath ? filePath + '/' : ''}${previewFile}"]`);
+                const fullItemPath = (filePath ? filePath + '/' : '') + previewFile;
+                const fileItemElement = DOM.fileListingContainer.querySelector(`[data-path="${fullItemPath}"]`);
                 if (fileItemElement) {
                     const item = {
-                        path: `${filePath ? filePath + '/' : ''}${previewFile}`,
+                        path: fullItemPath,
                         name: previewFile,
                         type: 'file',
                     };
