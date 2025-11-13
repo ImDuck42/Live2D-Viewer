@@ -1,6 +1,6 @@
 'use strict';
 
-// Make PIXI globally available for extensions
+// Make PIXI globally available for any extensions or plugins
 window.PIXI = PIXI;
 
 //==============================================================================
@@ -33,6 +33,7 @@ const LOG_STYLES = {
     },
 };
 
+// A themed logger function that provides styled and categorized console output.
 const log = (context, message, ...args) => {
     const contextUpper = context.toUpperCase();
     const styles = LOG_STYLES[contextUpper] || LOG_STYLES['SYSTEM'];
@@ -43,14 +44,14 @@ const log = (context, message, ...args) => {
 //==============================================================================
 // CONFIGURATION & CONSTANTS
 //==============================================================================
-// Application-wide configuration constants
+// Application-wide configuration constants.
 const CONFIG = {
     BACKGROUND_COLOR: 0x1a1a2e,
     MODEL_FIT_PADDING: 0.9,
     ZOOM_SENSITIVITY: 0.075,
     MIN_ZOOM: 0.01,
     MAX_ZOOM: 10.0,
-    HIT_AREA_HIGHLIGHT_DURATION: 500, // ms
+    HIT_AREA_HIGHLIGHT_DURATION: 500, // in milliseconds
     SELECTION_OUTLINE_COLOR: 0x8c5eff,
     SELECTION_OUTLINE_THICKNESS: 2,
     SELECTION_OUTLINE_ALPHA: 0.1,
@@ -61,7 +62,7 @@ const CONFIG = {
 //==============================================================================
 // DOM ELEMENT CACHE
 //==============================================================================
-// Cache DOM elements for performance
+// Caching DOM elements for better performance.
 const DOM = {
     canvas: document.getElementById('live2d-canvas'),
     loadingOverlay: document.getElementById('loading-overlay'),
@@ -85,7 +86,7 @@ const DOM = {
 //==============================================================================
 // STATE MANAGEMENT
 //==============================================================================
-// Application state variables
+// Centralized application state.
 const state = {
     app: null,
     models: [],
@@ -111,6 +112,7 @@ const state = {
 //==============================================================================
 // APPLICATION INITIALIZATION
 //==============================================================================
+// Sets up PIXI.js, create the selection outline, starts the ticker, and sets up interactions
 function initializeApplication() {
     if (!DOM.canvas) {
         log('ERROR', "Fatal Error: Canvas element not found. Application cannot start.");
@@ -147,14 +149,15 @@ function initializeApplication() {
     updateUI();
 }
 
-// Creates and adds the selection outline graphics to the stage.
+
+// Creates and adds the PIXI.Graphics object for the selection outline to the stage
 function initializeSelectionOutline() {
     state.selectionOutline = new PIXI.Graphics();
     state.selectionOutline.visible = false;
     state.app.stage.addChild(state.selectionOutline);
 }
 
-// Main update loop for continuous rendering tasks.
+// The main update loop, called on every frame
 function onTick() {
     if (state.selectedModel && state.selectionOutline.visible) {
         updateSelectionOutline(state.selectedModel);
@@ -162,7 +165,7 @@ function onTick() {
     }
 }
 
-// Checks for a 'model' URL parameter and loads it if present.
+// Checks for a 'model' URL parameter on page load and, if present, automatically loads the specified model
 function handleURLParameters() {
     const urlParams = new URLSearchParams(window.location.search);
     const modelURL = urlParams.get('model');
@@ -171,6 +174,7 @@ function handleURLParameters() {
         log('SYSTEM', `Found 'model' URL parameter: ${modelURL}`);
         DOM.modelUrlInput.value = modelURL;
         loadModel(modelURL);
+        // Clean up the URL after loading the model
         window.history.replaceState({}, '', window.location.pathname);
     }
 }
@@ -179,8 +183,7 @@ function handleURLParameters() {
 //==============================================================================
 // MODEL LOADING & MANAGEMENT
 //==============================================================================
-
-// Main function to load a Live2D model from a source URL.
+// The main function for loading a Live2D model from a given source URL
 async function loadModel(source) {
     if (!state.app?.stage) {
         log('ERROR', "PIXI Application not ready for model loading.");
@@ -198,11 +201,13 @@ async function loadModel(source) {
             onError: (e) => { throw new Error(`Live2DModel.from failed: ${e.message || 'Unknown error'}`); },
         });
 
+        // Assign a unique ID to each model for easy identification
         newModel.appModelId = state.modelIdCounter++;
         state.app.stage.addChild(newModel);
         state.models.push(newModel);
 
-        await new Promise(resolve => setTimeout(resolve, 150)); // Allow PIXI to calculate bounds
+        // A short delay to allow PIXI to calculate the model's bounds correctly
+        await new Promise(resolve => setTimeout(resolve, 150));
 
         fitAndPositionNewModel(newModel);
         newModel.cursor = 'grab';
@@ -213,6 +218,7 @@ async function loadModel(source) {
         log('ERROR', `Error loading model from ${source}:`, error);
         alert(`Error loading model: ${error.message || error}`);
 
+        // If the model fails to load, clean it up
         if (newModel) {
             newModel.parent?.removeChild(newModel);
             const index = state.models.findIndex(m => m.appModelId === newModel.appModelId);
@@ -220,6 +226,7 @@ async function loadModel(source) {
             newModel.destroy({ children: true, texture: false, baseTexture: false });
         }
 
+        // If the failed model was selected, select the previously loaded model
         if (state.selectedModel === newModel) {
             setSelectedModel(state.models[state.models.length - 1] || null);
         }
@@ -227,9 +234,10 @@ async function loadModel(source) {
         updateUIVisibility(false);
     }
 }
-window.loadLive2DModel = loadModel; // Expose for repoexplorer.js
+// Expose 'loadLive2DModel' to the global scope so it can be called by 'repoexplorer.js'
+window.loadLive2DModel = loadModel;
 
-// Sets the currently selected model and updates the UI accordingly.
+// Sets the currently selected model, updates the UI, and handles hit area frames
 function setSelectedModel(model) {
     state.hitAreaFrames?.parent?.removeChild(state.hitAreaFrames);
 
@@ -237,6 +245,7 @@ function setSelectedModel(model) {
 
     if (state.selectedModel) {
         log('MODEL', `Selected model ID: ${state.selectedModel.appModelId}`);
+        // If the 'HitAreaFrames' extension is available, add it to the selected model
         if (PIXI.live2d.HitAreaFrames) {
             if (!state.hitAreaFrames || state.hitAreaFrames.destroyed) {
                 state.hitAreaFrames = new PIXI.live2d.HitAreaFrames();
@@ -260,7 +269,7 @@ function setSelectedModel(model) {
     updateUI();
 }
 
-// Deletes the currently selected model from the stage and memory.
+// Deletes the currently selected model from the stage and cleans up its resources
 function deleteSelectedModel() {
     if (!state.selectedModel) return;
 
@@ -274,14 +283,16 @@ function deleteSelectedModel() {
         modelToDelete.parent.removeChild(modelToDelete);
     }
 
+    // Only destroy the texture if no other models are using it
     const shouldDestroyTexture = !state.models.some(m => m.textures.some(t => modelToDelete.textures.includes(t)));
     modelToDelete.destroy({ children: true, texture: shouldDestroyTexture, baseTexture: shouldDestroyTexture });
     log('MODEL', `Model ${modelToDelete.appModelId} deleted. Texture destroyed: ${shouldDestroyTexture}`);
 
+    // Select the previously loaded model
     setSelectedModel(state.models[state.models.length - 1] || null);
 }
 
-// Scales and positions a new model to fit nicely in the canvas view.
+// Scales and positions a new model to fit nicely within the canvas view
 function fitAndPositionNewModel(model) {
     if (!model || !state.app?.renderer) return;
 
@@ -302,18 +313,23 @@ function fitAndPositionNewModel(model) {
         model.scale.set(0.1);
     }
 
+    // Center the model in the view
     model.anchor.set(0.5, 0.5);
     model.position.set(viewWidth / 2, viewHeight / 2);
     log('MODEL', `Fitted model ${model.appModelId} to view.`);
 }
 
+// Brings the given model to the front of the stage so it's rendered on top of other models
 function bringModelToFront(model) {
     if (!model || !state.app?.stage) return;
+    // Move the model to the end of the stage's children array
     state.app.stage.setChildIndex(model, state.app.stage.children.length - 1);
     if (state.selectionOutline) {
+        // Ensure the selection outline is always on top
         state.app.stage.setChildIndex(state.selectionOutline, state.app.stage.children.length - 1);
     }
 
+    // Update the 'state.models' array to reflect the new order
     const idx = state.models.indexOf(model);
     if (idx > -1) {
         state.models.splice(idx, 1);
@@ -325,6 +341,7 @@ function bringModelToFront(model) {
 //==============================================================================
 // UI & CONTROL PANEL
 //==============================================================================
+// A central function to update all UI components based on the current state
 function updateUI() {
     updateUIVisibility();
     updateDeleteButtonState();
@@ -333,16 +350,18 @@ function updateUI() {
     DOM.showHitAreasCheckbox.disabled = !state.selectedModel;
 }
 
+// Shows or hides UI elements like the loading overlay and the "no model" message
 function updateUIVisibility(isLoading = false) {
     DOM.loadingOverlay.style.display = isLoading ? 'flex' : 'none';
     DOM.noModelMessage.style.display = state.models.length === 0 && !isLoading ? 'flex' : 'none';
 }
 
+// Enables or disables the delete button based on whether a model is selected
 function updateDeleteButtonState() {
     DOM.deleteSelectedButton.disabled = !state.selectedModel;
 }
 
-// Populates control panel sections with buttons for expressions, motions, and hit areas.
+// Populates the control panel (expressions, motions, hit areas) with buttons  for the currently selected model
 const controlPopulators = {
     expressions: model => {
         const data = model.internalModel?.expressions ?? model.internalModel?.settings?.expressions;
@@ -365,11 +384,12 @@ const controlPopulators = {
                 name: motion.Name || motion.File?.split('/').pop().replace(/\.(motion3\.json|mtn)$/i, '') || group,
                 action: () => {
                     motionManager?.stopAllMotions?.();
+                    // Using a timeout to prevent some motions from being cut off
                     setTimeout(() => model.motion(group, index), 0);
                 }
             }))
         );
-        // Handle duplicate names
+        // Handle cases where motions have duplicate names
         const nameCounts = items.reduce((acc, item) => (acc[item.name] = (acc[item.name] || 0) + 1, acc), {});
         const seenCounts = {};
         items.forEach(item => {
@@ -387,6 +407,7 @@ const controlPopulators = {
     }
 };
 
+// Updates the entire control panel based on the selected model
 function updateControlPanel() {
     log('UI', "Updating control panel for selected model.");
     if (state.selectedModel) {
@@ -394,12 +415,14 @@ function updateControlPanel() {
             populateControls(type, state.selectedModel);
         });
     } else {
+        // If no model is selected, clear the control panel sections
         Object.keys(controlPopulators).forEach(type => {
             setNoContentMessage(DOM[`${type}Container`], type);
         });
     }
 }
 
+// Populates a specific section of the control panel (e.g., expressions)
 function populateControls(type, model) {
     const container = DOM[`${type}Container`];
     const populator = controlPopulators[type];
@@ -421,7 +444,7 @@ function populateControls(type, model) {
     }
 }
 
-// Creates a button for the control panel.
+// A helper function to create a button for the control panel
 function createControlButton(text, type, onClick) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -436,7 +459,7 @@ function createControlButton(text, type, onClick) {
     return button;
 }
 
-// Briefly highlights a button in the control panel.
+// Briefly highlights a button in the control panel to provide visual feedback
 function highlightButton(button, container) {
     if (!container) return;
     container.querySelectorAll('.active').forEach(btn => btn.classList.remove('active'));
@@ -444,14 +467,14 @@ function highlightButton(button, container) {
     setTimeout(() => button.classList.remove('active'), CONFIG.HIT_AREA_HIGHLIGHT_DURATION);
 }
 
-// Displays a "no content" message in a container.
+// Displays a "No content available" message in a control panel container
 function setNoContentMessage(container, contentType) {
     if (container) {
         container.innerHTML = `<p class="no-content-message">No ${contentType} available</p>`;
     }
 }
 
-// Updates the model filename display in the corner of the canvas.
+// Updates the model filename display in the corner of the canvas
 function updateModelFilenameDisplay() {
     if (!state.selectedModel) {
         DOM.modelFilename.style.display = 'none';
@@ -463,7 +486,7 @@ function updateModelFilenameDisplay() {
     DOM.modelFilename.style.display = 'block';
 }
 
-// Draws the selection outline around the given model.
+// Draws and updates the selection outline around the currently selected model
 function updateSelectionOutline(model) {
     if (!state.selectionOutline || !model?.getBounds) return;
     state.selectionOutline.clear();
@@ -479,22 +502,23 @@ function updateSelectionOutline(model) {
 //==============================================================================
 // EVENT LISTENERS & HANDLERS
 //==============================================================================
-
-// Sets up event listeners for all UI elements.
+// Sets up event listeners for all UI elements
 function setupUIEventListeners() {
     DOM.loadSelectedButton.addEventListener('click', () => loadModel(DOM.dropdownHiddenInput.value));
     DOM.loadUrlButton.addEventListener('click', () => loadModel(DOM.modelUrlInput.value.trim()));
     DOM.showHitAreasCheckbox.addEventListener('change', toggleHitAreaFramesVisibility);
     DOM.deleteSelectedButton.addEventListener('click', deleteSelectedModel);
+    // Add a click listener to the filename display to copy the filename
     DOM.modelFilename.addEventListener('click', () => {
         if (DOM.modelFilename.textContent) {
             navigator.clipboard.writeText(DOM.modelFilename.textContent.replace('File: ', ''));
         }
     });
+    // Add a wheel listener to the filename display to cycle through loaded models
     DOM.modelFilename.addEventListener('wheel', handleModelFilenameScroll, { passive: false });
 }
 
-// Sets up interaction listeners on the PIXI stage.
+// Sets up interaction listeners on the main PIXI.js stage
 function setupStageInteractions() {
     state.app.stage.interactive = true;
     state.app.stage.hitArea = state.app.screen;
@@ -506,7 +530,7 @@ function setupStageInteractions() {
     DOM.canvas.addEventListener('wheel', handleCanvasZoom, { passive: false });
 }
 
-// Sets up the custom dropdown functionality.
+// Sets up the functionality for the custom dropdown menu
 function initializeCustomDropdown() {
     const { dropdown, dropdownSelected, dropdownList, dropdownHiddenInput } = DOM;
     if (!dropdown) return;
@@ -527,6 +551,7 @@ function initializeCustomDropdown() {
             toggleDropdown(false);
         });
     });
+    // Close the dropdown when clicking outside of it
     document.addEventListener('click', e => !dropdown.contains(e.target) && toggleDropdown(false));
 }
 
@@ -534,7 +559,7 @@ function initializeCustomDropdown() {
 //==============================================================================
 // INTERACTION HANDLERS
 //==============================================================================
-// Handles pointer down events for dragging and pinching.
+// Handles pointer down events, which can be the start of a drag or a pinch gesture
 function handlePointerDown(event) {
     const { interaction } = state;
     const globalPos = event.data.global;
@@ -542,9 +567,10 @@ function handlePointerDown(event) {
     interaction.modelJustSelected = false;
     interaction.wasDragging = false;
 
+    // Find the topmost model that was clicked on
     const downOnModel = state.models.slice().reverse().find(model => model.containsPoint(globalPos));
 
-    if (Object.keys(interaction.activePointers).length === 1) { // Drag start
+    if (Object.keys(interaction.activePointers).length === 1) { // Start of a drag
         if (downOnModel) {
             if (state.selectedModel !== downOnModel) {
                 setSelectedModel(downOnModel);
@@ -556,7 +582,7 @@ function handlePointerDown(event) {
             const localPos = interaction.activeDragTarget.parent.toLocal(globalPos);
             interaction.dragStartOffset = { x: localPos.x - interaction.activeDragTarget.x, y: localPos.y - interaction.activeDragTarget.y };
         }
-    } else if (Object.keys(interaction.activePointers).length === 2 && state.selectedModel) { // Pinch start
+    } else if (Object.keys(interaction.activePointers).length === 2 && state.selectedModel) { // Start of a pinch
         interaction.isDragging = false;
         if (interaction.activeDragTarget) interaction.activeDragTarget.cursor = 'grab';
         interaction.activeDragTarget = null;
@@ -568,7 +594,7 @@ function handlePointerDown(event) {
     }
 }
 
-// Handles pointer move events for moving the model.
+// Handles pointer move events, which are used for dragging the model or pinching to zoom
 function handlePointerMove(event) {
     const { interaction } = state;
     const pointerId = event.data.pointerId;
@@ -578,6 +604,7 @@ function handlePointerMove(event) {
     interaction.wasDragging = true;
 
     if (interaction.isPinching && interaction.activePinchTarget && Object.keys(interaction.activePointers).length === 2) {
+        // Handle pinching to zoom
         const pointers = Object.values(interaction.activePointers);
         const currentDistance = getDistance(pointers[0], pointers[1]);
         if (interaction.initialPinchDistance > 0) {
@@ -587,12 +614,13 @@ function handlePointerMove(event) {
             interaction.activePinchTarget.scale.set(newScale);
         }
     } else if (interaction.isDragging && interaction.activeDragTarget) {
+        // Handle dragging the model
         const newPos = interaction.activeDragTarget.parent.toLocal(event.data.global);
         interaction.activeDragTarget.position.set(newPos.x - interaction.dragStartOffset.x, newPos.y - interaction.dragStartOffset.y);
     }
 }
 
-// Handles pointer up events to stop dragging or pinching.
+// Handles pointer up events, which can be the end of a drag or a pinch gesture
 function handlePointerUp(event) {
     const { interaction } = state;
     delete interaction.activePointers[event.data.pointerId];
@@ -610,13 +638,15 @@ function handlePointerUp(event) {
     }
 }
 
-// Handles tap events on the stage to trigger hit area motions.
+// Handles tap events on the stage to trigger hit area motions
 function handleStageTap(event) {
+    // Don't trigger a tap if the user was dragging or just selected a model
     if (state.interaction.wasDragging || state.interaction.modelJustSelected) return;
 
     if (state.selectedModel) {
         const hitAreaNames = state.selectedModel.hitTest(event.data.global.x, event.data.global.y);
         if (hitAreaNames.length > 0) {
+            // If multiple hit areas overlap, pick one at random
             const randomHitArea = hitAreaNames[Math.floor(Math.random() * hitAreaNames.length)];
             log('INTERACTION', `Tap hit on area: ${randomHitArea}`);
             triggerMotionForHitArea(state.selectedModel, randomHitArea);
@@ -624,13 +654,15 @@ function handleStageTap(event) {
     }
 }
 
-// Handles zooming the selected model with the mouse wheel or fingers.
+// Handles zooming the selected model using the mouse wheel
 function handleCanvasZoom(event) {
     if (!state.selectedModel) return;
     event.preventDefault();
 
     const zoomFactor = Math.exp((event.deltaY < 0 ? 1 : -1) * CONFIG.ZOOM_SENSITIVITY);
     const newScale = Math.max(CONFIG.MIN_ZOOM, Math.min(state.selectedModel.scale.x * zoomFactor, CONFIG.MAX_ZOOM));
+    
+    // Zoom centered on the pointer's position
     const pointer = new PIXI.Point(event.clientX, event.clientY);
     const stagePos = state.app.stage.toLocal(pointer);
     const localPos = state.selectedModel.toLocal(stagePos);
@@ -642,7 +674,7 @@ function handleCanvasZoom(event) {
     state.selectedModel.y -= newGlobalPos.y - stagePos.y;
 }
 
-// Handles scrolling on the model filename to switch models.
+// Handles scrolling on the model filename display to cycle through the loaded models
 function handleModelFilenameScroll(event) {
     if (!state.models || state.models.length < 2) return;
     event.preventDefault();
@@ -651,6 +683,7 @@ function handleModelFilenameScroll(event) {
     let currentIndex = sorted.findIndex(m => m === state.selectedModel);
     
     const direction = event.deltaY < 0 ? -1 : 1;
+    // The modulo operator ensures the new index wraps around
     const newIndex = (currentIndex + direction + sorted.length) % sorted.length;
 
     if (newIndex !== currentIndex) {
@@ -662,7 +695,7 @@ function handleModelFilenameScroll(event) {
 //==============================================================================
 // HIT AREA & MOTION LOGIC
 //==============================================================================
-// Toggles the visibility of hit area frames based on the checkbox state.
+// Toggles the visibility of the hit area frames based on the checkbox in the UI
 function toggleHitAreaFramesVisibility() {
     if (state.hitAreaFrames && state.selectedModel) {
         state.hitAreaFrames.visible = DOM.showHitAreasCheckbox.checked;
@@ -670,7 +703,7 @@ function toggleHitAreaFramesVisibility() {
     }
 }
 
-// Simulates a tap on a hit area to trigger its motion and highlight the button.
+// Simulates a tap on a hit area
 function simulateTapOnHitArea(model, hitAreaName, buttonElement) {
     if (model !== state.selectedModel) setSelectedModel(model);
     triggerMotionForHitArea(model, hitAreaName);
@@ -678,7 +711,7 @@ function simulateTapOnHitArea(model, hitAreaName, buttonElement) {
     state.hitAreaFrames?.highlight?.(hitAreaName);
 }
 
-// Triggers a motion associated with the given hit area name.
+// Triggers a motion that corresponds to the given hit area name
 function triggerMotionForHitArea(model, hitAreaName) {
     const motionManager = model.internalModel?.motionManager;
     if (!motionManager) return;
@@ -690,13 +723,15 @@ function triggerMotionForHitArea(model, hitAreaName) {
 
     if (hitAreaName) {
         const lowerHitArea = hitAreaName.toLowerCase();
+        // Try to find a motion group that includes the hit area name
         const matchingGroups = Object.keys(motionGroups).filter(group => group.toLowerCase().includes(lowerHitArea));
         if (matchingGroups.length > 0) {
             groupToPlay = matchingGroups[Math.floor(Math.random() * matchingGroups.length)];
         }
     }
 
-    if (!groupToPlay) { // Fallback to a random motion
+    // If no matching motion group is found, fall back to playing a random motion
+    if (!groupToPlay) {
         const availableGroups = Object.keys(motionGroups).filter(g => motionGroups[g]?.length > 0);
         if (availableGroups.length > 0) {
             groupToPlay = availableGroups[Math.floor(Math.random() * availableGroups.length)];
@@ -706,6 +741,7 @@ function triggerMotionForHitArea(model, hitAreaName) {
 
     if (groupToPlay) {
         const indexToPlay = Math.floor(Math.random() * motionGroups[groupToPlay].length);
+        // Using a timeout to prevent some motions from being cut off
         setTimeout(() => {
             log('MODEL', `Playing motion for "${hitAreaName}": Group=${groupToPlay}, Index=${indexToPlay}`);
             model.motion(groupToPlay, indexToPlay);
@@ -717,6 +753,7 @@ function triggerMotionForHitArea(model, hitAreaName) {
 //==============================================================================
 // UTILITY FUNCTIONS
 //==============================================================================
+// A utility function to calculate the distance between two PIXI.Point objects
 const getDistance = (p1, p2) => Math.hypot(p2.x - p1.x, p2.y - p1.y);
 
 
@@ -724,6 +761,7 @@ const getDistance = (p1, p2) => Math.hypot(p2.x - p1.x, p2.y - p1.y);
 // SCRIPT EXECUTION START
 //==============================================================================
 if (document.readyState === 'loading') {
+    // If the script is loaded before the DOM is ready, wait for the DOMContentLoaded event
     document.addEventListener('DOMContentLoaded', initializeApplication);
     // Sneaky ASCII art console log
     (()=>{const ascii=`            
@@ -748,5 +786,6 @@ if (document.readyState === 'loading') {
     `;
     console.log('%c'+ascii, asciiStyle)})();
 } else {
+    // If the DOM is already ready, initialize the application immediately
     initializeApplication();
 }

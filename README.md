@@ -10,7 +10,8 @@
 &nbsp;&nbsp;&nbsp;
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ImDuck42/Live2D-Viewer)  
 
-A decently performant, browser-based Live2D viewer designed for interaction with one or more Live2D models. Built with vanilla JavaScript and the PIXI.js rendering engine.  
+A browser-based Live2D viewer designed for interaction with one or more Live2D models.  
+Built with vanilla JavaScript and the PIXI.js rendering engine.  
 This project offers a feature-rich experience without the overhead of heavy frameworks.
 
 It includes a dynamic UI, multi-model support, a GitHub repository explorer for discovering new models, and a "What's New" changelog modal, all wrapped in a clean, responsive design.
@@ -20,7 +21,7 @@ It includes a dynamic UI, multi-model support, a GitHub repository explorer for 
 ### **[https://imduck42.github.io/Live2D-Viewer](https://imduck42.github.io/Live2D-Viewer)**
 
 <details>
-    <summary><strong>Screenshots (kinda not new)</strong></summary>
+    <summary><strong>Screenshots (fresh from the stone-age)</strong></summary>
     <p align="left">
         <img src="assets/screenshots/PreviewPC.png" width="49%" alt="Preview on Desktop">
         <img src="assets/screenshots/PreviewMobile.png" height="220px" alt="Preview on Mobile">
@@ -82,7 +83,7 @@ To run the viewer locally, follow these steps:
     ```
 
 2.  **Open in a browser:**
-    You can open `index.html` directly in a modern browser.
+    You can open `index.html` directly in a modern browser. (Changelog modal won't work)
 
 3.  **(Recommended) Serve locally:**
     For best results and to avoid potential CORS issues when loading models, run a local web server. 

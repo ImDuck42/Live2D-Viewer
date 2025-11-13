@@ -1,7 +1,7 @@
 Planned:
     - Support opening models from .zip files
     - Local file editing
-    - If the file fails to load for any reason, color the canvas border red for ten seconds or sumtin
+    - If the file fails to load for any reason, color the canvas border red for ten seconds or something
     - On entering a directory ,scroll all the way up or implement a remembering function
 
 
@@ -10,5 +10,10 @@ Maybe:
     - Status on what part of the model is loading (idk how guanss did it but idk if its possible in my version)
 
 
-Other (No need for now):
-    - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework), 9th (major refactor), 10, 
+Refactor Count:
+    - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework), 9th (major refactor), 10, 11, 
+
+
+URL Tests:
+    - http://127.0.0.1:3000/?fe=Eikanya/Live2d-model/崩坏学园2/bronya&preview=model.json
+    - http://127.0.0.1:3000/?fe=ImDuck42/Live2D-Viewer&preview=index.html

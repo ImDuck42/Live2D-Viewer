@@ -1,6 +1,6 @@
 /**
  * PIXI JS Extra JS (Original: https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/extra.min.js)
- * (nc) 2025 ImDuck42
+ * (Author) 2025 ImDuck42
  * -- These changes have been made solely to fit my version of a Live2d viewer --
  * -- This file is heavily modified and will probably not work with other Live2d software --
  *

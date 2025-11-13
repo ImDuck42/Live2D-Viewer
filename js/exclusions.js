@@ -32,11 +32,11 @@ const CONSOLE_EXCLUSION_PATTERNS = {
 
     // Specific, known non-critical warnings
     MISC: [
-        /^_\$li : call _\$Ri\.update\(\) before _\$Ri\.draw\(\)/i, // A frequent, benign warning
+        /^_\$li : call _\$Ri\.update\(\) before _\$Ri\.draw\(\)/i, // A frequent, beginning warning
     ],
 };
 
-// Combine all patterns into a single array for efficient matching
+// Combine all the exclusion patterns into a single array for efficient matching
 const ALL_EXCLUSION_PATTERNS = Object.values(CONSOLE_EXCLUSION_PATTERNS).flat();
 
 //==============================================================================
@@ -56,19 +56,20 @@ function createFilteredConsoleMethod(originalMethod) {
             return;
         }
 
-        // Join arguments to form a single string for pattern matching
+        // Join all arguments to form a single string for pattern matching.
         const message = args.map(arg => String(arg)).join(' ');
 
-        // Check if the message matches any exclusion pattern
+        // Check if the message matches any of the exclusion patterns.
         const shouldBlock = ALL_EXCLUSION_PATTERNS.some(pattern => pattern.test(message));
 
+        // If the message should not be blocked, call the original console method.
         if (!shouldBlock) {
             originalMethod.apply(console, args);
         }
     };
 }
 
-// Override the native console methods with the filtered versions
+// Override the native console methods with the new, filtered versions.
 console.log = createFilteredConsoleMethod(console.log);
 console.warn = createFilteredConsoleMethod(console.warn);
 console.error = createFilteredConsoleMethod(console.error);

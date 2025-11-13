@@ -6,13 +6,13 @@
     inset: var(--main-padding);
     z-index: 2000;
     display: none;
+    overflow: hidden;
     flex-direction: column;
     color: var(--text-primary);
     background-color: rgba(var(--bg-secondary-rgb), 0.75);
     border: 1px solid rgba(var(--text-primary-rgb), 0.1);
     border-radius: var(--border-radius);
     box-shadow: 0 10px 40px rgba(var(--bg-primary-rgb), 0.5);
-    overflow: hidden;
     backdrop-filter: blur(10px) saturate(150%);
     -webkit-backdrop-filter: blur(10px) saturate(150%);
 }

@@ -2,27 +2,34 @@
 <html lang="en">
 
 <head>
-    <!-- Meta Tags -->
+    <!-- Metadata and stylesheets -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A feature-rich, browser-based Live2D model viewer using pixi-live2d-display.">
     <meta name="theme-color" content="#8c5eff">
+    
+    <!-- Name and favicon for the website -->
     <title>Live2D Viewer</title>
     <link rel="icon" type="image/svg+xml" href="assets/icon.svg" sizes="any">
 
-    <!-- Stylesheets and Font Awesome -->
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/repoexplorer.css">
-    <link rel="stylesheet" href="css/newsmodal.css">
+    <!-- CSS stylesheets -->
+    <link rel="stylesheet" href="css/styles.css">       <!-- Main application styles -->
+    <link rel="stylesheet" href="css/repoexplorer.css"> <!-- Styles for the GitHub repository explorer modal -->
+    <link rel="stylesheet" href="css/newsmodal.css">    <!-- Styles for the changelog modal -->
+
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 </head>
 
 <body oncontextmenu="return false;">
+    
     <!-- Main Application Container -->
     <div class="app-container">
         <header class="site-header">
             <h1 id="site-title-button" title="View Project News">Live2D Viewer</h1>
             <div class="model-imports">
+                
+                <!-- Group for loading a model from a URL or the GitHub explorer -->
                 <div class="model-loader-group">
                     <button id="open-file-explorer-btn" class="header-icon-button" title="Open GitHub File Explorer"
                         aria-controls="file-explorer-modal" aria-expanded="false">
@@ -34,13 +41,15 @@
                     <button id="load-url-button" title="Load model from the specified URL">Load URL</button>
                 </div>
 
-                <!-- Default Model Selector -->
+                <!-- Group for loading one of the default models -->
                 <div class="model-loader-group">
                     <div class="custom-dropdown" id="model-select-dropdown" tabindex="0" aria-haspopup="listbox"
                         aria-expanded="false" title="Select a default model to load">
                         <span class="custom-dropdown-selected" id="model-select-dropdown-selected">Default Models</span>
                         <ul class="custom-dropdown-list" id="model-select-dropdown-list" role="listbox"
                             aria-label="List of default models">
+                            
+                            <!-- Options for the default models dropdown -->
                             <li class="custom-dropdown-option"
                                 data-value="https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json"
                                 role="option">
@@ -57,6 +66,8 @@
                                 Bronya (Cubism 2.1)
                             </li>
                         </ul>
+
+                        <!-- Hidden input to store the value of the selected model -->
                         <input type="hidden" id="model-select" value="">
                     </div>
                     <button id="load-selected-button" title="Load the selected default model">Load Selected</button>
@@ -67,22 +78,32 @@
         <!-- Main Content Area -->
         <main class="main-content">
             <div class="canvas-area">
+
+                <!-- Area where the Live2D model is rendered -->
                 <canvas id="live2d-canvas" aria-label="Live2D Model Display Area"></canvas>
+                
+                <!-- Loading overlay shown while a model is being loaded -->
                 <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite"
                     style="display: none;">
                     <div class="spinner" aria-hidden="true"></div>
                     <p class="loading-text">Loading model...</p>
                 </div>
+
+                <!-- Message shown when no model is loaded -->
                 <div id="no-model-message" class="canvas-message">
                     <i class="fas fa-circle-user" aria-hidden="true"></i>
                     <p>Select or enter a model URL to display</p>
                 </div>
+
+                <!-- Displays the filename of the current model -->
                 <div id="model-filename" class="model-filename" title="Click to copy filename"></div>
             </div>
 
-            <!-- Control Panel -->
+            <!-- Sidebar with controls for the current model -->
             <aside class="control-panel" aria-labelledby="control-panel-heading">
                 <h2 id="control-panel-heading" class="sr-only">Model Controls</h2>
+
+                <!-- General model controls (e.g., show hit areas, delete model) -->
                 <div class="control-item">
                     <input type="checkbox" id="show-hit-areas-checkbox" disabled />
                     <label for="show-hit-areas-checkbox"
@@ -93,6 +114,7 @@
                     </button>
                 </div>
 
+                <!-- Section for model expressions -->
                 <div class="panel-section">
                     <h3>Expressions</h3>
                     <div id="expressions-container" class="model-features-container" aria-live="polite">
@@ -100,6 +122,7 @@
                     </div>
                 </div>
 
+                <!-- Section for model motions -->
                 <div class="panel-section">
                     <h3>Motions</h3>
                     <div id="motions-container" class="model-features-container" aria-live="polite">
@@ -107,6 +130,7 @@
                     </div>
                 </div>
 
+                <!-- Section for model hit areas -->
                 <div class="panel-section">
                     <h3>Hit Areas</h3>
                     <div id="hit-areas-container" class="model-features-container" aria-live="polite">
@@ -123,10 +147,10 @@
             <p>Model controls: Drag to move, Scroll/Pinch to zoom, Tap to interact.</p>
         </footer>
 
-        <!-- Placeholder for Changelog Modal -->
+        <!-- Placeholder for the Changelog Modal -->
         <div id="changelog-placeholder"></div>
 
-        <!-- File Explorer Modal -->
+        <!-- The modal for the GitHub repository explorer -->
         <div id="file-explorer-modal" class="file-explorer-modal-container" role="dialog" aria-modal="true"
             aria-labelledby="file-explorer-heading">
             <button id="file-explorer-close-btn" class="file-explorer-close-btn" title="Close File Explorer"
@@ -134,7 +158,7 @@
                 <i class="fas fa-xmark" aria-hidden="true"></i>
             </button>
 
-            <!-- File Explorer Header -->
+            <!-- Header of the file explorer modal -->
             <div class="file-explorer-header">
                 <h2 id="file-explorer-heading">GitHub Repository Explorer</h2>
                 <div class="fe-repo-input-container">
@@ -149,7 +173,7 @@
                 </div>
             </div>
 
-            <!-- File Explorer Main Content -->
+            <!-- Main content area of the file explorer modal -->
             <div class="file-explorer-main-content">
                 <div class="fe-content-area-header">
                     <button id="fe-up-directory-btn" class="fe-icon-button" title="Navigate to parent directory"
@@ -157,12 +181,18 @@
                         <i class="fas fa-arrow-up" aria-hidden="true"></i>
                         <span class="sr-only">Up one level</span>
                     </button>
+
+                    <!-- Breadcrumbs for navigating the repository folder structure -->
                     <div id="fe-breadcrumbs" class="fe-breadcrumbs"></div>
                 </div>
                 <div class="fe-content-area-body">
+
+                    <!-- Container for the list of files and folders -->
                     <div id="fe-file-listing-container" class="fe-file-listing-container scrollable">
                         <p class="fe-placeholder-text">Load a repository to see its content.</p>
                     </div>
+
+                    <!-- Container for previewing files -->
                     <div id="fe-file-preview-container" class="fe-file-preview-container" style="display: none;">
                         <div class="fe-preview-header">
                             <h4 id="fe-preview-filename"></h4>
@@ -177,33 +207,33 @@
                 </div>
             </div>
 
-            <!-- File Explorer Footer -->
+            <!-- Footer of the file explorer modal, displaying status messages -->
             <footer class="file-explorer-footer">
                 <p>Status: <span id="fe-status-message" aria-live="polite">Idle</span></p>
             </footer>
         </div>
 
-        <!-- Loader Overlay -->
+        <!-- Global loader overlay for the repository explorer -->
         <div id="fe-loader" class="fe-loader-overlay" style="display: none;" role="status" aria-live="assertive">
             <div class="spinner"></div>
             <p>Loading Repository Data...</p>
         </div>
     </div>
 
-    <!-- Console Exclusion Patterns -->
+    <!-- Console Log Exclusion Patterns -->
     <script src="js/exclusions.js"></script>
 
-    <!-- Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.10/dist/browser/pixi.min.js"></script>
-    <script src="libs/live2d.js"></script>
-    <script src="libs/live2dcubismcore.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/index.min.js"></script>
-    <script src="libs/extra.js"></script>
+    <!-- Application libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.10/dist/browser/pixi.min.js"></script>        <!-- PIXI.js rendering engine -->
+    <script src="libs/live2d.js"></script>                                                              <!-- Live2D framework -->
+    <script src="libs/live2dcubismcore.js"></script>                                                    <!-- Core Cubism library -->
+    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/index.min.js"></script>    <!-- PIXI Live2D display plugin -->
+    <script src="libs/extra.js"></script>                                                               <!-- HitArea rendering library -->
 
-    <!-- Custom Scripts -->
-    <script src="js/script.js"></script>
-    <script src="js/repoexplorer.js"></script>
-    <script src="js/newsmodal.js"></script>
+    <!-- Custom application scripts -->
+    <script src="js/script.js"></script>        <!-- Main application logic -->
+    <script src="js/repoexplorer.js"></script>  <!-- GitHub repository explorer logic -->
+    <script src="js/newsmodal.js"></script>     <!-- Changelog modal logic -->
 </body>
 
 </html>

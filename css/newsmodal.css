@@ -52,8 +52,8 @@
 
 .changelog-content {
     flex-grow: 1;
-    padding-top: var(--main-padding);
     padding-right: 1rem;
+    padding-top: var(--main-padding);
     overflow-y: auto;
 }
 

@@ -4,30 +4,29 @@ document.addEventListener('DOMContentLoaded', () => {
     //==============================================================================
     // CONSTANTS & CONFIGURATION
     //==============================================================================
-
     const NEWSMODAL_CONFIG = {
         CHANGES_HTML_URL: 'assets/changes.html',
     };
 
+
     //==============================================================================
     // DOM ELEMENT CACHE
     //==============================================================================
-
     const DOM = {
         siteTitleButton: document.getElementById('site-title-button'),
         changelogPlaceholder: document.getElementById('changelog-placeholder'),
         body: document.body,
     };
 
-    // These are populated after the content is fetched
+    // These elements are populated after the changelog content is fetched.
     let changelogModal = null;
     let changelogCloseButton = null;
+
 
     //==============================================================================
     // INITIALIZATION
     //==============================================================================
-
-    // Fetches and injects the changelog HTML, then sets up interactions.
+    // Fetches and injects the changelog HTML content from an external file,
     async function initializeChangelog() {
         if (!DOM.changelogPlaceholder || !DOM.siteTitleButton) {
             console.warn("News Modal: Required DOM elements not found. Feature disabled.");
@@ -39,10 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            // Injects the entire modal structure from an external file.
+
+            // Injects the entire modal structure from the external file.
             DOM.changelogPlaceholder.innerHTML = await response.text();
 
-            // Cache modal elements now that they exist in the DOM
+            // Cache modal elements now that they have been added to the DOM.
             changelogModal = document.getElementById('changelog-modal');
             changelogCloseButton = document.getElementById('changelog-close-button');
 
@@ -58,11 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     //==============================================================================
     // CORE FUNCTIONALITY
     //==============================================================================
-
-    // Opens the changelog modal and prevents background scrolling.
+    // Opens the changelog modal and adds a class to the body to prevent background scrolling.
     const openModal = () => {
         if (changelogModal) {
             changelogModal.classList.add('active');
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Closes the changelog modal and restores background scrolling.
+    // Closes the changelog modal and removes the no-scroll class from the body to restore background scrolling.
     const closeModal = () => {
         if (changelogModal) {
             changelogModal.classList.remove('active');
@@ -78,15 +78,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+
     //==============================================================================
     // EVENT HANDLERS & LISTENERS
     //==============================================================================
-
-    // Sets up all event listeners for modal interactions.
+    // Sets up all event listeners for the modal, including the open button, close button, and the 'Escape' key.
     function setupModalEventListeners() {
         DOM.siteTitleButton.addEventListener('click', openModal);
         changelogCloseButton.addEventListener('click', closeModal);
 
+        // Add a global keydown listener to close the modal with the 'Escape' key.
         window.addEventListener('keydown', (event) => {
             if (event.key === 'Escape' && changelogModal?.classList.contains('active')) {
                 closeModal();
@@ -94,6 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Start the process
+    // Initialize the changelog feature when the DOM is ready.
     initializeChangelog();
 });

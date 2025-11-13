@@ -42,23 +42,24 @@ document.addEventListener('DOMContentLoaded', () => {
         repo: '',
         path: '',
         selectedFileItemElement: null,
-        previewFile: null,
     };
 
 
     //==============================================================================
     // INITIALIZATION & EVENT LISTENERS
     //==============================================================================
+    // Initializes the file explorer, sets up event listeners, and handles deep-linked URLs
     function initialize() {
         if (Object.values(DOM).some(el => !el)) {
-            console.error("File Explorer: One or more DOM elements are missing. Feature disabled.");
+            log('ERROR', "File Explorer: One or more DOM elements are missing. Feature disabled.");
             return;
         }
         setupEventListeners();
-        handleUrlAndLoad();
+        handleFeUrl();
+        updateStatus('Enter GitHub Owner and Repository to begin.');
     }
 
-    // Set up all event listeners
+    // Attaches all necessary event listeners for the file explorer UI
     function setupEventListeners() {
         DOM.openExplorerBtn.addEventListener('click', openExplorer);
         DOM.closeExplorerBtn.addEventListener('click', closeExplorer);
@@ -68,21 +69,23 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM.ownerInput.addEventListener('keypress', handleInputKeyPress);
         DOM.upDirectoryBtn.addEventListener('click', navigateUp);
         DOM.closePreviewBtn.addEventListener('click', closeFilePreview);
-        window.addEventListener('popstate', handlePopState);
+        window.addEventListener('popstate', handleFeUrl);
     }
 
 
     //==============================================================================
     // EVENT HANDLERS
     //==============================================================================
-    // Global keydown handler for Escape and Enter keys
+    // Handles the 'Escape' key to close the explorer modal and loading the repository when the 'Enter' key is pressed
     const handleGlobalKeyDown = e => e.key === 'Escape' && DOM.explorerModal.classList.contains('active') && closeExplorer();
     const handleInputKeyPress = e => e.key === 'Enter' && handleLoadRepository();
 
+    // Handles clicks on file and directory list items
     function handleListItemClick(item) {
         state.selectedFileItemElement?.classList.remove('selected');
 
         if (item.type === 'dir') {
+            closeFilePreview();
             fetchAndDisplayContents(item.path);
             state.selectedFileItemElement = null;
         } else {
@@ -93,22 +96,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Handle breadcrumb navigation click
+    // Handles clicks on breadcrumb links to navigate to a specific path
     function handleBreadcrumbClick(event, path) {
         event.preventDefault();
         fetchAndDisplayContents(path);
     }
 
-    // Handle importing a Live2D model
+    // Imports a Live2D model by calling the global 'window.loadLive2DModel' function, which is exposed by 'script.js'
     function handleImportModel(fileItem, sourceUrlOverride = null) {
         const modelUrl = sourceUrlOverride || `${JSDELIVR_CDN_BASE}/${state.owner}/${state.repo}/${fileItem.path}`;
-        console.log(`[REPO EXPLORER] Attempting to import Live2D Model: ${modelUrl}`);
+        log('MODEL', `[REPO EXPLORER] Attempting to import Live2D Model: ${modelUrl}`);
 
         if (typeof window.loadLive2DModel === 'function') {
             window.loadLive2DModel(modelUrl);
             updateStatus(`Sent ${fileItem.name} to viewer.`, false, true);
         } else {
-            console.error('[REPO EXPLORER] Live2D import function (window.loadLive2DModel) not found.');
+            log('ERROR', '[REPO EXPLORER] Live2D import function (window.loadLive2DModel) not found.');
             updateStatus('Error: Live2D import function not available.', true);
         }
     }
@@ -117,22 +120,32 @@ document.addEventListener('DOMContentLoaded', () => {
     //==============================================================================
     // UI CONTROL
     //==============================================================================
+    // Opens the file explorer modal and updates the URL to reflect the current state
     function openExplorer() {
         DOM.explorerModal.classList.add('active');
         DOM.openExplorerBtn.setAttribute('aria-expanded', 'true');
         DOM.body.classList.add('no-scroll');
+        updateUrl();
     }
 
+    // Closes the file explorer modal and cleans up the URL
     function closeExplorer() {
         DOM.explorerModal.classList.remove('active');
         DOM.openExplorerBtn.setAttribute('aria-expanded', 'false');
         DOM.body.classList.remove('no-scroll');
+        
+        const url = new URL(window.location);
+        if (url.searchParams.has('fe')) {
+            url.searchParams.delete('fe');
+            url.searchParams.delete('preview');
+            history.replaceState({ path: url.pathname }, '', url.pathname);
+        }
     }
 
-    // Show or hide the loading spinner
+    // Toggles the visibility of the loading spinner
     const showLoader = show => DOM.loader.style.display = show ? 'flex' : 'none';
 
-    // Update the status message displayed to the user
+    // Updates the status message at the bottom of the file explorer
     function updateStatus(message, isError = false, isSuccess = false) {
         DOM.statusMessage.textContent = message;
         DOM.statusMessage.className = '';
@@ -140,6 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isSuccess) DOM.statusMessage.classList.add('fe-status-success');
     }
 
+
+    // Displays a placeholder message in a container
     function setPlaceholder(container, text, isError = false) {
         const className = isError ? 'fe-placeholder-text fe-error-message' : 'fe-placeholder-text';
         container.innerHTML = `<p class="${className}">${text}</p>`;
@@ -147,95 +162,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     //==============================================================================
-    // URL HANDLING
-    //==============================================================================
-    // Updates the browser's URL to reflect the current state of the file explorer.
-    function updateUrl(replaceState = false) {
-        if (!state.owner || !state.repo) return;
-        const feIndex = window.location.pathname.indexOf('/fe/');
-        const basePath = feIndex !== -1 
-        ? window.location.pathname.substring(0, feIndex) 
-        : window.location.pathname.replace(/\/$/, ''); // Get current path, remove trailing slash if any
-        let newPath = `${basePath}/fe/${state.owner}/${state.repo}`;
-        if (state.path) {
-            newPath += `/${state.path}`;
-        }
-
-        const params = new URLSearchParams(window.location.search);
-        if (state.previewFile) {
-            params.set('preview', state.previewFile);
-        } else {
-            params.delete('preview');
-        }
-
-        const queryString = params.toString();
-        if (queryString) {
-            newPath += `?${queryString}`;
-        }
-        
-        const currentUrl = window.location.pathname + window.location.search;
-        if (currentUrl !== newPath) {
-            const method = replaceState ? 'replaceState' : 'pushState';
-            // Use an empty string for the title
-            history[method]({}, '', newPath);
-        }
-    }
-
-    // Parses the URL on page load to initialize the explorer state.
-    function handleUrlAndLoad() {
-        // Handle the redirect from the 404.html page.
-        const initialParams = new URLSearchParams(window.location.search);
-        const redirectPath = initialParams.get('redirect');
-
-        if (redirectPath) {
-            // Contain the path the user originally tried to access.
-            const newUrl = new URL(redirectPath, window.location.href);
-            history.replaceState(null, '', newUrl.pathname + newUrl.search);
-        }
-
-        const path = window.location.pathname;
-        const params = new URLSearchParams(window.location.search);
-        const previewFile = params.get('preview');
-
-        const segments = path.split('/');
-        // Find the 'fe' segment
-        const feIndex = segments.findIndex(s => s.toLowerCase() === 'fe');
-
-        if (feIndex > -1 && segments.length >= feIndex + 3) {
-            const owner = segments[feIndex + 1];
-            const repo = segments[feIndex + 2];
-            const filePath = segments.slice(feIndex + 3).join('/');
-
-            openExplorer();
-            DOM.ownerInput.value = owner;
-            DOM.repoInput.value = repo;
-            state.owner = owner;
-            state.repo = repo;
-
-            const onContentLoaded = (items) => {
-                if (previewFile) {
-                    const fileToPreview = items.find(item => item.name === previewFile && item.type === 'file');
-                    if (fileToPreview) {
-                        handleListItemClick(fileToPreview);
-                    }
-                }
-            };
-            fetchAndDisplayContents(filePath, onContentLoaded);
-        } else {
-            updateStatus('Enter GitHub Owner and Repository to begin.');
-        }
-    }
-
-    // Handles browser back/forward navigation.
-    function handlePopState() {
-        closeFilePreview();
-        handleUrlAndLoad();
-    }
-
-
-    //==============================================================================
     // REPOSITORY LOADING & DATA FETCHING
     //==============================================================================
+
+    // Handles the "Load Repository" button click
     function handleLoadRepository() {
         state.owner = DOM.ownerInput.value.trim();
         state.repo = DOM.repoInput.value.trim();
@@ -250,8 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchAndDisplayContents('');
     }
 
-    // Fetch and display contents for a given path
-    async function fetchAndDisplayContents(path, onLoadCallback) {
+    // Fetches and displays the contents of a given path in the repository
+    async function fetchAndDisplayContents(path) {
         state.path = path;
         updateUrl();
         setPlaceholder(DOM.fileListingContainer, 'Loading items...');
@@ -261,17 +191,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const contents = await fetchGitHubContentsWithCache(path);
             renderItems(contents || []);
-            if (onLoadCallback) {
-                onLoadCallback(contents || []);
-            }
         } catch (error) {
-            console.error('[REPO EXPLORER] GitHub API Fetch error:', error);
+            log('ERROR', '[REPO EXPLORER] GitHub API Fetch error:', error);
             setPlaceholder(DOM.fileListingContainer, `Error: ${error.message}`, true);
             updateStatus(`Error: ${error.message}`, true);
         }
     }
 
-    // Fetch contents from GitHub API for a given Owner plus Repo
+    // Fetches repository contents from the GitHub API
     async function fetchGitHubContents(path) {
         const url = `${GITHUB_API_BASE}/${state.owner}/${state.repo}/contents/${path}`;
         updateStatus(`Fetching from API: ${path || 'root'}`);
@@ -290,7 +217,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Fetch contents with session storage caching
+
+    // A wrapper around 'fetchGitHubContents' that caches the results in 'sessionStorage' to avoid redundant API calls.
     async function fetchGitHubContentsWithCache(path) {
         const cacheKey = `fe_github_${state.owner}_${state.repo}_${path || 'ROOT'}`;
         const cachedItem = sessionStorage.getItem(cacheKey);
@@ -300,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateStatus(`Using cached data for: ${path || 'root'}`);
                 return data;
             } catch (e) {
-                console.warn("[REPO EXPLORER] Failed to parse cached item, removing:", e);
+                log('WARN', "[REPO EXPLORER] Failed to parse cached item, removing:", e);
                 sessionStorage.removeItem(cacheKey);
             }
         }
@@ -309,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data }));
             } catch (e) {
-                console.warn("[REPO EXPLORER] Failed to save to session storage (possibly full):", e);
+                log('WARN', "[REPO EXPLORER] Failed to save to session storage (possibly full):", e);
             }
         }
         return data;
@@ -319,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //==============================================================================
     // CONTENT & PREVIEW RENDERING
     //==============================================================================
-    // Render list of items in the file listing container
+    // Renders a list of files and directories in the file listing container
     function renderItems(items) {
         DOM.fileListingContainer.innerHTML = '';
         if (items.length === 0) {
@@ -327,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Sort items to show directories first, then files alphabetically
         items.sort((a, b) => {
             if (a.type === b.type) return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
             return a.type === 'dir' ? -1 : 1;
@@ -337,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM.fileListingContainer.appendChild(list);
     }
 
-    // Create a list item element for a given file or directory item
+    // Creates a single list item element for a file or directory
     function createListItemElement(item) {
         const li = document.createElement('li');
         li.className = 'fe-list-item';
@@ -352,6 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="fe-list-item-name">${item.name}</span>
         `;
 
+        // If the file is a model.json, add an "Import" button
         if (item.type === 'file' && MODEL_FILE_REGEX.test(item.name)) {
             const importBtn = document.createElement('button');
             importBtn.className = 'fe-import-model-btn';
@@ -366,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return li;
     }
 
-    // Update the breadcrumb navigation based on the current path
+    // Updates the breadcrumb navigation based on the current path
     function updateBreadcrumbs(path) {
         DOM.breadcrumbs.innerHTML = '';
         const segments = path.split('/').filter(Boolean);
@@ -380,6 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index < segments.length - 1) {
                 DOM.breadcrumbs.appendChild(createBreadcrumbLink(segment, `Navigate to ${segment}`, currentBuiltPath));
             } else {
+                // The last segment is the current directory and is not a link
                 const span = document.createElement('span');
                 span.textContent = segment;
                 DOM.breadcrumbs.appendChild(span);
@@ -387,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Create a breadcrumb link element
+    // A helper function to create a single breadcrumb link
     function createBreadcrumbLink(text, title, path) {
         const link = document.createElement('a');
         link.href = '#';
@@ -397,33 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return link;
     }
 
-    // Preview caching helpers (store small previews in sessionStorage)
-    function getPreviewCacheKey(path) {
-        return `fe_preview_${state.owner}_${state.repo}_${path}`;
-    }
 
-    function getPreviewFromCache(path) {
-        const key = getPreviewCacheKey(path);
-        const raw = sessionStorage.getItem(key);
-        if (!raw) return null;
-        try {
-            return JSON.parse(raw);
-        } catch (e) {
-            console.warn('[REPO EXPLORER] Invalid preview cache, removing:', e);
-            sessionStorage.removeItem(key);
-            return null;
-        }
-    }
-
-    function savePreviewToCache(path, type, content) {
-        const key = getPreviewCacheKey(path);
-        try {
-            sessionStorage.setItem(key, JSON.stringify({ type, content, timestamp: Date.now() }));
-        } catch (e) {
-            console.warn('[REPO EXPLORER] Failed to save preview to sessionStorage (possibly full):', e);
-        }
-    }
-
+    // Converts a Blob object to a data URL
     function blobToDataURL(blob) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -433,7 +339,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Display file preview for a given file item
+
+    // Displays a preview for the selected file
     async function displayFilePreview(fileItem) {
         DOM.previewFileName.textContent = fileItem.name;
         setPlaceholder(DOM.previewContent, 'Loading preview...');
@@ -441,14 +348,28 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM.filePreviewContainer.style.display = 'flex';
         DOM.filePreviewContainer.classList.add('active');
         DOM.fileListingContainer.classList.add('preview-open');
-
-        state.previewFile = fileItem.name;
-        updateUrl(true);
+        updateUrl();
 
         const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${state.owner}/${state.repo}/${fileItem.path}`;
         const extension = fileItem.name.split('.').pop().toLowerCase();
 
-        // If we have a cached preview, render it synchronously and skip the loader
+        // Attempt to load the preview from the cache
+        const getPreviewCacheKey = path => `fe_preview_${state.owner}_${state.repo}_${path}`;
+        const getPreviewFromCache = path => {
+            const raw = sessionStorage.getItem(getPreviewCacheKey(path));
+            if (!raw) return null;
+            try { return JSON.parse(raw); } catch (e) {
+                log('WARN', '[REPO EXPLORER] Invalid preview cache, removing:', e);
+                sessionStorage.removeItem(getPreviewCacheKey(path));
+                return null;
+            }
+        };
+        const savePreviewToCache = (path, type, content) => {
+            try { sessionStorage.setItem(getPreviewCacheKey(path), JSON.stringify({ type, content, timestamp: Date.now() })); } catch (e) {
+                log('WARN', '[REPO EXPLORER] Failed to save preview to sessionStorage (possibly full):', e);
+            }
+        };
+
         const cached = getPreviewFromCache(fileItem.path);
         if (cached) {
             try {
@@ -466,16 +387,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 renderPreviewActions(fileItem, jsDelivrUrl);
             } catch (err) {
-                console.warn('[REPO EXPLORER] Cached preview render failed, falling back to fetch:', err);
-                // fall through to fetch path
+                log('WARN', '[REPO EXPLORER] Cached preview render failed, falling back to fetch:', err);
             }
             return;
         }
 
-        // Not cached: show loader and fetch, then save to cache
+        // If not cached, fetch the file content and display the preview
         showLoader(true);
         try {
             if (IMAGE_EXTENSIONS.includes(extension)) {
+                // For images, fetch as a blob and convert to a data URL for caching
                 const response = await fetch(jsDelivrUrl);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const blob = await response.blob();
@@ -486,9 +407,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 await img.decode();
                 DOM.previewContent.innerHTML = '';
                 DOM.previewContent.appendChild(img);
-                // save image as data URL to cache
                 savePreviewToCache(fileItem.path, 'image', dataUrl);
             } else {
+                // For text-based files, fetch as text
                 const response = await fetch(jsDelivrUrl);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const text = await response.text();
@@ -497,20 +418,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 pre.textContent = content;
                 DOM.previewContent.innerHTML = '';
                 DOM.previewContent.appendChild(pre);
-                // save text to cache
                 savePreviewToCache(fileItem.path, 'text', content);
             }
             renderPreviewActions(fileItem, jsDelivrUrl);
         } catch (error) {
-            console.error('[REPO EXPLORER] File preview error:', error);
+            log('ERROR', '[REPO EXPLORER] File preview error:', error);
             setPlaceholder(DOM.previewContent, `Error loading preview: ${error.message}`, true);
-            renderPreviewActions(fileItem, fileItem.html_url, true); // Fallback
+            renderPreviewActions(fileItem, fileItem.html_url, true); // Fallback to GitHub URL.
         } finally {
             showLoader(false);
         }
     }
 
-    // Render action buttons for the file preview
+    // Renders action buttons for the file preview, such as "Open" and "Import Model"
     function renderPreviewActions(fileItem, url, isFallback = false) {
         DOM.previewActions.innerHTML = '';
         const openBtn = document.createElement('a');
@@ -521,6 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
         openBtn.rel = "noopener noreferrer";
         DOM.previewActions.appendChild(openBtn);
 
+        // Add an "Import Model" button for model.json files
         if (MODEL_FILE_REGEX.test(fileItem.name) && !isFallback) {
             const importBtn = document.createElement('button');
             importBtn.className = 'fe-import-model-btn-preview';
@@ -530,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Close the file preview panel
+    // Closes the file preview panel
     function closeFilePreview() {
         if (!DOM.filePreviewContainer.classList.contains('active')) return;
 
@@ -540,24 +461,89 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM.previewContent.innerHTML = '';
         DOM.previewActions.innerHTML = '';
         DOM.previewFileName.textContent = '';
-        
-        state.previewFile = null;
-        updateUrl(true);
-
         if (state.selectedFileItemElement) {
             state.selectedFileItemElement.classList.remove('selected');
             state.selectedFileItemElement = null;
         }
+        updateUrl();
     }
 
-    // Navigate up one directory level
+    // Navigates up one directory level
     const navigateUp = () => state.path && fetchAndDisplayContents(state.path.substring(0, state.path.lastIndexOf('/')));
 
 
     //==============================================================================
-    // UTILITIES & START
+    // URL MANAGEMENT & INITIALIZATION
     //==============================================================================
-    // Get appropriate icon class for a given file extension
+    // Handles deep linking by parsing URL parameters on page load
+    function handleFeUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fePath = urlParams.get('fe');
+        
+        if (!fePath) return;
+
+        const [owner, repo, ...pathSegments] = fePath.split('/');
+        if (owner && repo) {
+            openExplorer();
+            DOM.ownerInput.value = owner;
+            DOM.repoInput.value = repo;
+            // Prevent re-triggering handleLoadRepository if the values are the same
+            if (state.owner === owner && state.repo === repo) return;
+            state.owner = owner;
+            state.repo = repo;
+
+            const path = pathSegments.join('/');
+            fetchAndDisplayContents(path).then(async () => {
+                const previewFile = urlParams.get('preview');
+                if (previewFile) {
+                    await new Promise(r => setTimeout(r, 50)); // Allow DOM to update
+                    const fullPath = (path ? path + '/' : '') + previewFile;
+                    const fileItemElement = document.querySelector(`[data-path="${fullPath}"]`);
+                    if (fileItemElement) {
+                        const fileItem = {
+                            path: fullPath,
+                            name: previewFile,
+                            type: 'file',
+                        };
+                        handleListItemClick(fileItem);
+                    }
+                }
+            });
+        }
+    }
+
+
+    // Updates the URL's query parameters to reflect the current state of the file explorer
+    function updateUrl() {
+        // Only update the URL if the modal is active and a repository is loaded
+        if (!DOM.explorerModal.classList.contains('active') || !state.owner || !state.repo) {
+            return;
+        }
+    
+        // Construct the path, filtering out any empty segments to avoid double slashes
+        const pathSegments = [state.owner, state.repo, ...state.path.split('/')].filter(Boolean);
+        const fePath = pathSegments.join('/');
+    
+        const url = new URL(window.location);
+        url.searchParams.set('fe', fePath);
+    
+        const previewFileName = DOM.previewFileName.textContent;
+        if (DOM.filePreviewContainer.classList.contains('active') && previewFileName) {
+            url.searchParams.set('preview', previewFileName);
+        } else {
+            url.searchParams.delete('preview');
+        }
+    
+        const newSearchString = decodeURIComponent(url.search);
+        const newRelativeUrl = url.pathname + newSearchString;
+        const currentRelativeUrl = window.location.pathname + window.location.search;
+    
+        if (newRelativeUrl !== currentRelativeUrl) {
+            history.pushState({ path: newRelativeUrl }, '', newRelativeUrl);
+        }
+    }
+    
+    // Returns the appropriate Font Awesome icon class for a given filename
     function getFileIcon(filename) {
         const ext = filename.split('.').pop().toLowerCase();
         const iconMap = {
