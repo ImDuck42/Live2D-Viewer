@@ -152,7 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Updates the browser's URL to reflect the current state of the file explorer.
     function updateUrl(replaceState = false) {
         if (!state.owner || !state.repo) return;
-        const basePath = window.location.pathname.substring(0, window.location.pathname.indexOf('/fe/'));
+        const feIndex = window.location.pathname.indexOf('/fe/');
+        const basePath = feIndex !== -1 
+        ? window.location.pathname.substring(0, feIndex) 
+        : window.location.pathname.replace(/\/$/, ''); // Get current path, remove trailing slash if any
         let newPath = `${basePath}/fe/${state.owner}/${state.repo}`;
         if (state.path) {
             newPath += `/${state.path}`;
@@ -186,7 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (redirectPath) {
             // Contain the path the user originally tried to access.
-            history.replaceState(null, '', '/' + redirectPath);
+            const newUrl = new URL(redirectPath, window.location.href);
+            history.replaceState(null, '', newUrl.pathname + newUrl.search);
         }
 
         const path = window.location.pathname;
