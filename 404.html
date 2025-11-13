@@ -1,13 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Live2D Viewer - Loading...</title>
-    <script type="text/javascript">
-        sessionStorage.setItem('redirect', location.href);
-        window.location.replace(document.baseURI);
-    </script>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <script>
+    // Get the path the user was trying to access.
+    // The segmentCount determines how many parts of the path to ignore from the root.
+    // For a project site like https://user.github.io/repo/, segmentCount should be 1.
+    // For a user site like https://user.github.io/, segmentCount should be 0.
+    const segmentCount = 1; 
+    const path = location.pathname.split('/').slice(segmentCount).join('/');
+    
+    // Construct the new URL and redirect.
+    // We pass the original path as the 'redirect' query parameter.
+    location.replace(
+      location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') +
+      '/?redirect=' + encodeURIComponent(path)
+    );
+  </script>
 </head>
-
+<body>
+  <p>If you are not redirected automatically, <a href="/">follow this link</a>.</p>
+</body>
 </html>

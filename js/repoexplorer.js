@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         repo: '',
         path: '',
         selectedFileItemElement: null,
-        previewedFile: null,
+        previewFile: null,
     };
 
 
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         setupEventListeners();
-        handleInitialUrl();
+        handleUrlAndLoad();
     }
 
     // Set up all event listeners
@@ -68,83 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         DOM.ownerInput.addEventListener('keypress', handleInputKeyPress);
         DOM.upDirectoryBtn.addEventListener('click', navigateUp);
         DOM.closePreviewBtn.addEventListener('click', closeFilePreview);
-        window.addEventListener('popstate', handleInitialUrl); // New: Handle browser back/forward buttons
-    }
-
-
-    //==============================================================================
-    // URL HANDLING
-    //==============================================================================
-    // Parses the URL on load and populates the file explorer state
-    async function handleInitialUrl() {
-        const redirectUrl = sessionStorage.getItem('redirect');
-        if (redirectUrl) {
-            sessionStorage.removeItem('redirect');
-            history.replaceState(null, '', redirectUrl);
-        }
-
-        // Proceed with the path from the URL bar
-        const path = window.location.pathname;
-        const params = new URLSearchParams(window.location.search);
-        const previewFile = params.get('preview');
-
-        // This regex needs to account for potential repository names in the path on GitHub Pages
-        const pathSegments = path.split('/').filter(Boolean);
-        const feIndex = pathSegments.indexOf('fe');
-
-        if (feIndex > -1 && pathSegments.length >= feIndex + 3) {
-            const owner = pathSegments[feIndex + 1];
-            const repo = pathSegments[feIndex + 2];
-            const filePath = pathSegments.slice(feIndex + 3).join('/');
-
-            DOM.ownerInput.value = owner;
-            DOM.repoInput.value = repo;
-            state.owner = owner;
-            state.repo = repo;
-
-            // Open the explorer automatically if a repo is specified in the URL
-            openExplorer();
-
-            await fetchAndDisplayContents(filePath || '', false);
-
-            if (previewFile) {
-                // Find the file in the current listing and open its preview
-                const fullItemPath = (filePath ? filePath + '/' : '') + previewFile;
-                const fileItemElement = DOM.fileListingContainer.querySelector(`[data-path="${fullItemPath}"]`);
-                if (fileItemElement) {
-                    const item = {
-                        path: fullItemPath,
-                        name: previewFile,
-                        type: 'file',
-                    };
-                    handleListItemClick(item);
-                }
-            }
-        } else {
-            updateStatus('Enter GitHub Owner and Repository to begin.');
-        }
-    }
-
-    // Updates the browser's URL to reflect the current state
-    function updateUrl() {
-        if (!state.owner || !state.repo) return;
-
-        let newPath = `/fe/${state.owner}/${state.repo}`;
-        if (state.path) {
-            newPath += `/${state.path}`;
-        }
-
-        const params = new URLSearchParams();
-        if (state.previewedFile) {
-            params.set('preview', state.previewedFile.name);
-        }
-
-        const queryString = params.toString();
-        const finalUrl = queryString ? `${newPath}?${queryString}` : newPath;
-
-        if (window.location.pathname !== newPath || window.location.search !== (queryString ? `?${queryString}` : '')) {
-            history.pushState({ path: state.path }, '', finalUrl);
-        }
+        window.addEventListener('popstate', handlePopState);
     }
 
 
@@ -223,6 +147,89 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     //==============================================================================
+    // URL HANDLING
+    //==============================================================================
+    // Updates the browser's URL to reflect the current state of the file explorer.
+    function updateUrl(replaceState = false) {
+        if (!state.owner || !state.repo) return;
+        const basePath = window.location.pathname.substring(0, window.location.pathname.indexOf('/fe/'));
+        let newPath = `${basePath}/fe/${state.owner}/${state.repo}`;
+        if (state.path) {
+            newPath += `/${state.path}`;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        if (state.previewFile) {
+            params.set('preview', state.previewFile);
+        } else {
+            params.delete('preview');
+        }
+
+        const queryString = params.toString();
+        if (queryString) {
+            newPath += `?${queryString}`;
+        }
+        
+        const currentUrl = window.location.pathname + window.location.search;
+        if (currentUrl !== newPath) {
+            const method = replaceState ? 'replaceState' : 'pushState';
+            // Use an empty string for the title
+            history[method]({}, '', newPath);
+        }
+    }
+
+    // Parses the URL on page load to initialize the explorer state.
+    function handleUrlAndLoad() {
+        // Handle the redirect from the 404.html page.
+        const initialParams = new URLSearchParams(window.location.search);
+        const redirectPath = initialParams.get('redirect');
+
+        if (redirectPath) {
+            // Contain the path the user originally tried to access.
+            history.replaceState(null, '', '/' + redirectPath);
+        }
+
+        const path = window.location.pathname;
+        const params = new URLSearchParams(window.location.search);
+        const previewFile = params.get('preview');
+
+        const segments = path.split('/');
+        // Find the 'fe' segment
+        const feIndex = segments.findIndex(s => s.toLowerCase() === 'fe');
+
+        if (feIndex > -1 && segments.length >= feIndex + 3) {
+            const owner = segments[feIndex + 1];
+            const repo = segments[feIndex + 2];
+            const filePath = segments.slice(feIndex + 3).join('/');
+
+            openExplorer();
+            DOM.ownerInput.value = owner;
+            DOM.repoInput.value = repo;
+            state.owner = owner;
+            state.repo = repo;
+
+            const onContentLoaded = (items) => {
+                if (previewFile) {
+                    const fileToPreview = items.find(item => item.name === previewFile && item.type === 'file');
+                    if (fileToPreview) {
+                        handleListItemClick(fileToPreview);
+                    }
+                }
+            };
+            fetchAndDisplayContents(filePath, onContentLoaded);
+        } else {
+            updateStatus('Enter GitHub Owner and Repository to begin.');
+        }
+    }
+
+    // Handles browser back/forward navigation.
+    function handlePopState() {
+        closeFilePreview();
+        handleUrlAndLoad();
+    }
+
+
+    //==============================================================================
     // REPOSITORY LOADING & DATA FETCHING
     //==============================================================================
     function handleLoadRepository() {
@@ -235,18 +242,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         setPlaceholder(DOM.fileListingContainer, 'Loading content...');
         DOM.breadcrumbs.innerHTML = '';
-        closeFilePreview(false); // Updated: Don't update URL yet
+        closeFilePreview();
         fetchAndDisplayContents('');
     }
 
     // Fetch and display contents for a given path
-    async function fetchAndDisplayContents(path, shouldUpdateUrl = true) {
+    async function fetchAndDisplayContents(path, onLoadCallback) {
         state.path = path;
-        state.previewedFile = null;
-        if (shouldUpdateUrl) {
-            updateUrl();
-        }
-        
+        updateUrl();
         setPlaceholder(DOM.fileListingContainer, 'Loading items...');
         updateBreadcrumbs(path);
         DOM.upDirectoryBtn.style.display = path ? 'flex' : 'none';
@@ -254,6 +257,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const contents = await fetchGitHubContentsWithCache(path);
             renderItems(contents || []);
+            if (onLoadCallback) {
+                onLoadCallback(contents || []);
+            }
         } catch (error) {
             console.error('[REPO EXPLORER] GitHub API Fetch error:', error);
             setPlaceholder(DOM.fileListingContainer, `Error: ${error.message}`, true);
@@ -425,15 +431,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Display file preview for a given file item
     async function displayFilePreview(fileItem) {
-        state.previewedFile = fileItem;
-        updateUrl();
-
         DOM.previewFileName.textContent = fileItem.name;
         setPlaceholder(DOM.previewContent, 'Loading preview...');
         DOM.previewActions.innerHTML = '';
         DOM.filePreviewContainer.style.display = 'flex';
         DOM.filePreviewContainer.classList.add('active');
         DOM.fileListingContainer.classList.add('preview-open');
+
+        state.previewFile = fileItem.name;
+        updateUrl(true);
 
         const jsDelivrUrl = `${JSDELIVR_CDN_BASE}/${state.owner}/${state.repo}/${fileItem.path}`;
         const extension = fileItem.name.split('.').pop().toLowerCase();
@@ -521,25 +527,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Close the file preview panel
-    function closeFilePreview(shouldUpdateUrl = true) {
+    function closeFilePreview() {
+        if (!DOM.filePreviewContainer.classList.contains('active')) return;
+
         DOM.filePreviewContainer.classList.remove('active');
         DOM.fileListingContainer.classList.remove('preview-open');
         DOM.filePreviewContainer.style.display = 'none';
         DOM.previewContent.innerHTML = '';
         DOM.previewActions.innerHTML = '';
         DOM.previewFileName.textContent = '';
+        
+        state.previewFile = null;
+        updateUrl(true);
 
         if (state.selectedFileItemElement) {
             state.selectedFileItemElement.classList.remove('selected');
             state.selectedFileItemElement = null;
-        }
-
-        // Clear preview state and update URL
-        if (state.previewedFile) {
-            state.previewedFile = null;
-            if (shouldUpdateUrl) {
-                updateUrl();
-            }
         }
     }
 
