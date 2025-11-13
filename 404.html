@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Live2D Viewer - Loading...</title>
+    <script type="text/javascript">
+        (function () {
+            const pathname = window.location.pathname;
+            const search = window.location.search;
+            const basePath = pathname.substring(0, pathname.lastIndexOf('/') + 1);
+            const targetUrl = window.location.origin + basePath;
+            if (!pathname.endsWith('/404.html')) {
+                sessionStorage.setItem('redirectPath', pathname + search);
+            }
+            window.location.replace(targetUrl);
+        })();
+    </script>
+</head>
+
+</html>
