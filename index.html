@@ -35,7 +35,6 @@
                         aria-controls="file-explorer-modal" aria-expanded="false">
                         <i class="fas fa-folder-open" aria-hidden="true"></i>
                     </button>
-                    <label for="model-url-input" class="sr-only">Model URL</label>
                     <input type="text" id="model-url-input" placeholder="Enter L2D model URL..."
                         title="Enter the URL of a Live2D model file">
                     <button id="load-url-button" title="Load model from the specified URL">Load URL</button>
@@ -101,7 +100,6 @@
 
             <!-- Sidebar with controls for the current model -->
             <aside class="control-panel" aria-labelledby="control-panel-heading">
-                <h2 id="control-panel-heading" class="sr-only">Model Controls</h2>
 
                 <!-- General model controls (e.g., show hit areas, delete model) -->
                 <div class="control-item">
@@ -110,7 +108,6 @@
                         title="Toggle visibility of interactive hit areas on the model">Show Hit Areas</label>
                     <button id="delete-selected-model-button" title="Delete the currently selected model" disabled>
                         <i class="fas fa-trash" aria-hidden="true"></i>
-                        <span class="sr-only">Delete Selected Model</span>
                     </button>
                 </div>
 
@@ -162,11 +159,9 @@
             <div class="file-explorer-header">
                 <h2 id="file-explorer-heading">GitHub Repository Explorer</h2>
                 <div class="fe-repo-input-container">
-                    <label for="fe-owner-input" class="sr-only">GitHub Owner</label>
                     <input type="text" id="fe-owner-input" placeholder="GitHub Owner" value="Eikanya"
                         title="Enter GitHub username or organization">
                     <span>/</span>
-                    <label for="fe-repo-input" class="sr-only">Repository Name</label>
                     <input type="text" id="fe-repo-input" placeholder="Repository Name" value="Live2d-model"
                         title="Enter GitHub repository name">
                     <button id="fe-load-repo-btn" title="Load repository content">Load Repository</button>
@@ -179,7 +174,6 @@
                     <button id="fe-up-directory-btn" class="fe-icon-button" title="Navigate to parent directory"
                         style="display: none;">
                         <i class="fas fa-arrow-up" aria-hidden="true"></i>
-                        <span class="sr-only">Up one level</span>
                     </button>
 
                     <!-- Breadcrumbs for navigating the repository folder structure -->

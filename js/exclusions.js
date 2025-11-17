@@ -1,7 +1,6 @@
 //==============================================================================
 // CONFIGURATION
 //==============================================================================
-
 const CONSOLE_EXCLUSION_PATTERNS = {
     // General Live2D SDK, PixiJS startup and profile messages
     SDK_INFO: [
@@ -42,13 +41,12 @@ const ALL_EXCLUSION_PATTERNS = Object.values(CONSOLE_EXCLUSION_PATTERNS).flat();
 //==============================================================================
 // CONSOLE METHOD OVERRIDE
 //==============================================================================
-
 // Allow debugging by setting this flag in the console
 window.consoleDebug = false;
 
 // Creates a wrapped version of a console method (log, warn, error) that filters messages.
-function createFilteredConsoleMethod(originalMethod) {
-    return function(...args) {
+const createFilteredConsoleMethod = (originalMethod) => {
+    return (...args) => {
         // If debug mode is on, bypass filtering and show a stack trace for easier debugging
         if (window.consoleDebug) {
             const trace = new Error().stack?.split('\n')[2]?.trim() || 'Trace not available';
@@ -67,7 +65,7 @@ function createFilteredConsoleMethod(originalMethod) {
             originalMethod.apply(console, args);
         }
     };
-}
+};
 
 // Override the native console methods with the new, filtered versions.
 console.log = createFilteredConsoleMethod(console.log);
