@@ -33,7 +33,7 @@ const LOG_STYLES = {
     },
 };
 
-// A themed logger function that provides styled and categorized console output.
+// A themed logger function that provides styled and categorized console output
 const log = (context, message, ...args) => {
     const contextUpper = context.toUpperCase();
     const styles = LOG_STYLES[contextUpper] || LOG_STYLES['SYSTEM'];
@@ -43,7 +43,7 @@ const log = (context, message, ...args) => {
 //==============================================================================
 // CONFIGURATION & CONSTANTS
 //==============================================================================
-// Application-wide configuration constants.
+// Application-wide configuration constants
 const CONFIG = {
     BACKGROUND_COLOR: 0x1a1a2e,
     MODEL_FIT_PADDING: 0.9,
@@ -60,7 +60,7 @@ const CONFIG = {
 //==============================================================================
 // DOM ELEMENT CACHE
 //==============================================================================
-// Caching DOM elements for better performance.
+// Caching DOM elements for better performance
 const DOM = {
     canvas: document.getElementById('live2d-canvas'),
     loadingOverlay: document.getElementById('loading-overlay'),
@@ -83,7 +83,7 @@ const DOM = {
 //==============================================================================
 // STATE MANAGEMENT
 //==============================================================================
-// Centralized application state.
+// Centralized application state
 const state = {
     app: null,
     models: [],
@@ -403,7 +403,7 @@ const loadModel = async (source) => {
         newModel.cursor = 'grab';
         setSelectedModel(newModel);
 
-        log('MODEL', `Model loaded successfully: ${newModel.internalModel?.settings?.name || `Model ${newModel.appModelId}`}`);
+        log('MODEL', `Model loaded successfully: ${newModel.internalModel?.settings?.name || `Model ${newModel.appModelId}`}`, newModel);
     } catch (error) {
         log('ERROR', `Error loading model from ${source}:`, error);
         alert(`Error loading model: ${error.message || error}\nPlease check the console for more details.`);

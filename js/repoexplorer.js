@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const GITHUB_API_BASE = 'https://api.github.com/repos';
     const JSDELIVR_CDN_BASE = 'https://cdn.jsdelivr.net/gh';
     const MODEL_FILE_REGEX = /model3?[-\w]*\.json$/i;
-    const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'];
+    const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'apng', 'webp', 'svg'];
 
     //==============================================================================
     // DOM ELEMENT CACHE
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             log('ERROR', '[REPO EXPLORER] File preview error:', error);
             setPlaceholder(DOM.previewContent, `Error loading preview: ${error.message}`, true);
-            renderPreviewActions(fileItem, fileItem.html_url, true); // Fallback to GitHub URL.
+            renderPreviewActions(fileItem, fileItem.html_url, true); // Fallback to GitHub URL
         } finally {
             showLoader(false);
         }
@@ -361,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchAndDisplayContents = async (path) => {
         state.path = path;
         updateUrl();
+        DOM.fileListingContainer.scrollTop = 0; 
         setPlaceholder(DOM.fileListingContainer, 'Loading items...');
         updateBreadcrumbs(path);
         DOM.upDirectoryBtn.style.display = path ? 'flex' : 'none';

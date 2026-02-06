@@ -1,16 +1,16 @@
 Planned:
-    - Support opening models from .zip files
+    - Support opening models from .zip files using jszip.js or sum
+        - A somewhat working version to load local zipped models (very slow due to  hige strings):
+        - https://imduck42.github.io/Live2D-Viewer/Archives_INACTIVE/tests/ziptouri.html
+    
     - Local file editing
-    - On entering a directory ,scroll all the way up or implement a remembering function
+    - Update README screenshots
 
 
 Maybe:
     - Support for "text": atributes on models
     - Status on what part of the model is loading (idk how guanss did it but idk if its possible in my version)
-
-
-Refactor Count:
-    - Refactor all files 1st, 2nd, 3rd(css), 4th, 5th, 6th, 7th, 8th (major rework), 9th (major refactor), 10, 11, 12, 
+        - They on their own split loading different parts into their own functions and used those to print what function (model part) is currently running
 
 
 URL Tests:

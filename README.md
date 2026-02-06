@@ -2,16 +2,17 @@
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
 [![GitHub Pages](https://img.shields.io/github/deployments/ImDuck42/Live2D-Viewer/github-pages?label=Live%20Preview&logo=github)](https://imduck42.github.io/Live2D-Viewer)
+[![Code Factor](https://codefactor.io/repository/github/ImDuck42/Live2D-Viewer/badge)](https://codefactor.io/repository/github/ImDuck42/Live2D-Viewer)
 [![GitHub stars](https://img.shields.io/github/stars/ImDuck42/Live2D-Viewer?style=flat&color=purple&logo=github&logoColor=white)](https://github.com/ImDuck42/Live2D-Viewer/stargazers)
 &nbsp;&nbsp;&nbsp;
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](index.html)
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css&logoColor=white)](css)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](js)
 &nbsp;&nbsp;&nbsp;
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ImDuck42/Live2D-Viewer)  
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ImDuck42/Live2D-Viewer)
 
 A browser-based Live2D viewer designed for interaction with one or more Live2D models.  
-Built with vanilla JavaScript and the PIXI.js rendering engine.  
+Built with vanilla JavaScript the PIXI.js rendering engine and the Cubism Library.  
 This project offers a feature-rich experience without the overhead of heavy frameworks.
 
 It includes a dynamic UI, multi-model support, a GitHub repository explorer for discovering new models, and a "What's New" changelog modal, all wrapped in a clean, responsive design.
@@ -44,8 +45,8 @@ It includes a dynamic UI, multi-model support, a GitHub repository explorer for 
 | **Intuitive Controls**   | Full model manipulation via **drag** (move), **scroll/pinch** (zoom), and **tap** (trigger motions).       |
 | **Dynamic Control Panel**| A real-time UI to manage expressions, motions, and hit-area visibility for the currently selected model.   |
 | **GitHub Explorer**      | Browse GitHub repositories, preview model files, and instantly load models using the jsDelivr CDN.         |
-| **Changelog Modal**      | A sleek, glassmorphism-style modal that displays the latest project updates from `changes.html`.           |
-| **Responsive Design**    | A fluid and modern interface that adapts seamlessly to desktop, tablet, and mobile devices.                |
+| **Changelog Modal**      | A glassmorphism-style modal that displays the latest project updates from `changes.html`.                  |
+| **Responsive Design**    | A modern interface that adapts seamlessly to desktop, tablet, and mobile devices.                          |
 | **Framework-Free**       | Built with pure, well-organized JavaScript, ensuring a lightweight footprint and a transparent codebase.   |
 
 ## Technology Stack
@@ -63,10 +64,11 @@ The project is organized into a clean, modular, and maintainable structure:
 
 ```
 .
+├── Archives_INACTIVE/   # Literally anything else — best to stay away
 ├── assets/              # Static assets like icons, screenshots, and changelog
 ├── css/                 # Component-specific and global stylesheets
 ├── js/                  # Modular JavaScript files for each feature
-├── libs/                # Core Live2D and PIXI.js library files
+├── libs/                # Core Live2D and PIXI.js library files — thanks for the F-rating
 ├── index.html           # Main application entry point
 ├── README.md            # You are here!
 └── LICENSE              # Project license file
@@ -126,7 +128,7 @@ Contributions are welcome! If you have ideas for improvements, new features, or 
 
 Feel free to reach out if you have questions or suggestions:
 
-- **Email**: [imduck420@gmail](mailto:imduck420@gmail.com?subject=Help&body=Describe%20your%20issue)
+- **Email**: [imduck420@gmail.com](mailto:imduck420@gmail.com?subject=Help&body=Describe%20your%20issue)
 - **GitHub**: [ImDuck42](https://github.com/ImDuck42)
 - **Discord**: [Starchasm Nyx (@hu7ao)](https://discord.com/users/977936340186443826)
 

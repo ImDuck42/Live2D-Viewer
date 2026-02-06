@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>L2D Zip to Data URI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* Palette variables */
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-element: #262639;
+            --bg-interactive: #3a3a50;
+            --accent-primary: #8c5eff;
+            --accent-secondary: #6a3df0;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8d0;
+            --border-color: #40405a;
+            --error-color: #ff4757;
+            --success-color: #2ecc71;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            margin: 0;
+            background-color: var(--bg-primary);
+            padding: 20px;
+            color: var(--text-primary);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(10,10,20,0.6);
+            border: 1px solid var(--border-color);
+
+            box-sizing: border-box;
+            max-height: calc(100vh - 40px);
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .container::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        .container::-webkit-scrollbar-track {
+            background: var(--bg-element);
+        }
+        .container::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
+        .container::-webkit-scrollbar-thumb {
+            background: var(--bg-interactive);
+            border-radius: 8px;
+            border: 2px solid var(--bg-element);
+        }
+
+        .container {
+            scrollbar-width: thin;
+            scrollbar-color: var(--bg-interactive) var(--bg-element);
+        }
+
+        h1 { margin-top: 0; font-size: 1.5rem; color: var(--accent-primary); }
+        p { color: var(--text-secondary); }
+
+        #drop-zone {
+            border: 3px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            margin-bottom: 25px;
+            background: var(--bg-element);
+            color: var(--text-primary);
+        }
+
+        #drop-zone.dragover {
+            border-color: var(--accent-primary);
+            background-color: var(--bg-interactive);
+            transform: scale(1.01);
+        }
+
+        #result-area {
+            display: none;
+            border-top: 1px solid rgba(255,255,255,0.03);
+            padding-top: 20px;
+        }
+
+        .alert-box {
+            background-color: var(--bg-element);
+            border-left: 4px solid var(--accent-secondary);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .url-box {
+            background: var(--bg-element);
+            color: var(--text-secondary);
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            word-break: break-all;
+            max-height: 80px;
+            overflow: hidden;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+                
+        .url-box::after { display: none; }
+
+        button.action-btn {
+            background-color: var(--accent-primary);
+            color: var(--text-primary);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.12s, transform 0.05s;
+            width: 100%;
+        }
+
+        button.action-btn:hover { background-color: var(--accent-secondary); }
+        button.action-btn:active { transform: translateY(1px); }
+
+        #file-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-element);
+        }
+
+        #file-list li {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+        }
+        #file-list li:last-child { border-bottom: none; }
+        .file-tag {
+            background: var(--bg-interactive);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        #clipboard-helper {
+            position: absolute;
+            left: -9999px;
+            top: 0;
+        }
+
+        .progress {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        #file-list::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+        #file-list::-webkit-scrollbar-track {
+            background: var(--bg-element);
+        }
+
+        #file-list::-webkit-scrollbar-thumb {
+            background: var(--bg-interactive);
+            border-radius: 8px;
+            border: 2px solid var(--bg-element);
+        }
+
+        #file-list {
+            scrollbar-width: thin;
+            scrollbar-color: var(--bg-interactive) var(--bg-element);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Live2D URI Extractor</h1>
+        <p>Drag & Drop a zip file. All files will be embedded as data URIs.</p>
+        <p>If you have just a normal folder, please compress the rot folder containing the model/model3.json file as .zip.</p>
+        
+        <div id="drop-zone">
+            <span style="font-size: 3rem;">📦</span><br>
+            <strong>Drop .zip file here</strong>
+        </div>
+
+        <div id="result-area">
+            <div class="alert-box">
+                <strong>⚠️ Instruction:</strong><br>
+                The generated URL is a "Data URI" containing your entire model configuration with all assets embedded.
+                <br><br>
+                1. Click <strong>"Copy to Clipboard"</strong> below.<br>
+                2. Paste it into your Viewer's <strong>"Model URL" input field</strong>.<br>
+                3. <strong>Do NOT</strong> paste it into the browser address bar (it is too long and will crash).
+            </div>
+
+            <div class="url-box" id="url-preview">
+                (Waiting for file...)
+            </div>
+
+            <div class="progress" id="progress"></div>
+
+            <textarea id="clipboard-helper"></textarea>
+            <button class="action-btn" onclick="copyResult()">Copy URL to Clipboard</button>
+
+            <ul id="file-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const resultArea = document.getElementById('result-area');
+        const urlPreview = document.getElementById('url-preview');
+        const fileList = document.getElementById('file-list');
+        const clipboardHelper = document.getElementById('clipboard-helper');
+        const progress = document.getElementById('progress');
+
+        const MODEL_REGEX = /model3?[-\w]*\.json$/i;
+        let generatedUrl = "";
+
+        // --- Drag & Drop ---
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
+            dropZone.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); });
+        });
+
+        dropZone.addEventListener('dragenter', () => dropZone.classList.add('dragover'));
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        
+        dropZone.addEventListener('drop', (e) => {
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.zip')) {
+                processZip(file);
+            } else {
+                alert("Please drop a valid .zip file");
+            }
+        });
+
+        // --- Copy Logic ---
+        function copyResult() {
+            if (!generatedUrl) return;
+
+            clipboardHelper.value = generatedUrl;
+            clipboardHelper.select();
+            clipboardHelper.setSelectionRange(0, 99999999);
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    const btn = document.querySelector('.action-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = "✅ Copied!";
+                    btn.style.backgroundColor = "#2f855a";
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.backgroundColor = "#48bb78";
+                    }, 2000);
+                } else {
+                    throw new Error("execCommand failed");
+                }
+            } catch (err) {
+                alert("Could not auto-copy. Please manually select and copy the text.");
+                urlPreview.style.userSelect = "all";
+                urlPreview.style.overflow = "auto";
+                urlPreview.style.maxHeight = "200px";
+                urlPreview.textContent = generatedUrl;
+            }
+        }
+
+        // --- Convert Blob to Base64 ---
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // --- Get proper MIME type ---
+        function getMimeType(filename) {
+            const lower = filename.toLowerCase();
+            if (lower.endsWith('.json')) return 'application/json';
+            if (lower.endsWith('.png')) return 'image/png';
+            if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+            if (lower.endsWith('.moc3')) return 'application/octet-stream';
+            if (lower.endsWith('.moc')) return 'application/octet-stream';
+            if (lower.endsWith('.physics3.json')) return 'application/json';
+            if (lower.endsWith('.model3.json')) return 'application/json';
+            return 'application/octet-stream';
+        }
+
+        // --- Recursive JSON Walker ---
+        function replacePaths(obj, dirPath, dataUriMap) {
+            for (const key in obj) {
+                const val = obj[key];
+                if (typeof val === 'string') {
+                    try {
+                        const fullPath = new URL(val, `http://d/${dirPath}`).pathname.substring(1);
+                        const decoded = decodeURIComponent(fullPath);
+                        
+                        if (dataUriMap.has(decoded)) {
+                            obj[key] = dataUriMap.get(decoded);
+                        } else if (dataUriMap.has(val)) {
+                            obj[key] = dataUriMap.get(val);
+                        }
+                    } catch (e) { 
+                        if (dataUriMap.has(val)) {
+                            obj[key] = dataUriMap.get(val);
+                        }
+                    }
+                } else if (typeof val === 'object' && val !== null) {
+                    replacePaths(val, dirPath, dataUriMap);
+                }
+            }
+        }
+
+        // --- Main Process ---
+        async function processZip(file) {
+            dropZone.innerHTML = "⏳ Processing...";
+            resultArea.style.display = 'none';
+            fileList.innerHTML = '';
+            progress.textContent = '';
+            generatedUrl = "";
+            const dataUriMap = new Map();
+
+            try {
+                const zip = await JSZip.loadAsync(file);
+                let modelEntry = null;
+                let modelName = "";
+                let totalFiles = 0;
+                let processedFiles = 0;
+
+                // Count files
+                zip.forEach((relativePath, zipEntry) => {
+                    if (!zipEntry.dir && !relativePath.includes("__MACOSX")) {
+                        totalFiles++;
+                    }
+                });
+
+                // Convert all files to Data URIs
+                const promises = [];
+                zip.forEach((relativePath, zipEntry) => {
+                    if (zipEntry.dir || relativePath.includes("__MACOSX")) return;
+
+                    const p = zipEntry.async('blob').then(async (blob) => {
+                        const mimeType = getMimeType(relativePath);
+                        const typedBlob = new Blob([blob], { type: mimeType });
+                        
+                        // Convert to Data URI
+                        const dataUri = await blobToBase64(typedBlob);
+                        dataUriMap.set(relativePath, dataUri);
+
+                        // Check for model file
+                        if (MODEL_REGEX.test(relativePath)) {
+                            modelEntry = zipEntry;
+                            modelName = relativePath;
+                        }
+
+                        // UI update
+                        processedFiles++;
+                        progress.textContent = `Processing: ${processedFiles}/${totalFiles} files`;
+                        
+                        const li = document.createElement('li');
+                        const size = (dataUri.length / 1024).toFixed(1);
+                        li.innerHTML = `<span>${relativePath}</span> <span class="file-tag">${size} KB</span>`;
+                        fileList.appendChild(li);
+                    });
+                    promises.push(p);
+                });
+
+                await Promise.all(promises);
+                progress.textContent = 'Building final JSON...';
+
+                if (!modelEntry) throw new Error("No .model3.json or .model.json found!");
+
+                // Read and Patch JSON
+                const jsonStr = await modelEntry.async('text');
+                const jsonObj = JSON.parse(jsonStr);
+
+                // Determine directory of model file
+                const dirPath = modelName.includes('/') ? modelName.substring(0, modelName.lastIndexOf('/') + 1) : '';
+
+                // Replace all relative paths with Data URIs
+                replacePaths(jsonObj, dirPath, dataUriMap);
+
+                // Create Data URI for the main JSON
+                const patchedStr = JSON.stringify(jsonObj);
+                const base64 = btoa(unescape(encodeURIComponent(patchedStr)));
+                generatedUrl = `data:application/json;base64,${base64}`;
+
+                // Update UI
+                const totalSize = (generatedUrl.length / 1024 / 1024).toFixed(2);
+                urlPreview.textContent = `${generatedUrl.substring(0, 80)}... [${totalSize} MB total]`;
+                progress.textContent = `✅ Complete! Total size: ${totalSize} MB`;
+                dropZone.innerHTML = "✅ Done! Drop another?";
+                resultArea.style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                alert("Error: " + err.message);
+                dropZone.innerHTML = "❌ Error. Try again.";
+                progress.textContent = '';
+            }
+        }
+    </script>
+</body>
+</html>

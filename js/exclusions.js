@@ -41,33 +41,40 @@ const ALL_EXCLUSION_PATTERNS = Object.values(CONSOLE_EXCLUSION_PATTERNS).flat();
 //==============================================================================
 // CONSOLE METHOD OVERRIDE
 //==============================================================================
-// Allow debugging by setting this flag in the console
-window.consoleDebug = false;
+const DEBUG_STORAGE_KEY = 'consoleDebug';
 
-// Creates a wrapped version of a console method (log, warn, error) that filters messages.
+// Getter/Setter for "consoleDebug": reads/writes a boolean to localStorage
+Object.defineProperty(window, 'consoleDebug', {
+  get: () => localStorage.getItem(DEBUG_STORAGE_KEY) === 'true',
+  set: state => localStorage.setItem(DEBUG_STORAGE_KEY, state ? 'true' : 'false'),
+  configurable: true,
+  enumerable: true
+});
+
+// Creates a wrapped version of a console method (log, warn, error) that filters messages
 const createFilteredConsoleMethod = (originalMethod) => {
     return (...args) => {
         // If debug mode is on, bypass filtering and show a stack trace for easier debugging
         if (window.consoleDebug) {
             const trace = new Error().stack?.split('\n')[2]?.trim() || 'Trace not available';
-            originalMethod.apply(console, [...args, `\n↳ ${trace}`]);
+            originalMethod.apply(console, [...args, `\n ↳ ${trace}`]);
             return;
         }
 
-        // Join all arguments to form a single string for pattern matching.
+        // Join all arguments to form a single string for pattern matching
         const message = args.map(arg => String(arg)).join(' ');
 
-        // Check if the message matches any of the exclusion patterns.
+        // Check if the message matches any of the exclusion patterns
         const shouldBlock = ALL_EXCLUSION_PATTERNS.some(pattern => pattern.test(message));
 
-        // If the message should not be blocked, call the original console method.
+        // If the message should not be blocked, call the original console method
         if (!shouldBlock) {
             originalMethod.apply(console, args);
         }
     };
 };
 
-// Override the native console methods with the new, filtered versions.
+// Override the native console methods with the new, filtered versions
 console.log = createFilteredConsoleMethod(console.log);
 console.warn = createFilteredConsoleMethod(console.warn);
 console.error = createFilteredConsoleMethod(console.error);
