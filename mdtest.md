@@ -1,21 +1,21 @@
 # <img src="assets/icon.svg" width="32" height="32" alt="Site Icon" style="vertical-align: text-bottom;"> Live2D Viewer <sub style="font-size: small;"><span style="color: #8c5eff;">v</span>5.0</sub>  
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
-[![GitHub Pages](https://img.shields.io/github/deployments/ImDuck42/Live2D-Viewer/github-pages?label=Live%20Preview&logo=github)](https://imduck42.github.io/Live2D-Viewer)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Preview-success?logo=github)](https://imduck42.github.io/Live2D-Viewer)
 [![Code Factor](https://codefactor.io/repository/github/ImDuck42/Live2D-Viewer/badge)](https://codefactor.io/repository/github/ImDuck42/Live2D-Viewer)
 [![GitHub stars](https://img.shields.io/github/stars/ImDuck42/Live2D-Viewer?style=flat&color=purple&logo=github&logoColor=white)](https://github.com/ImDuck42/Live2D-Viewer/stargazers)
 &nbsp;&nbsp;&nbsp;
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](index.html)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css&logoColor=white)](css)
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](js)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css&logoColor=white)](css/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](js/)
 &nbsp;&nbsp;&nbsp;
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ImDuck42/Live2D-Viewer)
 
 A browser-based Live2D viewer designed for interaction with one or more Live2D models.  
 Built with vanilla JavaScript, the PIXI.js rendering engine and the Cubism Library.  
+This project offers a feature-rich experience without the overhead of heavy frameworks.
 
-It includes a dynamic UI, multi-model support, a GitHub repository explorer for discovering new models, the feature to upload local models  
-and a "What's New" changelog modal, all wrapped in a clean, responsive design.
+It includes a dynamic UI, multi-model support, a GitHub repository explorer for discovering new models, and a "What's New" changelog modal, all wrapped in a clean, responsive design.
 
 ## Live Preview
 
@@ -24,18 +24,18 @@ and a "What's New" changelog modal, all wrapped in a clean, responsive design.
 <details>
     <summary><strong>Screenshots (Versioned: v5.0)</strong></summary>
     <div>
-        <img src="assets/screenshots/PreviewPC.png" width="50%" alt="Preview on Desktop">
-        <img src="assets/screenshots/PreviewMobile.png" height="230px" alt="Preview on Mobile">
+        <img src="assets/screenshots/PreviewPC.png" width="50%" alt="Desktop preview showing Live2D model controls">
+        <img src="assets/screenshots/PreviewMobile.png" height="230px" alt="Mobile preview with responsive layout">
     </div>
     <br>
     <div>
-        <img src="assets/screenshots/ExplorerPC.png" width="50%" alt="File Explorer on Desktop">
-        <img src="assets/screenshots/ExplorerMobile.png" height="230px" alt="File Explorer on Mobile">
+        <img src="assets/screenshots/ExplorerPC.png" width="50%" alt="GitHub explorer on desktop">
+        <img src="assets/screenshots/ExplorerMobile.png" height="230px" alt="GitHub explorer on mobile">
     </div>
     <br>
     <div>
-        <img src="assets/screenshots/NewsPC.png" width="50%" alt="Changelog on Desktop">
-        <img src="assets/screenshots/NewsMobile.png" height="230px" alt="Changelog on Mobile">
+        <img src="assets/screenshots/NewsPC.png" width="50%" alt="Changelog modal on desktop">
+        <img src="assets/screenshots/NewsMobile.png" height="230px" alt="Changelog modal on mobile">
     </div>
 </details>
 
@@ -66,7 +66,6 @@ and a "What's New" changelog modal, all wrapped in a clean, responsive design.
 
 The project is organized into a clean, modular, and maintainable structure:
 
-```
 .
 ├── Archives_INACTIVE/   # Anything not listed below — best to stay away
 ├── assets/              # Static assets like icons, screenshots, and changelog
@@ -77,7 +76,6 @@ The project is organized into a clean, modular, and maintainable structure:
 ├── LICENSE              # Project license file
 ├── README.md            # You are here!
 └── Ze_ToDo_List.txt     # The holy grail that is my check list
-```
 
 ## Installation
 
@@ -89,17 +87,18 @@ To run the viewer locally, follow these steps:
     cd Live2D-Viewer
     ```
 
-2.  **Open in a browser:**
-    You can (but should't) open the `index.html` directly in a modern browser. (Changelog modal won't work)
-
-3.  **(Recommended) Serve locally:**
-    For best results and to avoid potential CORS issues when loading models or opening the changelog modal, run a local web server. 
+2.  **(Recommended) Serve locally:**
+    For best results and to avoid potential CORS issues (especially for the changelog modal), run a local web server:
     ```bash
     # If you have Python installed:
     python -m http.server 8000
 
     # Then open http://localhost:8000 in your browser.
-    ```
+
+3.  **Quick start (limited):**
+    You can open `index.html` directly in a modern browser, but note:  
+    - Changelog modal won't work (CORS restrictions when loading external HTML)
+    - Some GitHub explorer features may be limited
 
 ## Usage
 
@@ -109,7 +108,7 @@ To run the viewer locally, follow these steps:
     -   **Via GitHub Explorer:** Click the **folder icon** to open the explorer, browse a repository, and import a model file directly.
 
 2.  **Upload a Model:**
-    -   **Via the dropdown:** Tap the "Default Models" dropdown on the top right, select the "Upload Model" option and select the .zip archive containing your model's files.
+    -   **Via the dropdown:** Tap the "Default Models" dropdown on the top right, select the "Upload Model" option and select the .zip archive containing your model's files (include all model files: .model3.json, textures, motions, etc.).
     -   **Via drag and drop:** Open the webpage and a file explorer, drag the .zip archive over the canvas area until its border colors purple and drop the file.
 
 3.  **Interact with Models:**
@@ -123,6 +122,10 @@ To run the viewer locally, follow these steps:
     -   **Expressions & Motions:** Click buttons to apply facial expressions or trigger full-body animations.
     -   **Delete Model:** Click the trash icon to remove the selected model.
 
+## Privacy Note
+
+When using the GitHub Explorer, models are loaded via jsDelivr CDN. This may involve external requests to GitHub and jsDelivr servers. No data is collected or stored by this application itself.
+
 ## Contributing
 
 Contributions are welcome! If you have ideas for improvements, new features, or bug fixes, please feel free to:
@@ -131,7 +134,8 @@ Contributions are welcome! If you have ideas for improvements, new features, or 
 2.  **Fork the repository** and submit a **Pull Request** with a clear description of your work.
 3.  **Reach out** via the listed contact methods  
 
-**Please adhere to the established code style and organizational principles of the project.** (TL;DR Don't write Pasghetto Code)
+**Please adhere to the established code style and organizational principles of the project.**  
+(Yes, including the informal comments — they give it character!)
 
 ## Contact
 
@@ -139,11 +143,15 @@ Feel free to reach out if you have questions or suggestions:
 
 - **Email**: [imduck420@gmail.com](mailto:imduck420@gmail.com?subject=Help&body=Describe%20your%20issue)
 - **GitHub**: [ImDuck42](https://github.com/ImDuck42)
-- **Discord**: [Starchasm Nyx (@hu7ao)](https://discord.com/users/977936340186443826)
+- **Discord**: [Starchasm Nyx (@hu7ao)](https://discord.com/users/977936340186443826)  
+  *(Clicking this in Discord will open my profile)*
 
 ## License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for full details.
 
 > **Note on Dependencies:**  
-> Since Pixi Live2D Display only works up to Pixi.js 6.5.10 (7.4.3 but without model cursor tracking), this won't be updatable.
+> Since Pixi Live2D Display only works up to Pixi.js 6.5.10 (7.4.3 but without model cursor tracking), this won't be updatable. Sometimes you just gotta work with what you've got!
+
+> **Note on Changelog:**  
+> Project updates are managed in [`assets/changes.html`](assets/changes.html). The modal dynamically loads this file to display what's new.
