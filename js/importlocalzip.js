@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return dataUrl;
         } catch (err) {
-            console.error('Failed to process ZIP file:', err);
+            log('ERROR', 'Failed to process ZIP file:', err);
             if (DOM.modelUrlInput) DOM.modelUrlInput.value = '';
         }
     };

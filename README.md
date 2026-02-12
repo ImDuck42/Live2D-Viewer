@@ -131,7 +131,8 @@ Contributions are welcome! If you have ideas for improvements, new features, or 
 2.  **Fork the repository** and submit a **Pull Request** with a clear description of your work.
 3.  **Reach out** via the listed contact methods  
 
-**Please adhere to the established code style and organizational principles of the project.** (TL;DR Don't write Pasghetto Code)
+**Please adhere to the established code style and organizational principles of the project.**  
+(TL;DR Don't write Pasghetto Code)
 
 ## Contact
 
