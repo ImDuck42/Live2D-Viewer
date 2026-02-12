@@ -2,6 +2,8 @@ Planned:
     - Local file editing
     - Update README screenshots
 
+    - Transition to ESM module based file structure
+
 
 Maybe:
     - Support for "text": atributes on models
