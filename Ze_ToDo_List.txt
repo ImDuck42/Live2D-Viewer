@@ -6,3 +6,4 @@ Maybe:
     - Status on what part of the model is loading (idk how guansss did it but idk if its possible in my version)
         - They on their own split loading different parts into their own functions and used those to print what function (model part) is currently running
     - Maybe try adding ghdb to allow custom model uploads from users and auto submit locally changed files; then notify if there's a fixed version
+    - Extract pixi live2d display into a custom script
