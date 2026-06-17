@@ -174,7 +174,7 @@ const displayFilePreview = async (fileItem) => {
   DOM.fileListingContainer.classList.add('preview-open');
   syncUrl();
 
-  const cdnUrl = `${GITHUB_RAW}/${state.owner}/${state.repo}/refs/heads/main/${fileItem.path}`;
+  const cdnUrl = `${GITHUB_RAW}/${state.owner}/${state.repo}/master/${fileItem.path}`;
   const ext    = fileItem.name.split('.').pop().toLowerCase();
   const cached = getPreviewCache(fileItem.path);
 
@@ -420,7 +420,7 @@ const handleListItemClick = (item) => {
 };
 
 const handleImportModel = (fileItem, urlOverride = null) => {
-  const url = urlOverride ?? `${GITHUB_RAW}/${state.owner}/${state.repo}/refs/heads/main/${fileItem.path}`;
+  const url = urlOverride ?? `${GITHUB_RAW}/${state.owner}/${state.repo}/master/${fileItem.path}`;
   log('MODEL', `[REPO EXPLORER] Importing: ${url}`);
 
   if (typeof window.loadLive2DModel === 'function') {
