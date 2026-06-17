@@ -141,6 +141,10 @@ Feel free to reach out if you have questions or suggestions:
 - **GitHub**: [ImDuck42](https://github.com/ImDuck42)
 - **Discord**: [Starchasm Nyx (@hu7ao)](https://discord.com/users/977936340186443826)
 
+## Star History
+
+![Star History Chart](https://api.star-history.com/chart?repos=ImDuck42/Live2D-Viewer&type=date&legend=top-left)
+
 ## License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for full details.
