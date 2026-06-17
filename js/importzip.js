@@ -117,8 +117,8 @@ export const processZipFile = async (file) => {
 
     try {
       jsonObj = JSON.parse(jsonText);
-    } catch (err) {
-      throw new Error(`Invalid JSON in ${modelPath}: ${err.message}`);
+    } catch (error) {
+      throw new Error(`Invalid JSON in ${modelPath}: ${error.message}`);
     }
 
     const dirPath    = modelPath.includes('/') ? modelPath.slice(0, modelPath.lastIndexOf('/') + 1) : '';
@@ -145,15 +145,9 @@ export const processZipFile = async (file) => {
     const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(jsonObj))));
     return `data:application/json;base64,${base64}`;
 
-    const patchedJson = JSON.stringify(jsonObj);
-    const blob = new Blob([patchedJson], { type: 'application/json' });
-    return {
-      url:  URL.createObjectURL(blob),
-      name: file.name.replace(/\.zip$/i, ''),
-    };
-
-  } catch (err) {
-    log('ERROR', 'Failed to process ZIP file:', err);
+  } catch (error) {
+    log('ERROR', 'Failed to process ZIP file:', error);
+    throw error;
   }
 };
 
@@ -162,7 +156,7 @@ export const processZipFile = async (file) => {
 // ===========================================================================
 
 const setDropHighlight = (active) => {
-  if (canvasArea) canvasArea.style.borderColor = active ? ZIP_CONFIG.HIGHLIGHT_COLOR : '';
+  if (canvasArea) canvasArea.style.borderColor = active ? ZIP_CONFIG.HIGHLIGHT_COLOR : 'var(--border)';
 };
 
 const handleDrop = async (event) => {
@@ -172,8 +166,12 @@ const handleDrop = async (event) => {
 
   const file = event.dataTransfer?.files?.[0];
   if (file?.name?.toLowerCase().endsWith('.zip')) {
-    const url = await processZipFile(file);
-    if (url) window.loadLive2DModel?.(url);
+    try {
+      const url = await processZipFile(file);
+      if (url) window.loadLive2DModel?.(url);
+    } catch (error) {
+      alert(`Error loading ZIP file: ${error.message ?? error}\nCheck the console for details.`);
+    }
   }
 };
 
@@ -194,8 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (canvasArea) canvasArea.id = 'drop-zone';
 
   // Wire the static upload button and file input declared in index.html.
-  const uploadBtn = document.getElementById('upload-btn');
-  const zipInput  = document.getElementById('zip-upload-input');
+  const uploadBtn     = document.getElementById('upload-btn');
+  const zipInput      = document.getElementById('zip-upload-input');
+  const dropdownLabel = document.getElementById('dropdown-label');
+  const dropdown      = document.getElementById('model-dropdown');
 
   if (uploadBtn && zipInput) {
     uploadBtn.addEventListener('click', () => zipInput.click());
@@ -203,8 +203,16 @@ document.addEventListener('DOMContentLoaded', () => {
     zipInput.addEventListener('change', async () => {
       const file = zipInput.files?.[0];
       if (file?.name?.toLowerCase().endsWith('.zip')) {
-        const url = await processZipFile(file);
-        if (url) window.loadLive2DModel?.(url);
+        try {
+          const url = await processZipFile(file);
+          if (url) {
+            if (dropdownLabel) dropdownLabel.textContent = file.name;
+            if (dropdown) dropdown.classList.remove('open');
+            window.loadLive2DModel?.(url);
+          }
+        } catch (error) {
+          alert(`Error loading ZIP file: ${error.message ?? error}\nCheck the console for details.`);
+        }
       }
       zipInput.value = '';
     });

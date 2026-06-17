@@ -1,4 +1,4 @@
-import { log } from './logger.js';
+import { log }                from './logger.js';
 import { CONFIG, DOM, state } from './config.js';
 
 // ===========================================================================
@@ -138,13 +138,19 @@ export const updateControlPanel = () => {
   }
 };
 
-export const updateLoadingState = (isLoading = false) => {
+export const updateLoadingState = (isLoading = false, message = 'Loading model...') => {
   DOM.loadingOverlay.hidden = !isLoading;
   DOM.emptyMessage.hidden   = !(state.models.length === 0 && !isLoading);
+
+  if (isLoading) {
+    const textEl = DOM.loadingOverlay.querySelector('.loading-text');
+    if (textEl) textEl.textContent = message;
+  }
 };
 
 export const updateDeleteButton = () => {
-  DOM.deleteModelBtn.disabled = !state.selectedModel;
+  DOM.deleteModelBtn.disabled  = !state.selectedModel;
+  if (DOM.screenshotBtn) DOM.screenshotBtn.disabled = !state.selectedModel;
 };
 
 export const updateModelLabel = () => {

@@ -134,7 +134,7 @@
   padding: 0.5rem;
   font-size: 1rem;
   line-height: 1;
-  color: var(--text-main);
+  color: var(--text-muted);
   background-color: var(--bg-element);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);

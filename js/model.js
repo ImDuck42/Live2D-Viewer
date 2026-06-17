@@ -1,7 +1,7 @@
-import { log } from './logger.js';
-import { CONFIG, DOM, state } from './config.js';
+import { log }                          from './logger.js';
+import { processZipFile }               from './importzip.js';
+import { CONFIG, DOM, state }           from './config.js';
 import { updateUI, updateLoadingState } from './ui.js';
-import { processZipFile } from './importzip.js';
 
 // ===========================================================================
 // Model selection & ordering
@@ -128,7 +128,7 @@ export const loadModel = async (source) => {
 
   // Handle ZIP files by extracting and converting assets to data URIs.
   if (source.endsWith('.zip')) {
-    updateLoadingState(true);
+    const zipName = source.split('/').pop();
     try {
       const response = await fetch(source);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -146,14 +146,15 @@ export const loadModel = async (source) => {
     return;
   }
 
+  const modelName = source.startsWith('data:') ? 'model' : source.split('/').pop();
   log('MODEL', `Loading model from: ${source}`);
-  updateLoadingState(true);
+  updateLoadingState(true, `Loading ${modelName}…`);
   let newModel = null;
 
   try {
     newModel = await PIXI.live2d.Live2DModel.from(source, {
-      onError: (err) => {
-        throw new Error(`Live2DModel.from failed: ${err.message ?? 'Unknown error'}`);
+      onError: (error) => {
+        throw new Error(`Live2DModel.from failed: ${error.message ?? 'Unknown error'}`);
       },
     });
 

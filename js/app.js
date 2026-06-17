@@ -1,7 +1,8 @@
-import { log } from './logger.js';
-import { DOM, state } from './config.js';
+import { log }                                                        from './logger.js';
+import { DOM, state }                                                 from './config.js';
+import { initKeyboardShortcuts, initContextMenu }                     from './context.js';
+import { loadModel, deleteSelectedModel, setSelectedModel }           from './model.js';
 import { registerHitAreaPopulator, updateSelectionOutline, updateUI } from './ui.js';
-import { loadModel, deleteSelectedModel } from './model.js';
 import {
   simulateTapOnHitArea,
   toggleHitAreaVisibility,
@@ -59,6 +60,11 @@ const initDropdown = () => {
 const setupUIEvents = () => {
   DOM.loadSelectedBtn.addEventListener('click', () => loadModel(DOM.dropdownValue.value));
   DOM.loadUrlBtn.addEventListener('click', () => loadModel(DOM.modelUrlInput.value.trim()));
+
+  DOM.modelUrlInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') loadModel(DOM.modelUrlInput.value.trim());
+  });
+
   DOM.hitareasToggle.addEventListener('change', toggleHitAreaVisibility);
   DOM.deleteModelBtn.addEventListener('click', deleteSelectedModel);
 
@@ -155,6 +161,8 @@ const initApp = () => {
   setupUIEvents();
   setupStageEvents();
   initDropdown();
+  initKeyboardShortcuts();
+  initContextMenu();
   handleURLParams();
   updateUI();
 };

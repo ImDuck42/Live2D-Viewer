@@ -226,9 +226,9 @@ const displayFilePreview = async (fileItem) => {
     }
 
     renderPreviewActions(fileItem, cdnUrl);
-  } catch (err) {
-    log('ERROR', '[REPO EXPLORER] Preview error:', err);
-    setPlaceholder(DOM.previewContent, `Error loading preview: ${err.message}`, true);
+  } catch (error) {
+    log('ERROR', '[REPO EXPLORER] Preview error:', error);
+    setPlaceholder(DOM.previewContent, `Error loading preview: ${error.message}`, true);
     renderPreviewActions(fileItem, fileItem.html_url, true);
   } finally {
     showLoader(false);
@@ -247,8 +247,8 @@ const fetchContents = async (path) => {
   try {
     const res = await fetch(url, { headers: { Accept: 'application/vnd.github.v3+json' } });
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ message: res.statusText }));
-      throw new Error(`GitHub API (${res.status}): ${err.message}`);
+      const error = await res.json().catch(() => ({ message: res.statusText }));
+      throw new Error(`GitHub API (${res.status}): ${error.message}`);
     }
     const data = await res.json();
     updateStatus(`Fetched: ${path || 'root'}`, false, true);
@@ -393,10 +393,10 @@ const fetchAndDisplay = async (path) => {
 
   try {
     renderItems(await fetchContentsWithCache(path) ?? []);
-  } catch (err) {
-    log('ERROR', '[REPO EXPLORER] Fetch error:', err);
-    setPlaceholder(DOM.fileListingContainer, `Error: ${err.message}`, true);
-    updateStatus(`Error: ${err.message}`, true);
+  } catch (error) {
+    log('ERROR', '[REPO EXPLORER] Fetch error:', error);
+    setPlaceholder(DOM.fileListingContainer, `Error: ${error.message}`, true);
+    updateStatus(`Error: ${error.message}`, true);
   }
 };
 

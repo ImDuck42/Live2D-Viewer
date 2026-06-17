@@ -38,8 +38,8 @@ const init = async () => {
       if (event.key === 'Escape' && modal.classList.contains('active')) close();
     });
 
-  } catch (err) {
-    console.error('News Modal: Error loading changelog:', err);
+  } catch (error) {
+    console.error('News Modal: Error loading changelog:', error);
     titleBtn.title = 'Changelog unavailable';
   }
 };

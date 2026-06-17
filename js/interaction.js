@@ -1,7 +1,7 @@
-import { log } from './logger.js';
+import { log }                from './logger.js';
+import { highlightButton }    from './ui.js';
+import { setSelectedModel }   from './model.js';
 import { CONFIG, DOM, state } from './config.js';
-import { highlightButton } from './ui.js';
-import { setSelectedModel } from './model.js';
 
 // ===========================================================================
 // Utilities
